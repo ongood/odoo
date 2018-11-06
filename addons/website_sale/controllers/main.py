@@ -349,6 +349,9 @@ class WebsiteSale(ProductConfiguratorController):
         revive: Revival method when abandoned cart. Can be 'merge' or 'squash'
         """
         order = request.website.sale_get_order()
+        if order and order.state != 'draft':
+            request.session['sale_order_id'] = None
+            order = request.website.sale_get_order()
         values = {}
         if access_token:
             abandoned_order = request.env['sale.order'].sudo().search([('access_token', '=', access_token)], limit=1)
@@ -392,11 +395,16 @@ class WebsiteSale(ProductConfiguratorController):
 
     @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True, csrf=False)
     def cart_update(self, product_id, add_qty=1, set_qty=0, **kw):
+        sale_order = request.website.sale_get_order(force_create=True)
+        if sale_order.state != 'draft':
+            request.session['sale_order_id'] = None
+            sale_order = request.website.sale_get_order(force_create=True)
+
         product_custom_attribute_values = None
         if kw.get('product_custom_attribute_values'):
             product_custom_attribute_values = json.loads(kw.get('product_custom_attribute_values'))
 
-        request.website.sale_get_order(force_create=1)._cart_update(
+        sale_order._cart_update(
             product_id=int(product_id),
             add_qty=add_qty,
             set_qty=set_qty,
@@ -569,6 +577,7 @@ class WebsiteSale(ProductConfiguratorController):
 
         new_values['customer'] = True
         new_values['team_id'] = request.website.salesteam_id and request.website.salesteam_id.id
+        new_values['user_id'] = request.website.salesperson_id and request.website.salesperson_id.id
         new_values['website_id'] = request.website.id
 
         lang = request.lang if request.lang in request.website.mapped('language_ids.code') else None
@@ -1091,7 +1100,10 @@ class WebsiteSale(ProductConfiguratorController):
         if lang:
             request.website = request.website.with_context(lang=lang)
 
-        order = request.website.sale_get_order(force_create=1)
+        order = request.website.sale_get_order(force_create=True)
+        if order.state != 'draft':
+            request.session['sale_order_id'] = None
+            order = request.website.sale_get_order(force_create=True)
         optional_product_ids = []
         for k, v in kw.items():
             if "optional-product-" in k and int(kw.get(k.replace("product", "add"))):
