@@ -226,10 +226,11 @@ class HrPayslip(models.Model):
         worked_days_dict = {}
         inputs_dict = {}
         blacklist = []
-        for worked_days_line in self.worked_days_line_ids:
-            worked_days_dict[worked_days_line.code] = worked_days_line
-        for input_line in self.input_line_ids:
-            inputs_dict[input_line.code] = input_line
+
+        for code in self.worked_days_line_ids.mapped('code'):
+            worked_days_dict[code] = self.worked_days_line_ids.filtered(lambda l: l.code == code)
+        for code in self.input_line_ids.mapped('code'):
+            inputs_dict[code] = self.input_line_ids.filtered(lambda l: l.code == code)
 
         categories = BrowsableObject(self.employee_id.id, {}, self.env)
         inputs = InputLine(self.employee_id.id, inputs_dict, self.env)
@@ -421,7 +422,7 @@ class HrPayslipLine(models.Model):
     _name = 'hr.payslip.line'
     _inherit = 'hr.salary.rule'
     _description = 'Payslip Line'
-    _order = 'contract_id, sequence'
+    _order = 'contract_id, sequence, code'
 
     slip_id = fields.Many2one('hr.payslip', string='Pay Slip', required=True, ondelete='cascade')
     salary_rule_id = fields.Many2one('hr.salary.rule', string='Rule', required=True)
@@ -506,4 +507,5 @@ class HrPayslipRun(models.Model):
 
     @api.multi
     def close_payslip_run(self):
+        self.mapped('slip_ids').filtered(lambda payslip: payslip.state != 'done').action_payslip_done()
         return self.write({'state': 'close'})

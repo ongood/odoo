@@ -111,6 +111,11 @@ class Website(models.Model):
         ('b2c', 'Free sign up'),
     ], string='Customer Account', default='b2b')
 
+    @api.onchange('language_ids')
+    def _onchange_language_ids(self):
+        if self.language_ids and self.default_lang_id not in self.language_ids:
+            self.default_lang_id = self.language_ids[0]
+
     @api.multi
     def _compute_menu(self):
         Menu = self.env['website.menu']
@@ -988,7 +993,7 @@ class Page(models.Model):
         # Create redirect if needed
         if data['create_redirect']:
             self.env['website.redirect'].create({
-                'type': data['redirect_type'],
+                'redirect_type': data['redirect_type'],
                 'url_from': original_url,
                 'url_to': url,
                 'website_id': website.id,

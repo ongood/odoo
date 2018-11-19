@@ -381,6 +381,7 @@ class ProductProduct(models.Model):
             partner_ids = [partner_id, self.env['res.partner'].browse(partner_id).commercial_partner_id.id]
         else:
             partner_ids = []
+        company_id = self.env.context.get('company_id')
 
         # all user don't have access to seller and partner
         # check access and use superuser
@@ -399,6 +400,11 @@ class ProductProduct(models.Model):
                 sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and (x.product_id == product)]
                 if not sellers:
                     sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and not x.product_id]
+                # Filter out sellers based on the company. This is done afterwards for a better
+                # code readability. At this point, only a few sellers should remain, so it should
+                # not be a performance issue.
+                if company_id:
+                    sellers = [x for x in sellers if x.company_id.id in [company_id, False]]
             if sellers:
                 for s in sellers:
                     seller_variant = s.product_name and (
@@ -597,6 +603,22 @@ class ProductProduct(models.Model):
             name += '\n' + self.description_sale
 
         return name
+
+    def _has_valid_attributes(self, valid_attributes, valid_values):
+        """ Check if a product has valid attributes. It is considered valid if:
+            - it uses ALL valid attributes
+            - it ONLY uses valid values
+            We must make sure that all attributes are used to take into account the case where
+            attributes would be added to the template.
+
+            :param valid_attributes: a recordset of product.attribute
+            :param valid_values: a recordset of product.attribute.value
+            :return: True if the attibutes and values are correct, False instead
+        """
+        self.ensure_one()
+        values = self.attribute_value_ids.filtered(lambda v: v.attribute_id.create_variant != 'no_variant')
+        attributes = values.mapped('attribute_id')
+        return attributes == valid_attributes and values <= valid_values
 
 
 class ProductPackaging(models.Model):

@@ -314,7 +314,7 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
                 field_type = record._fields[field_name].type
                 if field_type == 'monetary':
                     # Compare monetary field.
-                    currency_field_name = record._fields[field_name]._related_currency_field
+                    currency_field_name = record._fields[field_name].currency_field
                     record_currency = record[currency_field_name]
                     if record_currency.compare_amounts(candidate_value, record_value)\
                             if record_currency else candidate_value != record_value:
@@ -447,7 +447,7 @@ class SavepointCase(SingleTransactionCase):
 class ChromeBrowser():
     """ Helper object to control a Chrome headless process. """
 
-    def __init__(self, logger):
+    def __init__(self, logger, window_size):
         self._logger = logger
         if websocket is None:
             self._logger.warning("websocket-client module is not installed")
@@ -459,6 +459,7 @@ class ChromeBrowser():
         self.user_data_dir = tempfile.mkdtemp(suffix='_chrome_odoo')
         self.chrome_process = None
         self.screencast_frames = []
+        self.window_size = window_size
         self._chrome_start()
         self._find_websocket()
         self._logger.info('Websocket url found: %s', self.ws_url)
@@ -529,8 +530,9 @@ class ChromeBrowser():
             '--disable-extensions': '',
             '--user-data-dir': self.user_data_dir,
             '--disable-translate': '',
-            '--window-size': '1366x768',
-            '--remote-debugging-port': str(self.devtools_port)
+            '--window-size': self.window_size,
+            '--remote-debugging-port': str(self.devtools_port),
+            '--no-sandbox': '',
         }
         cmd = [self.executable]
         cmd += ['%s=%s' % (k, v) if v else k for k, v in switches.items()]
@@ -788,6 +790,7 @@ class HttpCase(TransactionCase):
     """
     registry_test_mode = True
     browser = None
+    browser_size = '1366x768'
 
     def __init__(self, methodName='runTest'):
         super(HttpCase, self).__init__(methodName)
@@ -803,7 +806,7 @@ class HttpCase(TransactionCase):
     def start_browser(cls, logger):
         # start browser on demand
         if cls.browser is None:
-            cls.browser = ChromeBrowser(logger)
+            cls.browser = ChromeBrowser(logger, cls.browser_size)
 
     @classmethod
     def tearDownClass(cls):
@@ -989,10 +992,10 @@ def can_import(module):
 
 # TODO: sub-views (o2m, m2m) -> sub-form?
 # TODO: domains
-ref_re = re.compile("""
+ref_re = re.compile(r"""
 # first match 'form_view_ref' key, backrefs are used to handle single or
 # double quoting of the value
-(['"])(?P<view_type>\w+)_view_ref\1
+(['"])(?P<view_type>\w+_view_ref)\1
 # colon separator (with optional spaces around)
 \s*:\s*
 # open quote for value
@@ -1003,7 +1006,7 @@ ref_re = re.compile("""
     [.\w]+
 )
 # close with same quote as opening
-\2
+\3
 """, re.VERBOSE)
 class Form(object):
     """ Server-side form view implementation (partial)
@@ -1096,40 +1099,6 @@ class Form(object):
         arch = etree.fromstring(fvg['arch'])
 
         object.__setattr__(self, '_view', fvg)
-        # TODO: make this less crappy?
-        # look up edition view for the O2M
-        for f, descr in fvg['fields'].items():
-            if descr['type'] != 'one2many':
-                continue
-
-            node = next(n for n in arch.iter('field') if n.get('name') == f)
-            default_view = next(
-                (m for m in node.get('mode', 'tree').split(',') if m != 'form'),
-                'tree'
-            )
-
-            refs = {
-                m.group('view_type'): m.group('view_id')
-                for m in ref_re.finditer(node.get('context', ''))
-            }
-            # always fetch for simplicity, ensure we always have a tree and
-            # a form view
-            submodel = env[descr['relation']]
-            views = submodel.with_context(**refs) \
-                .load_views([(False, 'tree'), (False, 'form')])['fields_views']
-            # embedded views should take the priority on externals
-            views.update(descr['views'])
-
-            # if the default view is a kanban or a non-editable list, the
-            # "edition controller" is the form view
-            edition = views['form']
-            if default_view == 'tree':
-                subarch = etree.fromstring(views['tree']['arch'])
-                if subarch.get('editable'):
-                    edition = views['tree']
-
-            self._process_fvg(submodel, edition)
-            descr['views']['edition'] = edition
 
         self._process_fvg(recordp, fvg)
 
@@ -1145,6 +1114,35 @@ class Form(object):
             self._init_from_values(recordp)
         else:
             self._init_from_defaults(self._model)
+
+    def _o2m_set_edition_view(self, descr, node):
+        default_view = next(
+            (m for m in node.get('mode', 'tree').split(',') if m != 'form'),
+            'tree'
+        )
+        refs = {
+            m.group('view_type'): m.group('view_id')
+            for m in ref_re.finditer(node.get('context', ''))
+        }
+        # always fetch for simplicity, ensure we always have a tree and
+        # a form view
+        submodel = self._env[descr['relation']]
+        views = submodel.with_context(**refs) \
+            .load_views([(False, 'tree'), (False, 'form')])['fields_views']
+        # embedded views should take the priority on externals
+        views.update(descr['views'])
+        # re-set all resolved views on the descriptor
+        descr['views'] = views
+        # if the default view is a kanban or a non-editable list, the
+        # "edition controller" is the form view
+        edition = views['form']
+        if default_view == 'tree':
+            subarch = etree.fromstring(views['tree']['arch'])
+            if subarch.get('editable'):
+                edition = views['tree']
+
+        self._process_fvg(submodel, edition)
+        descr['views']['edition'] = edition
 
     def __str__(self):
         return "<%s %s(%s)>" % (
@@ -1164,7 +1162,7 @@ class Form(object):
         # pre-resolve modifiers & bind to arch toplevel
         modifiers = fvg['modifiers'] = {}
         contexts = fvg['contexts'] = {}
-        for f in etree.fromstring(fvg['arch']).iter('field'):
+        for f in etree.fromstring(fvg['arch']).xpath('//field[not(ancestor::field)]'):
             fname = f.get('name')
             modifiers[fname] = {
                 modifier: domain if isinstance(domain, bool) else normalize_domain(domain)
@@ -1173,6 +1171,11 @@ class Form(object):
             ctx = f.get('context')
             if ctx:
                 contexts[fname] = ctx
+
+            descr = fvg['fields'].get(fname) or {'type': None}
+            if descr['type'] == 'one2many':
+                self._o2m_set_edition_view(descr, f)
+
         fvg['modifiers']['id'] = {'required': False, 'readonly': True}
         fvg['onchange'] = model._onchange_spec(fvg)
 

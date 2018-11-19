@@ -1276,11 +1276,9 @@ class Monetary(Field):
     def __init__(self, string=Default, currency_field=Default, **kwargs):
         super(Monetary, self).__init__(string=string, currency_field=currency_field, **kwargs)
 
-    _related_currency_field = property(attrgetter('currency_field'))
     _description_currency_field = property(attrgetter('currency_field'))
 
-    def _setup_regular_full(self, model):
-        super(Monetary, self)._setup_regular_full(model)
+    def _setup_currency_field(self, model):
         if not self.currency_field:
             # pick a default, trying in order: 'currency_id', 'x_currency_id'
             if 'currency_id' in model._fields:
@@ -1289,6 +1287,16 @@ class Monetary(Field):
                 self.currency_field = 'x_currency_id'
         assert self.currency_field in model._fields, \
             "Field %s with unknown currency_field %r" % (self, self.currency_field)
+
+    def _setup_regular_full(self, model):
+        super(Monetary, self)._setup_regular_full(model)
+        self._setup_currency_field(model)
+
+    def _setup_related_full(self, model):
+        super(Monetary, self)._setup_related_full(model)
+        if self.inherited:
+            self.currency_field = self.related_field.currency_field
+        self._setup_currency_field(model)
 
     def convert_to_column(self, value, record, values=None, validate=True):
         # retrieve currency from values or record
@@ -2417,6 +2425,9 @@ class One2many(_RelationalMulti):
                 to_relink.update(dict.fromkeys(line_ids, False))
 
         def flush():
+            if to_delete:
+                comodel.browse(to_delete).unlink()
+                to_delete.clear()
             if to_create:
                 comodel.create(to_create)
                 to_create.clear()
@@ -2432,9 +2443,6 @@ class One2many(_RelationalMulti):
                     if lines:
                         comodel.browse(lines._ids).write({inverse: record_id})
                 to_relink.clear()
-            if to_delete:
-                comodel.browse(to_delete).unlink()
-                to_delete.clear()
 
         with model.env.norecompute():
             for records, commands in records_commands_list:

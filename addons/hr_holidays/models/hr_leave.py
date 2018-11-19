@@ -31,6 +31,9 @@ class HolidaysRequest(models.Model):
       - can discuss on its leave requests;
       - can reset only its own leaves;
       - cannot validate any leaves;
+     - a Team Leader
+      - has same rights as a regular employee
+      - but is able to approve employees' leaves who are in his/her team (see Employee.leave_manager_id in hr_holidays/hr.py)
      - an Officer
       - can see all leaves;
       - can validate "HR" single validation leaves from people if
@@ -290,6 +293,7 @@ class HolidaysRequest(models.Model):
         tz = self.env.user.tz if self.env.user.tz and not self.request_unit_custom else 'UTC'  # custom -> already in UTC
         self.date_from = timezone(tz).localize(datetime.combine(self.request_date_from, hour_from)).astimezone(UTC).replace(tzinfo=None)
         self.date_to = timezone(tz).localize(datetime.combine(self.request_date_to, hour_to)).astimezone(UTC).replace(tzinfo=None)
+        self._onchange_leave_dates()
 
     @api.onchange('request_unit_half')
     def _onchange_request_unit_half(self):
@@ -471,8 +475,10 @@ class HolidaysRequest(models.Model):
             values.update({'department_id': self.env['hr.employee'].browse(employee_id).department_id.id})
         holiday = super(HolidaysRequest, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(values)
         holiday.add_follower(employee_id)
-        if 'employee_id' in values:
+        if employee_id:
             holiday._onchange_employee_id()
+        if 'number_of_days' not in values and ('date_from' in values or 'date_to' in values):
+            holiday._onchange_leave_dates()
         holiday.activity_update()
         return holiday
 
@@ -500,9 +506,12 @@ class HolidaysRequest(models.Model):
         if values.get('state'):
             self._check_approval_update(values['state'])
         result = super(HolidaysRequest, self).write(values)
-        self.add_follower(employee_id)
-        if 'employee_id' in values:
-            self._onchange_employee_id()
+        for holiday in self:
+            if employee_id:
+                holiday.add_follower(employee_id)
+                holiday._onchange_employee_id()
+            if 'number_of_days' not in values and ('date_from' in values or 'date_to' in values):
+                holiday._onchange_leave_dates()
         return result
 
     @api.multi
@@ -649,7 +658,7 @@ class HolidaysRequest(models.Model):
                 elif holiday.holiday_type == 'company':
                     employees = self.env['hr.employee'].search([('company_id', '=', self.mode_company_id.id)])
                 else:
-                    holiday.department_id.member_ids
+                    employees = holiday.department_id.member_ids
                 for employee in employees:
                     values = holiday._prepare_holiday_values(employee)
                     leaves += self.with_context(
@@ -686,7 +695,7 @@ class HolidaysRequest(models.Model):
     def _check_approval_update(self, state):
         """ Check if target state is achievable. """
         current_employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_team_leader = self.env.user.has_group('hr_holidays.group_hr_holidays_team_leader')
         is_manager = self.env.user.has_group('hr_holidays.group_hr_holidays_manager')
         for holiday in self:
             val_type = holiday.holiday_status_id.validation_type
@@ -698,10 +707,10 @@ class HolidaysRequest(models.Model):
                     raise UserError(_('Only a Leave Manager can reset other people leaves.'))
                 continue
 
-            if not is_officer:
-                raise UserError(_('Only a Leave Officer or Manager can approve or refuse leave requests.'))
+            if not is_team_leader:
+                raise UserError(_('Only a Team Leader, Leave Officer or Manager can approve or refuse leave requests.'))
 
-            if is_officer:
+            if is_team_leader:
                 # use ir.rule based first access check: department, members, ... (see security.xml)
                 holiday.check_access_rule('write')
 
@@ -722,8 +731,8 @@ class HolidaysRequest(models.Model):
     # ------------------------------------------------------------
 
     def _get_responsible_for_approval(self):
-        if self.state == 'confirm' and self.manager_id.user_id:
-            return self.manager_id.user_id
+        if self.state == 'confirm' and self.employee_id.leave_manager_id:
+            return self.employee_id.leave_manager_id
         elif self.state == 'confirm' and self.employee_id.parent_id.user_id:
             return self.employee_id.parent_id.user_id
         elif self.department_id.manager_id.user_id:
