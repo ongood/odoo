@@ -223,6 +223,59 @@ QUnit.test('basic rendering', function (assert) {
     form.destroy();
 });
 
+QUnit.test('basic rendering: message_attachment_count can be in view standalone', function (assert) {
+    assert.expect(1);
+
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        services: this.services,
+        arch: '<form string="Partners">' +
+                '<sheet>' +
+                    '<group>' +
+                        '<field name="message_attachment_count" string="I\'m here"/>' +
+                    '</group>' +
+                '</sheet>' +
+            '</form>',
+        res_id: 2,
+    });
+
+    assert.strictEqual(form.$('.o_form_label').text(), "I'm here",
+        "The field message_attachment_count must be present according to the view's specs");
+
+    form.destroy();
+});
+
+QUnit.test('basic rendering: message_attachment_count can be in view with chatter', function (assert) {
+    assert.expect(1);
+
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        services: this.services,
+        arch: '<form string="Partners">' +
+                '<sheet>' +
+                    '<group>' +
+                        '<field name="message_attachment_count" string="I\'m here"/>' +
+                    '</group>' +
+                '</sheet>' +
+                '<div class="oe_chatter">' +
+                    '<field name="message_follower_ids" widget="mail_followers"/>' +
+                    '<field name="message_ids" widget="mail_thread"/>' +
+                    '<field name="activity_ids" widget="mail_activity"/>' +
+                '</div>' +
+            '</form>',
+        res_id: 2,
+    });
+
+    assert.strictEqual(form.$('.o_form_label').text(), "I'm here",
+        "The field message_attachment_count must be present according to the view's specs");
+
+    form.destroy();
+});
+
 QUnit.test('Activity Done keep feedback on blur', function (assert) {
     assert.expect(3);
     var done = assert.async();
@@ -1448,6 +1501,55 @@ QUnit.test('chatter: Attachment viewer', function (assert) {
         "Modal popup should open with the pdf preview");
     // close attachment popup
     $('.o_modal_fullscreen .o_viewer-header .o_close_btn').click();
+    form.destroy();
+});
+
+QUnit.test('chatter: keep context when sending a message', function(assert) {
+    assert.expect(1);
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        services: this.services,
+        arch: '<form string="Partners">' +
+                '<sheet>' +
+                    '<field name="foo"/>' +
+                '</sheet>' +
+                '<div class="oe_chatter">' +
+                    '<field name="message_ids" widget="mail_thread"/>' +
+                '</div>' +
+            '</form>',
+        res_id: 2,
+        session: {
+            user_context: {lang: 'en_US'},
+        },
+        mockRPC: function (route, args) {
+            if (args.method === 'message_get_suggested_recipients') {
+                return $.when({2: []});
+            }
+            if (args.method === 'message_post') {
+                assert.deepEqual(args.kwargs.context, {
+                        default_model: "partner",
+                        default_res_id: 2,
+                        lang: "en_US",
+                        mail_post_autofollow: true,
+                    },
+                    "the context is incorrect");
+                return $.when(57923);
+            }
+            if (args.method === 'message_format') {
+                return $.when([{
+                    author_id: [42, "Me"],
+                    model: 'partner',
+                }]);
+            }
+            return this._super(route, args);
+        },
+    });
+
+    testUtils.dom.click(form.$('.o_chatter_button_new_message'));
+    testUtils.fields.editInput(form.$('.oe_chatter .o_composer_text_field:first()'), 'Pouet');
+    testUtils.dom.click(form.$('.oe_chatter .o_composer_button_send'));
     form.destroy();
 });
 

@@ -13,6 +13,7 @@ odoo.define('web.test_utils_mock', function (require) {
 var basic_fields = require('web.basic_fields');
 var config = require('web.config');
 var core = require('web.core');
+var dom = require('web.dom');
 var MockServer = require('web.MockServer');
 var session = require('web.session');
 
@@ -154,6 +155,8 @@ function addMockEnvironment(widget, params) {
     // make sure the debounce value for input fields is set to 0
     var initialDebounceValue = DebouncedField.prototype.DEBOUNCE;
     DebouncedField.prototype.DEBOUNCE = params.fieldDebounce || 0;
+    var initialDOMDebounceValue = dom.DEBOUNCE;
+    dom.DEBOUNCE = 0;
     var initialSession, initialConfig, initialParameters, initialDebounce, initialThrottle;
     initialSession = _.extend({}, session);
     session.getTZOffset = function () {
@@ -195,7 +198,13 @@ function addMockEnvironment(widget, params) {
         // widget is destroyed, at the end of each test to avoid collisions
         core.bus.trigger('clear_cache');
 
+        _(services).chain()
+            .compact() // services can be defined but null (e.g. ajax)
+            .reject(function (s) { return s.isDestroyed(); })
+            .invoke('destroy');
+
         DebouncedField.prototype.DEBOUNCE = initialDebounceValue;
+        dom.DEBOUNCE = initialDOMDebounceValue;
         if (params.debounce === false) {
             _.debounce = initialDebounce;
         }

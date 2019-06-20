@@ -253,9 +253,10 @@ var ImageWidget = MediaWidget.extend({
         } else if (this.$media.is('a.o_image')) {
             o.url = this.$media.attr('href').replace(/[?].*/, '');
             o.id = +o.url.match(/\/web\/content\/(\d+)/, '')[1];
+            o.isDocument = true;
         }
         if (o.url) {
-            self._toggleImage(_.find(self.records, function (record) { return record.url === o.url;}) || o, true);
+            self._toggleImage(_.find(self.records, function (record) { return record.src === o.url;}) || o, true);
         }
 
         return def;
@@ -736,6 +737,7 @@ var IconWidget = MediaWidget.extend({
         this.$('div.font-icons-icons').html(
             QWeb.render('web_editor.dialog.font-icons.icons', {iconsParser: iconsParser})
         );
+        return $.when();
     },
 
     //--------------------------------------------------------------------------
@@ -911,7 +913,7 @@ var VideoWidget = MediaWidget.extend({
         options = options || {};
 
         // Video url patterns(youtube, instagram, vimeo, dailymotion, youku, ...)
-        var ytRegExp = /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+        var ytRegExp = /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:youtu\.be\/|youtube(-nocookie)?\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((?:\w|-){11})(?:\S+)?$/;
         var ytMatch = url.match(ytRegExp);
 
         var insRegExp = /(.*)instagram.com\/p\/(.[a-zA-Z0-9]*)/;
@@ -938,8 +940,8 @@ var VideoWidget = MediaWidget.extend({
 
         var autoplay = options.autoplay ? '?autoplay=1' : '?autoplay=0';
 
-        if (ytMatch && ytMatch[1].length === 11) {
-            $video.attr('src', '//www.youtube.com/embed/' + ytMatch[1] + autoplay);
+        if (ytMatch && ytMatch[2].length === 11) {
+            $video.attr('src', '//www.youtube' + (ytMatch[1] || '') + '.com/embed/' + ytMatch[2] + autoplay);
         } else if (insMatch && insMatch[2].length) {
             $video.attr('src', '//www.instagram.com/p/' + insMatch[2] + '/embed/');
             videoType = 'ins';
@@ -1288,6 +1290,7 @@ var MediaDialog = Dialog.extend({
      * @private
      */
     _onPagerClick: function (ev) {
+        ev.preventDefault();
         this.active.goToPage(this.active.page + ($(ev.currentTarget).hasClass('previous') ? -1 : 1));
         this._updateControlPanel();
     },
@@ -1403,6 +1406,7 @@ var LinkDialog = Dialog.extend({
                 }
 
                 this.data.range = range.create(sc, so, ec, eo);
+                $(editable).data("range", this.data.range);
                 this.data.range.select();
             } else {
                 nodes = dom.ancestor(sc, dom.isAnchor).childNodes;

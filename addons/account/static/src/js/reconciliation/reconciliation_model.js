@@ -109,7 +109,7 @@ var StatementModel = BasicModel.extend({
         this.valuenow = 0;
         this.valuemax = 0;
         this.alreadyDisplayed = [];
-        this.defaultDisplayQty = 10;
+        this.defaultDisplayQty = options && options.defaultDisplayQty || 10;
         this.limitMoveLines = options && options.limitMoveLines || 15;
     },
 
@@ -135,7 +135,7 @@ var StatementModel = BasicModel.extend({
 
         // Onchange the partner if not already set on the statement line.
         if(!line.st_line.partner_id && line.reconciliation_proposition
-            && line.reconciliation_proposition.length == 1 && prop.partner_id){
+            && line.reconciliation_proposition.length == 1 && prop.partner_id && line.type === undefined){
             return this.changePartner(handle, {'id': prop.partner_id, 'display_name': prop.partner_name}, true)
                 .then(function (result) {
                     return $.when(self._computeLine(line), self._performMoveLine(handle));
@@ -365,6 +365,7 @@ var StatementModel = BasicModel.extend({
                     var handle = _.uniqueId('rline');
                     self.lines[handle] = {
                         id: res.st_line.id,
+                        partner_id: res.st_line.partner_id,
                         handle: handle,
                         reconciled: false,
                         mode: 'inactive',
@@ -853,6 +854,7 @@ var StatementModel = BasicModel.extend({
                                 'tax_id': [tax.id, null],
                                 'amount': tax.amount,
                                 'label': tax.name,
+                                'date': prop.date,
                                 'account_id': tax.account_id ? [tax.account_id, null] : prop.account_id,
                                 'analytic': tax.analytic,
                                 'is_tax': true,
@@ -898,11 +900,11 @@ var StatementModel = BasicModel.extend({
             });
             var company_currency = session.get_currency(line.st_line.currency_id);
             var company_precision = company_currency && company_currency.digits[1] || 2;
-            total = utils.round_precision(total*1000, company_precision)/1000 || 0;
+            total = utils.round_decimals(total, company_precision) || 0;
             if(isOtherCurrencyId){
                 var other_currency = session.get_currency(isOtherCurrencyId);
                 var other_precision = other_currency && other_currency.digits[1] || 2;
-                amount_currency = utils.round_precision(amount_currency, other_precision)
+                amount_currency = utils.round_decimals(amount_currency, other_precision);
             }
             line.balance = {
                 amount: total,
@@ -1008,6 +1010,11 @@ var StatementModel = BasicModel.extend({
                                 'display_name': line.reconciliation_proposition[0].partner_name,
                             }, true);
                         }
+                    }else if(!line.st_line.partner_id && line.partner_id && line.partner_name){
+                        return self.changePartner(line.handle, {
+                            'id': line.partner_id,
+                            'display_name': line.partner_name,
+                        }, true);
                     }
                     return true;
                 })
@@ -1061,6 +1068,7 @@ var StatementModel = BasicModel.extend({
      */
     _formatQuickCreate: function (line, values) {
         values = values || {};
+        var today = new moment().utc().format();
         var account = this._formatNameGet(values.account_id);
         var formatOptions = {
             currency_id: line.st_line.currency_id,
@@ -1077,6 +1085,7 @@ var StatementModel = BasicModel.extend({
             'tax_id': this._formatNameGet(values.tax_id),
             'debit': 0,
             'credit': 0,
+            'date': values.date ? values.date : field_utils.parse.date(today, {}, {isUTC: true}),
             'base_amount': values.amount_type !== "percentage" ?
                 (amount) : line.balance.amount * values.amount / 100,
             'percent': values.amount_type === "percentage" ? values.amount : null,
@@ -1227,12 +1236,23 @@ var StatementModel = BasicModel.extend({
  * datas allowing manual reconciliation
  */
 var ManualModel = StatementModel.extend({
-    quickCreateFields: ['account_id', 'journal_id', 'amount', 'analytic_account_id', 'label', 'tax_id', 'force_tax_included', 'analytic_tag_ids'],
+    quickCreateFields: ['account_id', 'journal_id', 'amount', 'analytic_account_id', 'label', 'tax_id', 'force_tax_included', 'analytic_tag_ids', 'date'],
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Return a boolean telling if load button needs to be displayed or not
+     *
+     * @returns {boolean} true if load more button needs to be displayed
+     */
+    hasMoreLines: function () {
+        if (this.manualLines.length > this.pagerIndex) {
+            return true;
+        }
+        return false;
+    },
     /**
      * load data from
      * - 'account.reconciliation.widget' fetch the lines to reconciliate
@@ -1294,10 +1314,12 @@ var ManualModel = StatementModel.extend({
                             context: context,
                         })
                         .then(function (result) {
-                            var defs = _.map(result, self._formatLine.bind(self, context.mode));
+                            self.manualLines = result;
                             self.valuenow = 0;
-                            self.valuemax = Object.keys(self.lines).length;
-                            return $.when.apply($, defs);
+                            self.valuemax = Object.keys(self.manualLines).length;
+                            var lines = self.manualLines.splice(0, self.defaultDisplayQty);
+                            self.pagerIndex = lines.length;
+                            return self.loadData(lines);
                         });
                 case 'accounts':
                     return self._rpc({
@@ -1307,10 +1329,12 @@ var ManualModel = StatementModel.extend({
                             context: context,
                         })
                         .then(function (result) {
-                            var defs = _.map(result, self._formatLine.bind(self, 'accounts'));
+                            self.manualLines = result;
                             self.valuenow = 0;
-                            self.valuemax = Object.keys(self.lines).length;
-                            return $.when.apply($, defs);
+                            self.valuemax = Object.keys(self.manualLines).length;
+                            var lines = self.manualLines.splice(0, self.defaultDisplayQty);
+                            self.pagerIndex = lines.length;
+                            return self.loadData(lines);
                         });
                 default:
                     var partner_ids = context.partner_ids;
@@ -1326,15 +1350,45 @@ var ManualModel = StatementModel.extend({
                             context: context,
                         })
                         .then(function (result) {
-                            var defs = _.map(result.accounts, self._formatLine.bind(self, 'accounts'));
-                            defs = defs.concat(_.map(result.customers, self._formatLine.bind(self, 'customers')));
-                            defs = defs.concat(_.map(result.suppliers, self._formatLine.bind(self, 'suppliers')));
+                            // Flatten the result
+                            self.manualLines = [].concat(result.accounts, result.customers, result.suppliers)
                             self.valuenow = 0;
-                            self.valuemax = Object.keys(self.lines).length;
-                            return $.when.apply($, defs);
+                            self.valuemax = Object.keys(self.manualLines).length;
+                            var lines = self.manualLines.splice(0, self.defaultDisplayQty);
+                            self.pagerIndex = lines.length;
+                            return self.loadData(lines);
                         });
             }
         });
+    },
+    /**
+     * Load more partners/accounts
+     *
+     * @param {integer} qty quantity to load
+     * @returns {Deferred}
+     */
+    loadMore: function(qty) {
+        if (qty === undefined) {
+            qty = this.defaultDisplayQty;
+        }
+        var lines = this.manualLines.splice(this.pagerIndex, qty);
+        this.pagerIndex += qty;
+        return this.loadData(lines);
+    },
+    /**
+     * Method to load informations on lines
+     *
+     * @param {Array} lines manualLines to load
+     * @returns {Deferred}
+     */
+    loadData: function(lines) {
+        var self = this;
+        var defs = [];
+        _.each(lines, function (l) {
+            defs.push(self._formatLine(l.mode, l))
+        });
+        return $.when.apply($, defs);
+
     },
     /**
      * Mark the account or the partner as reconciled
@@ -1386,7 +1440,6 @@ var ManualModel = StatementModel.extend({
             }
             line.reconciliation_proposition = [];
         });
-
         if (process_reconciliations.length) {
             def = self._rpc({
                     model: 'account.reconciliation.widget',
@@ -1577,6 +1630,12 @@ var ManualModel = StatementModel.extend({
                 context: this.context,
             })
             .then(this._formatMoveLine.bind(this, handle));
+    },
+    
+    _formatToProcessReconciliation: function (line, prop) {
+        var result = this._super(line, prop);
+        result['date'] = prop.date;
+        return result;
     },
 });
 

@@ -3,6 +3,9 @@ odoo.define('sale.product_configurator_tour', function (require) {
 
 var tour = require('web_tour.tour');
 
+// Note: please keep this test without pricelist for maximum coverage.
+// The pricelist is tested on the other tours.
+
 tour.register('sale_product_configurator_tour', {
     url: "/web",
     test: true,
@@ -16,14 +19,7 @@ tour.register('sale_product_configurator_tour', {
     trigger: ".o_list_button_add",
     extra_trigger: ".o_sale_order"
 }, {
-    trigger: ".o_required_modifier[name=partner_id] input",
-    run: "text Couscous Magique",
-}, {
-    trigger: ".ui-menu-item > a:contains('Couscous Magique')",
-    auto: true,
-}, {
     trigger: "a:contains('Configure a product')",
-    extra_trigger: ".o_field_widget[name=pricelist_id] > .o_external_button", // Wait for pricelist (onchange_partner_id)
 }, {
     trigger: '.o_product_configurator .o_input_dropdown input',
     run: 'click'
@@ -34,29 +30,19 @@ tour.register('sale_product_configurator_tour', {
     run: 'click'
 }, {
     trigger: '.configurator_container span:contains("Steel")',
-    run: function () {
-        $('input.product_id').change(function () {
-            var request_count = 0;
-            if ($('.o_sale_product_configurator_add').attr('request_count')) {
-                request_count = parseInt($('.o_sale_product_configurator_add').attr('request_count'));
-            }
-            request_count++;
-            $('.o_sale_product_configurator_add').attr('request_count', request_count);
-        });
-    }
+    run: function () {},
 }, {
     trigger: '.configurator_container span:contains("Aluminium")',
     run: 'click'
 }, {
-    trigger: 'span.oe_currency_value:contains("800")',
+    trigger: 'span.oe_currency_value:contains("800.40")',
     run: function (){} // check updated price
 }, {
     trigger: 'input[data-value_name="Black"]'
 }, {
-    trigger: 'input[data-value_name="White"]'
+    trigger: '.o_sale_product_configurator_add.disabled'
 }, {
-    trigger: '.o_sale_product_configurator_add[request_count="3"]',
-    run: function (){} // used to sync with "get_combination_info" completion
+    trigger: 'input[data-value_name="White"]'
 }, {
     trigger: '.o_sale_product_configurator_add:not(.disabled)'
 }, {
@@ -74,11 +60,12 @@ tour.register('sale_product_configurator_tour', {
 }, {
     trigger: 'button span:contains(Confirm)',
     extra_trigger: '.oe_optional_products_modal',
+    id: "quotation_product_selected",
     run: 'click'
 },
 // check that 3 products were added to the SO
 {
-    trigger: 'td.o_data_cell:contains("Customizable Desk (White, Aluminium)")',
+    trigger: 'td.o_data_cell:contains("Customizable Desk (Aluminium, White)")',
     extra_trigger: 'div[name="order_line"]',
     in_modal: false,
     run: function (){}
@@ -93,15 +80,10 @@ tour.register('sale_product_configurator_tour', {
     in_modal: false,
     run: function (){}
 }, {
-    trigger: '.o_readonly_modifier[name=amount_total]:contains("835")',
+    trigger: '.o_readonly_modifier[name=amount_total]:contains("0.00")',
     in_modal: false,
-    edition: 'community',
     run: function (){}
-}, {
-    trigger: '.o_readonly_modifier[name=amount_total]:contains("837")',
-    in_modal: false,
-    edition: 'enterprise',
-    run: function (){}
-}]);
+}
+]);
 
 });
