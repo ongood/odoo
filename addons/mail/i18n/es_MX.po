@@ -4,11 +4,11 @@
 # 
 # Translators:
 # Wil Odoo, 2023
-# Martin Trigaux, 2023
 # Lucia Pacheco, 2023
 # Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2023
 # Iran Villalobos López, 2023
-# Fernanda Alvarez, 2023
+# Martin Trigaux, 2024
+# Fernanda Alvarez, 2024
 # 
 msgid ""
 msgstr ""
@@ -16,7 +16,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-25 11:22+0000\n"
 "PO-Revision-Date: 2023-07-25 12:22+0000\n"
-"Last-Translator: Fernanda Alvarez, 2023\n"
+"Last-Translator: Fernanda Alvarez, 2024\n"
 "Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -767,7 +767,7 @@ msgstr "Tipos de actividad"
 #: model:ir.model.fields,field_description:mail.field_ir_actions_server__activity_user_type
 #: model:ir.model.fields,field_description:mail.field_ir_cron__activity_user_type
 msgid "Activity User Type"
-msgstr "Tipo de actividad de usuario"
+msgstr "Tipo de usuario de la actividad"
 
 #. module: mail
 #. odoo-javascript
@@ -825,7 +825,7 @@ msgstr "Agregar una reacción"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Add a Tenor GIF API key to enable GIFs support."
-msgstr "Agregue la clave API de Tenor para habilitar imágenes en formato GIF."
+msgstr "Agregue la clave API de Tenor para habilitar imágenes en formato .gif"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_res_config_settings__tenor_api_key
@@ -1904,7 +1904,7 @@ msgstr "Configuración"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Configure your ICE server list for webRTC"
-msgstr "Configurar la lista de servidores ICE para webRTC"
+msgstr "Configure su lista de servidores ICE para webRTC"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
@@ -3233,7 +3233,7 @@ msgstr "Buscar ahora"
 #: model:ir.model.fields,help:mail.field_res_config_settings__tenor_gif_limit
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Fetch up to the specified number of GIF."
-msgstr "Buscar hasta el número especificado de GIF."
+msgstr "Consulte hasta el número especificado de imágenes en formato .gif"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_tracking_value__field
@@ -4752,10 +4752,10 @@ msgstr "Registrar paso:"
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/discuss/core/public/welcome_page.xml:0
+#: code:addons/mail/static/src/discuss/core/public/welcome_page.js:0
 #, python-format
-msgid "Logged as"
-msgstr "Registrado como"
+msgid "Logged in as"
+msgstr "Inició sesión como"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_email_server_form
@@ -6313,7 +6313,7 @@ msgstr "Contraseña"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Paste your API key"
-msgstr "Pegar la clave API"
+msgstr "Pegue aquí su clave API"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_res_partner__phone
@@ -7042,8 +7042,8 @@ msgstr "Restringir la creación de plantillas"
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Restrict mail templates edition and QWEB placeholders usage."
 msgstr ""
-"Restringir la edición de plantillas de correo y el uso de marcadores de "
-"posición QWEB."
+"Restrinja la edición de plantillas de correo y el uso de marcadores de "
+"posición QWEB"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__restricted_attachment_count
@@ -7301,7 +7301,8 @@ msgstr "Seleccionar usuario..."
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Select the content filter used for filtering GIFs"
-msgstr "Seleccionar el filtro de contenido utilizado para filtrar GIFs"
+msgstr ""
+"Seleccione el filtro de contenido que se utilizará para filtrar los GIF"
 
 #. module: mail
 #. odoo-javascript
@@ -10059,3 +10060,10 @@ msgstr "{{ object.partner_id.lang }}"
 #, python-format
 msgid "Delete all previews"
 msgstr "Eliminar todas las previsualizaciones "
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/web/chatter.js:0
+#, python-format
+msgid "No recipient"
+msgstr "Sin destinatario"

@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 from markupsafe import Markup
-from functools import partial
+from functools import partial, lru_cache
 from itertools import groupby
 from collections import defaultdict
 from markupsafe import escape
@@ -268,7 +268,7 @@ class PosOrder(models.Model):
     is_total_cost_computed = fields.Boolean(compute='_compute_is_total_cost_computed',
         help="Allows to know if all the total cost of the order lines have already been computed")
     lines = fields.One2many('pos.order.line', 'order_id', string='Order Lines', states={'draft': [('readonly', False)]}, readonly=True, copy=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, index=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', states={
                                    'draft': [('readonly', False)]}, readonly=True)
     partner_id = fields.Many2one('res.partner', string='Customer', change_default=True, index='btree_not_null', states={'draft': [('readonly', False)], 'paid': [('readonly', False)]})
@@ -296,7 +296,7 @@ class PosOrder(models.Model):
 
     note = fields.Text(string='Internal Notes')
     nb_print = fields.Integer(string='Number of Print', readonly=True, copy=False, default=0)
-    pos_reference = fields.Char(string='Receipt Number', readonly=True, copy=False)
+    pos_reference = fields.Char(string='Receipt Number', readonly=True, copy=False, index=True)
     sale_journal = fields.Many2one('account.journal', related='session_id.config_id.journal_id', string='Sales Journal', store=True, readonly=True, ondelete='restrict')
     fiscal_position_id = fields.Many2one(
         comodel_name='account.fiscal.position', string='Fiscal Position',
@@ -344,8 +344,18 @@ class PosOrder(models.Model):
 
     @api.depends('date_order', 'company_id', 'currency_id', 'company_id.currency_id')
     def _compute_currency_rate(self):
+        @lru_cache
+        def get_rate(from_currency, to_currency, company, date):
+            return self.env['res.currency']._get_conversion_rate(
+                from_currency=from_currency,
+                to_currency=to_currency,
+                company=company,
+                date=date,
+            )
         for order in self:
-            order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.date_order)
+            # date_order is a datetime, but the rates are looked up on a date basis,
+            # therefor converting the date_order to a date helps with sharing entries in the lru_cache
+            order.currency_rate = get_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.date_order.date())
 
     @api.depends('lines.is_total_cost_computed')
     def _compute_is_total_cost_computed(self):
@@ -499,11 +509,11 @@ class PosOrder(models.Model):
     def _is_pos_order_paid(self):
         return float_is_zero(self._get_rounded_amount(self.amount_total) - self.amount_paid, precision_rounding=self.currency_id.rounding)
 
-    def _get_rounded_amount(self, amount):
+    def _get_rounded_amount(self, amount, force_round=False):
         # TODO: add support for mix of cash and non-cash payments when both cash_rounding and only_round_cash_method are True
         if self.config_id.cash_rounding \
-           and (not self.config_id.only_round_cash_method \
-           or any(p.payment_method_id.is_cash_count for p in self.payment_ids)):
+           and (force_round or (not self.config_id.only_round_cash_method \
+           or any(p.payment_method_id.is_cash_count for p in self.payment_ids))):
             amount = float_round(amount, precision_rounding=self.config_id.rounding_method.rounding, rounding_method=self.config_id.rounding_method.rounding_method)
         currency = self.currency_id
         return currency.round(amount) if currency else amount
@@ -675,7 +685,7 @@ class PosOrder(models.Model):
                 product=line.product_id,
                 taxes=line.tax_ids_after_fiscal_position,
                 price_unit=line.price_unit,
-                quantity=sign * line.qty,
+                quantity=-line.qty,
                 discount=line.discount,
                 account=account,
                 is_refund=is_refund,
@@ -819,7 +829,11 @@ class PosOrder(models.Model):
                 move_lines.append(aml_values)
 
         # Make a move with all the lines.
-        reversal_entry = self.env['account.move'].with_context(default_journal_id=self.config_id.journal_id.id).create({
+        reversal_entry = self.env['account.move'].with_context(
+            default_journal_id=self.config_id.journal_id.id,
+            skip_invoice_sync=True,
+            skip_invoice_line_sync=True,
+        ).create({
             'journal_id': self.config_id.journal_id.id,
             'date': fields.Date.context_today(self),
             'ref': _('Reversal of POS closing entry %s for order %s from session %s', self.session_move_id.name, self.name, self.session_id.name),
@@ -1604,7 +1618,7 @@ class PosOrderLine(models.Model):
         for line in self.filtered(lambda l: not l.is_total_cost_computed):
             product = line.product_id
             if line._is_product_storable_fifo_avco() and stock_moves:
-                product_cost = product._compute_average_price(0, line.qty, self._get_stock_moves_to_consider(stock_moves, product))
+                product_cost = product._compute_average_price(0, line.qty, line._get_stock_moves_to_consider(stock_moves, product))
             else:
                 product_cost = product.standard_price
             line.total_cost = line.qty * product.cost_currency_id._convert(
@@ -1617,6 +1631,7 @@ class PosOrderLine(models.Model):
             line.is_total_cost_computed = True
 
     def _get_stock_moves_to_consider(self, stock_moves, product):
+        self.ensure_one()
         return stock_moves.filtered(lambda ml: ml.product_id.id == product.id)
 
     @api.depends('price_subtotal', 'total_cost')

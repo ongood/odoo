@@ -40,6 +40,10 @@ import { nbsp } from "@web/core/utils/strings";
 import { getNextTabableElement } from "@web/core/utils/ui";
 import { session } from "@web/session";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
+import { KanbanCompiler } from "@web/views/kanban/kanban_compiler";
+import { KanbanDynamicGroupList } from "@web/views/kanban/kanban_model";
+import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
+import { KanbanRecord } from "@web/views/kanban/kanban_record";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { DynamicRecordList } from "@web/views/relational_model";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -47,9 +51,7 @@ import { AnimatedNumber } from "@web/views/view_components/animated_number";
 
 import { Component, onWillRender, xml } from "@odoo/owl";
 import { pick } from "@web/core/utils/objects";
-import { KanbanDynamicGroupList } from "@web/views/kanban/kanban_model";
 import { SampleServer } from "@web/views/sample_server";
-import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 
 const serviceRegistry = registry.category("services");
 const viewWidgetRegistry = registry.category("view_widgets");
@@ -338,7 +340,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.module("KanbanView");
 
     QUnit.test("basic ungrouped rendering", async (assert) => {
-        assert.expect(6);
+        assert.expect(7);
 
         await makeView({
             type: "kanban",
@@ -365,6 +367,10 @@ QUnit.module("Views", (hooks) => {
 
         assert.hasClass(target.querySelector(".o_kanban_view"), "o_kanban_test");
         assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_ungrouped");
+        assert.containsOnce(
+            target,
+            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex button.o-kanban-button-new"
+        );
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 4);
         assert.containsN(target, ".o_kanban_ghost", 6);
         assert.containsOnce(target, ".o_kanban_record:contains(gnap)");
@@ -479,7 +485,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("basic grouped rendering", async (assert) => {
-        assert.expect(13);
+        assert.expect(14);
 
         await makeView({
             type: "kanban",
@@ -507,6 +513,10 @@ QUnit.module("Views", (hooks) => {
         });
         assert.hasClass(target.querySelector(".o_kanban_view"), "o_kanban_test");
         assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_grouped");
+        assert.containsOnce(
+            target,
+            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex button.o-kanban-button-new"
+        );
         assert.containsN(target, ".o_kanban_group", 2);
         assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
         assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
@@ -4467,6 +4477,8 @@ QUnit.module("Views", (hooks) => {
 
         await editColumnName("new column");
         await validateColumn();
+
+        await nextTick();
 
         assert.strictEqual(target.querySelector(".o_column_quick_create input").value, "");
         assert.containsN(target, ".o_kanban_group", 2);
@@ -10852,7 +10864,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test("set cover image", async (assert) => {
-        assert.expect(10);
+        assert.expect(11);
 
         serviceRegistry.add("dialog", dialogService, { force: true });
         serviceRegistry.add("http", {
@@ -10906,7 +10918,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(getCard(0), "img", "Initially there is no image.");
 
         await click(document.body, ".modal .o_kanban_cover_image img", true);
-        await click(document.body, ".modal .btn-primary:first-child");
+        await click(document.querySelector(".modal .btn-primary:first-child"));
 
         assert.containsOnce(target, 'img[data-src*="/web/image/1"]');
 
@@ -10918,6 +10930,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(document.body, ".modal .o_kanban_cover_image");
         assert.containsOnce(document.body, ".modal .btn:contains(Select)");
         assert.containsOnce(document.body, ".modal .btn:contains(Discard)");
+        assert.containsNone(document.body, ".modal .btn:contains(Remove Cover Image)");
 
         await triggerEvent(
             document.body,
@@ -10930,6 +10943,74 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, 'img[data-src*="/web/image/2"]');
 
         // await click(target, ".o_kanban_record:first-child .o_attachment_image"); //Not sure, to discuss
+
+        assert.verifySteps(["1", "2"], "should writes on both kanban records");
+    });
+
+    QUnit.test("unset cover image", async (assert) => {
+        serverData.models.partner.records[0].displayed_image_id = 1;
+        serverData.models.partner.records[1].displayed_image_id = 2;
+        serviceRegistry.add("dialog", dialogService, { force: true });
+        serviceRegistry.add("http", {
+            start: () => ({}),
+        });
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch:
+                `<kanban>
+                    <templates>
+                        <t t-name="kanban-menu">
+                            <a type="set_cover" data-field="displayed_image_id" class="dropdown-item">Set Cover Image</a>
+                        </t>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <field name="name"/>
+                                <div>
+                                    <field name="displayed_image_id" widget="attachment_image"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            async mockRPC(_route, { model, method, args }) {
+                if (model === "partner" && method === "write") {
+                    assert.step(String(args[0][0]));
+                    assert.strictEqual(args[1].displayed_image_id, false);
+                }
+            },
+        });
+
+        await toggleRecordDropdown(0);
+        await click(getCard(0), ".oe_kanban_action");
+
+        assert.containsOnce(getCard(0), 'img[data-src*="/web/image/1"]');
+        assert.containsOnce(getCard(1), 'img[data-src*="/web/image/2"]');
+
+        assert.containsOnce(document.body, ".modal .o_kanban_cover_image");
+        assert.containsOnce(document.body, ".modal .btn:contains(Select)");
+        assert.containsOnce(document.body, ".modal .btn:contains(Discard)");
+        assert.containsOnce(document.body, ".modal .btn:contains(Remove Cover Image)");
+
+        await click(document.querySelector(".modal .modal-footer .btn-secondary")); // click on "Remove Cover Image" button
+
+        assert.containsNone(getCard(0), "img", "The cover image should be removed.");
+
+        await toggleRecordDropdown(1);
+        const coverButton = getCard(1).querySelector("a");
+        assert.strictEqual(coverButton.innerText.trim(), "Set Cover Image");
+        await click(coverButton);
+
+        await triggerEvent(
+            document.body,
+            ".modal .o_kanban_cover_image img",
+            "dblclick",
+            { bubbles: true },
+            { skipVisibilityCheck: true }
+        );
+
+        assert.containsNone(getCard(1), "img", "The cover image should be removed.");
 
         assert.verifySteps(["1", "2"], "should writes on both kanban records");
     });
@@ -14016,5 +14097,110 @@ QUnit.module("Views", (hooks) => {
         def.resolve();
         await nextTick();
         assert.deepEqual(getFacetTexts(target), ["Some Filter"]);
+    });
+
+    QUnit.test("kanbans with basic and custom compiler, same arch", async (assert) => {
+        // In this test, the exact same arch will be rendered by 2 different kanban renderers:
+        // once with the basic one, and once with a custom renderer having a custom compiler. The
+        // purpose of the test is to ensure that the template is compiled twice, once by each
+        // compiler, even though the arch is the same.
+        class MyKanbanCompiler extends KanbanCompiler {
+            setup() {
+                super.setup();
+                this.compilers.push({ selector: "div", fn: this.compileDiv });
+            }
+
+            compileDiv(node, params) {
+                const compiledNode = this.compileGenericNode(node, params);
+                compiledNode.setAttribute("class", "my_kanban_compiler");
+                return compiledNode;
+            }
+        }
+        class MyKanbanRecord extends KanbanRecord {}
+        MyKanbanRecord.Compiler = MyKanbanCompiler;
+        class MyKanbanRenderer extends KanbanRenderer {}
+        MyKanbanRenderer.components = {
+            ...KanbanRenderer.components,
+            KanbanRecord: MyKanbanRecord,
+        };
+        viewRegistry.add("my_kanban", {
+            ...kanbanView,
+            Renderer: MyKanbanRenderer,
+        });
+
+        serverData.models.partner.fields.one2many = {
+            type: "one2many",
+            name: "o2m",
+            relation: "partner",
+        };
+        serverData.models.partner.records[0].one2many = [1];
+        serverData.views = {
+            "partner,false,form": `<form><field name="one2many" mode="kanban"/></form>`,
+            "partner,false,search": `<search/>`,
+            "partner,false,kanban": `<kanban js_class="my_kanban">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click"><field name="foo"/></div>
+                    </t>
+                </templates>
+            </kanban>`,
+        };
+
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, {
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [
+                [false, "kanban"],
+                [false, "form"],
+            ],
+        });
+
+        // main kanban, custom view
+        assert.containsOnce(target, ".o_kanban_view");
+        assert.containsN(target, ".my_kanban_compiler", 4);
+
+        // switch to form
+        await click(target.querySelector(".o_kanban_record"));
+        assert.containsOnce(target, ".o_form_view");
+        assert.containsOnce(target, ".o_form_view .o_field_widget[name=one2many]");
+
+        // x2many kanban, basic renderer
+        assert.containsOnce(target, ".o_kanban_record:not(.o_kanban_ghost)");
+        assert.containsNone(target, ".my_kanban_compiler");
+    });
+
+    QUnit.test("can quick create a column when pressing enter when input is focused", async (assert) => {
+        await makeView({
+            type: "kanban",
+            resModel: "partner",
+            serverData,
+            arch:
+                `<kanban>
+                    <field name="product_id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div><field name="foo"/></div>
+                        </t>
+                    </templates>
+                </kanban>`,
+            groupBy: ["product_id"],
+        });
+
+        assert.containsN(target, ".o_kanban_group", 2);
+
+        await createColumn();
+        
+        // We don't use the editInput helper as it would trigger a change event automatically.
+        // We need to wait for the enter key to trigger the event.
+        const input = target.querySelector(".o_column_quick_create input");
+        input.value = "New Column";
+        await triggerEvent(input, null, "input");
+
+        await triggerEvent(target, ".o_quick_create_unfolded input", "keydown", {
+            key: "Enter",
+        });
+
+        assert.containsN(target, ".o_kanban_group", 3);
     });
 });

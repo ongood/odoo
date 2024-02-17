@@ -323,7 +323,7 @@ class AccountMoveSend(models.Model):
         # Render the invoice PDF but allow to set a custom report_name and custom values.
         # That way, all invoice reports are separated from the main one but don't need an
         # extra report every time.
-        IrActionsReport = type(self.env['ir.actions.report'])
+        IrActionsReport = self.env.registry['ir.actions.report']
         _render_template = IrActionsReport._render_template
         inv_report, inv_report_values = self._get_invoice_pdf_report_to_render(invoice, invoice_data)
 
@@ -491,7 +491,7 @@ class AccountMoveSend(models.Model):
         subtype = self.env.ref('mail.mt_comment')
         mail_template = self.mail_template_id
 
-        for move, move_data in moves_data.items():
+        for move, move_data in [(move, move_data) for move, move_data in moves_data.items() if move.partner_id.email]:
             form = move_data['_form']
             mail_params = form._get_mail_params(move)
             if not mail_params:
@@ -542,10 +542,7 @@ class AccountMoveSend(models.Model):
             form = invoice_data['_form']
             if form._need_invoice_document(invoice):
                 form._hook_invoice_document_before_pdf_report_render(invoice, invoice_data)
-                invoice_data['blocking_error'] = invoice_data.get('error') \
-                                                 and not (allow_fallback_pdf and invoice_data.get('error_but_continue'))
-                if invoice_data['blocking_error']:
-                    continue
+                invoice_data['error_but_continue'] = allow_fallback_pdf and invoice_data.get('error_but_continue')
 
         invoices_data_web_service = {
             invoice: invoice_data
@@ -558,11 +555,11 @@ class AccountMoveSend(models.Model):
         invoices_data_pdf = {
             invoice: invoice_data
             for invoice, invoice_data in invoices_data.items()
-            if not invoice_data.get('error') or not invoice_data.get('blocking_error', True)
+            if not invoice_data.get('error') or invoice_data.get('error_but_continue')
         }
         for invoice, invoice_data in invoices_data_pdf.items():
             form = invoice_data['_form']
-            if form._need_invoice_document(invoice):
+            if form._need_invoice_document(invoice) and not invoice_data.get('error'):
                 form._prepare_invoice_pdf_report(invoice, invoice_data)
                 form._hook_invoice_document_after_pdf_report_render(invoice, invoice_data)
 
@@ -575,8 +572,6 @@ class AccountMoveSend(models.Model):
             }
             if invoices_data_pdf_error:
                 self._hook_if_errors(invoices_data_pdf_error, allow_fallback_pdf=allow_fallback_pdf)
-            for invoice_data in invoices_data_pdf_error.values():
-                invoice_data.pop('error')
 
         # Web-service after the PDF generation.
         invoices_data_web_service = {
@@ -587,10 +582,10 @@ class AccountMoveSend(models.Model):
         if invoices_data_web_service:
             self._call_web_service_after_invoice_pdf_render(invoices_data_web_service)
 
-        # Create and link the generated documents to the invoice if the web-service didn't failed.
-        for invoice, invoice_data in invoices_data_pdf.items():
+        # Create and link the generated documents to the invoice if the "before" web-service didn't failed.
+        for invoice, invoice_data in invoices_data_web_service.items():
             form = invoice_data['_form']
-            if not invoice_data.get('error') and form._need_invoice_document(invoice):
+            if form._need_invoice_document(invoice) and (not invoice_data.get('error') or allow_fallback_pdf):
                 form._link_invoice_documents(invoice, invoice_data)
 
     def _generate_invoice_fallback_documents(self, invoices_data):
@@ -599,10 +594,11 @@ class AccountMoveSend(models.Model):
         :param invoices_data:   The collected data for invoices so far.
         """
         for invoice, invoice_data in invoices_data.items():
-            if self._need_invoice_document(invoice) and invoice_data.get('error'):
+            form = invoice_data['_form']
+            if form._need_invoice_document(invoice) and invoice_data.get('error'):
                 invoice_data.pop('error')
-                self._prepare_invoice_proforma_pdf_report(invoice, invoice_data)
-                self._hook_invoice_document_after_pdf_report_render(invoice, invoice_data)
+                form._prepare_invoice_proforma_pdf_report(invoice, invoice_data)
+                form._hook_invoice_document_after_pdf_report_render(invoice, invoice_data)
                 invoice_data['proforma_pdf_attachment'] = self.env['ir.attachment']\
                     .create(invoice_data.pop('proforma_pdf_attachment_values'))
 
@@ -650,7 +646,7 @@ class AccountMoveSend(models.Model):
                 self._generate_invoice_fallback_documents(errors)
 
             # Send mail.
-            success = {move: move_data for move, move_data in moves_data.items() if not move_data.get('error') and move.partner_id.email}
+            success = {move: move_data for move, move_data in moves_data.items() if not move_data.get('error')}
             if success:
                 self._hook_if_success(success, from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
 

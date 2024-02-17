@@ -8,6 +8,7 @@ import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
 import { requireWysiwygLegacyModule } from "@web_editor/js/frontend/loader";
 import { setEditableWindow } from 'web_editor.utils';
 import { isMediaElement } from '@web_editor/js/editor/odoo-editor/src/utils/utils';
+import { cloneContentEls } from "website.utils";
 
 import { EditMenuDialog, MenuDialog } from "../dialog/edit_menu";
 import { WebsiteDialog } from '../dialog/dialog';
@@ -93,6 +94,15 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         useHotkey('control+k', () => {});
 
         onWillStart(() => {
+            // Destroy the widgets before instantiating the wysiwyg.
+            // grep: RESTART_WIDGETS_EDIT_MODE
+            // TODO ideally this should be done as close as the restart as
+            // as possible to avoid long flickering when entering edit mode. At
+            // moment some RPC are awaited before the restart so it is not
+            // ideal. But this has to be done before adding o_editable classes
+            // in the DOM. To review once everything is OWLified.
+            this._websiteRootEvent("widgets_stop_request");
+
             const pageOptionEls = this.websiteService.pageDocument.querySelectorAll('.o_page_option_data');
             for (const pageOptionEl of pageOptionEls) {
                 const optionName = pageOptionEl.name;
@@ -178,6 +188,8 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                         this._toggleMegaMenu($toggle[0]);
                     }
                 })
+                // FIXME this is not right, the observer should not be inactive
+                // for async periods of time.
                 .then(() => this.odooEditor.observerActive());
         });
 
@@ -198,6 +210,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         }
         // The jquery instance inside the iframe needs to be aware of the wysiwyg.
         this.websiteService.contentWindow.$('#wrapwrap').data('wysiwyg', this);
+        // grep: RESTART_WIDGETS_EDIT_MODE
         await new Promise((resolve, reject) => this._websiteRootEvent('widgets_start_request', {
             editableMode: true,
             onSuccess: resolve,
@@ -396,11 +409,17 @@ export class WysiwygAdapterComponent extends Wysiwyg {
             // generated a new stack and break the "redo" of the editor.
             this.odooEditor.automaticStepSkipStack();
             for (const record of records) {
-                const $savable = $(record.target).closest(this.savableSelector);
-
                 if (record.attributeName === 'contenteditable') {
                     continue;
                 }
+
+                const $savable = $(record.target).closest(this.savableSelector);
+                if (!$savable.length) {
+                    continue;
+                }
+
+                // Mark any savable element dirty if any tracked mutation occurs
+                // inside of it.
                 $savable.not('.o_dirty').each(function () {
                     if (!this.hasAttribute('data-oe-readonly')) {
                         this.classList.add('o_dirty');
@@ -761,6 +780,13 @@ export class WysiwygAdapterComponent extends Wysiwyg {
      * @returns {boolean} true if the page has been altered.
      */
     _isDirty() {
+        // TODO improve in master: the way we check if the page is dirty should
+        // match the fact the save will actually do something or not. Right now,
+        // this check checks the whole page, including the non editable parts,
+        // regardless of the fact something can be saved inside or not. It is
+        // also thus of course considering the page dirty too often by mistake
+        // since non editable parts can have their DOM changed without impacting
+        // the save (e.g. menus being folded into the "+" menu for example).
         return this.isDirty() || Object.values(this.pageOptions).some(option => option.isDirty);
     }
     _trigger_up(ev) {
@@ -887,11 +913,27 @@ export class WysiwygAdapterComponent extends Wysiwyg {
     /**
      * @override
      */
-    async _saveElement($el, context, withLang) {
+    async _saveElement($el, context, withLang, ...rest) {
         var promises = [];
 
-        // Saving a view content
-        await super._saveElement(...arguments);
+        // Saving Embed Code snippets with <script> in the database, as these
+        // elements are removed in edit mode.
+        if ($el[0].querySelector(".s_embed_code")) {
+            // Copied so as not to impact the actual DOM and prevent scripts
+            // from loading.
+            const $clonedEl = $el.clone(true, true);
+            for (const embedCodeEl of $clonedEl[0].querySelectorAll(".s_embed_code")) {
+                const embedTemplateEl = embedCodeEl.querySelector(".s_embed_code_saved");
+                if (embedTemplateEl) {
+                    embedCodeEl.querySelector(".s_embed_code_embedded")
+                        .replaceChildren(cloneContentEls(embedTemplateEl.content, true));
+                }
+            }
+            await super._saveElement($clonedEl, context, withLang, ...rest);
+        } else {
+            // Saving a view content
+            await super._saveElement(...arguments);
+        }
 
         // Saving mega menu options
         if ($el.data('oe-field') === 'mega_menu_content') {

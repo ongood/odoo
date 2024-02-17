@@ -91,7 +91,7 @@ class HolidaysRequest(models.Model):
 
         if 'state' in fields_list and not defaults.get('state'):
             lt = self.env['hr.leave.type'].browse(defaults.get('holiday_status_id'))
-            defaults['state'] = 'confirm'
+            defaults['state'] = 'confirm' if lt and lt.leave_validation_type != 'no_validation' else 'draft'
 
         if 'date_from' and 'date_to' in fields_list:
             now = fields.Datetime.now()
@@ -183,6 +183,7 @@ class HolidaysRequest(models.Model):
     number_of_days = fields.Float(
         'Duration (Days)', compute='_compute_number_of_days', store=True, readonly=False, copy=False, tracking=True,
         help='Number of days of the time off request. Used in the calculation. To manually correct the duration, use this field.')
+    last_several_days = fields.Boolean("All day", compute="_compute_last_several_days")
     number_of_days_display = fields.Float(
         'Duration in days', compute='_compute_number_of_days_display', readonly=True,
         help='Number of days of the time off request according to your working schedule. Used for interface.')
@@ -503,6 +504,11 @@ class HolidaysRequest(models.Model):
             else:
                 holiday.number_of_days = 0
 
+    @api.depends('number_of_days')
+    def _compute_last_several_days(self):
+        for holiday in self:
+            holiday.last_several_days = holiday.number_of_days > 1
+
     @api.depends('tz')
     @api.depends_context('uid')
     def _compute_tz_mismatch(self):
@@ -708,8 +714,8 @@ class HolidaysRequest(models.Model):
                 unallocated_employees = []
                 for employee in holiday.sudo().employee_ids:
                     leave_days = mapped_days[employee.id][holiday.holiday_status_id.id]
-                    if float_compare(leave_days['remaining_leaves'], self.number_of_days, precision_digits=2) == -1\
-                            or float_compare(leave_days['virtual_remaining_leaves'], self.number_of_days, precision_digits=2) == -1:
+                    if float_compare(leave_days['remaining_leaves'], holiday.number_of_days, precision_digits=2) == -1\
+                            or float_compare(leave_days['virtual_remaining_leaves'], holiday.number_of_days, precision_digits=2) == -1:
                         unallocated_employees.append(employee.name)
                 if unallocated_employees:
                     raise ValidationError(_('The number of remaining time off is not sufficient for this time off type.\n'
@@ -1551,22 +1557,31 @@ class HolidaysRequest(models.Model):
         return responsible
 
     def activity_update(self):
-        to_clean, to_do = self.env['hr.leave'], self.env['hr.leave']
+        to_clean, to_do, to_do_confirm_activity = self.env['hr.leave'], self.env['hr.leave'], self.env['hr.leave']
         activity_vals = []
         for holiday in self:
-            note = _(
-                'New %(leave_type)s Request created by %(user)s',
-                leave_type=holiday.holiday_status_id.name,
-                user=holiday.create_uid.name,
-            )
             if holiday.state == 'draft':
                 to_clean |= holiday
-            elif holiday.state == 'confirm':
+            elif holiday.state in ['confirm', 'validate1']:
                 if holiday.holiday_status_id.leave_validation_type != 'no_validation':
+                    if holiday.state == 'confirm':
+                        note = _(
+                            'New %(leave_type)s Request created by %(user)s',
+                            leave_type=holiday.holiday_status_id.name,
+                            user=holiday.create_uid.name,
+                            )
+                        activity_type = self.env.ref('hr_holidays.mail_act_leave_approval')
+                    else:
+                        note = _(
+                            'Second approval request for %(leave_type)s',
+                            leave_type=holiday.holiday_status_id.name,
+                            )
+                        activity_type = self.env.ref('hr_holidays.mail_act_leave_second_approval')
+                        to_do_confirm_activity |= holiday
                     user_ids = holiday.sudo()._get_responsible_for_approval().ids or self.env.user.ids
                     for user_id in user_ids:
                         activity_vals.append({
-                            'activity_type_id': self.env.ref('hr_holidays.mail_act_leave_approval').id,
+                            'activity_type_id': activity_type.id,
                             'automated': True,
                             'note': note,
                             'user_id': user_id,
@@ -1579,6 +1594,8 @@ class HolidaysRequest(models.Model):
                 to_clean |= holiday
         if to_clean:
             to_clean.activity_unlink(['hr_holidays.mail_act_leave_approval', 'hr_holidays.mail_act_leave_second_approval'])
+        if to_do_confirm_activity:
+            to_do_confirm_activity.activity_feedback(['hr_holidays.mail_act_leave_approval'])
         if to_do:
             to_do.activity_feedback(['hr_holidays.mail_act_leave_approval', 'hr_holidays.mail_act_leave_second_approval'])
         self.env['mail.activity'].create(activity_vals)
@@ -1645,7 +1662,7 @@ class HolidaysRequest(models.Model):
 
     def message_subscribe(self, partner_ids=None, subtype_ids=None):
         # due to record rule can not allow to add follower and mention on validated leave so subscribe through sudo
-        if self.state in ['validate', 'validate1']:
+        if any(holiday.state in ['validate', 'validate1'] for holiday in self):
             self.check_access_rights('read')
             self.check_access_rule('read')
             return super(HolidaysRequest, self.sudo()).message_subscribe(partner_ids=partner_ids, subtype_ids=subtype_ids)

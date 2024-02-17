@@ -48,8 +48,6 @@ import {
     isWhitespace,
     isVisibleTextNode,
     getCursorDirection,
-    firstLeaf,
-    lastLeaf,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
@@ -132,9 +130,9 @@ function hasColor(element, mode) {
         }
     }
     return (
-        (style[mode] && style[mode] !== 'inherit' && style[mode] !== parent.style[mode]) ||
+        (style[mode] && style[mode] !== 'inherit' && (!parent || style[mode] !== parent.style[mode])) ||
         (classRegex.test(element.className) &&
-            getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode])
+            (!parent || getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode]))
     );
 }
 
@@ -328,7 +326,9 @@ export const editorCommands = {
             !descendants(block).some(descendant => selectedBlocks.includes(descendant)) &&
             block.isContentEditable
         ));
-        const [startContainer, startOffset, endContainer, endOffset] = [firstLeaf(range.startContainer), range.startOffset, lastLeaf(range.endContainer), range.endOffset];
+        let { startContainer, startOffset, endContainer, endOffset } = range;
+        const startContainerChild = startContainer.firstChild;
+        const endContainerChild = endContainer.lastChild;
         for (const block of deepestSelectedBlocks) {
             if (
                 ['P', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'].includes(
@@ -339,6 +339,7 @@ export const editorCommands = {
                 if (inLI && tagName === "P") {
                     inLI.oToggleList(0);
                 } else {
+                    block.classList.remove('h1', 'h2', 'h3', 'h4', 'h5', 'h6');
                     setTagName(block, tagName);
                 }
             } else {
@@ -350,10 +351,17 @@ export const editorCommands = {
                 children.forEach(child => newBlock.appendChild(child));
             }
         }
+        const isContextBlock = container => ['TD', 'DIV', 'LI'].includes(container.nodeName);
+        if (!startContainer.isConnected || isContextBlock(startContainer)) {
+            startContainer = startContainerChild.parentNode;
+        }
+        if (!endContainer.isConnected || isContextBlock(endContainer)) {
+            endContainer = endContainerChild.parentNode;
+        }
         const newRange = new Range();
-        newRange.setStart(startContainer,startOffset);
-        newRange.setEnd(endContainer,endOffset);
-        getDeepRange(editor.editable, { range: newRange, select: true, });
+        newRange.setStart(startContainer, startOffset);
+        newRange.setEnd(endContainer, endOffset);
+        getDeepRange(editor.editable, { range: newRange, select: true });
         editor.historyStep();
     },
 
@@ -373,7 +381,11 @@ export const editorCommands = {
         const changedElements = [];
         const defaultDirection = editor.options.direction;
         const shouldApplyStyle = !isSelectionFormat(editor.editable, 'switchDirection');
-        for (const block of new Set(selectedTextNodes.map(textNode => closestElement(textNode, 'ul,ol') || closestBlock(textNode)))) {
+        let blocks = new Set(selectedTextNodes.map(textNode => closestElement(textNode, 'ul,ol') || closestBlock(textNode)));
+        blocks.forEach(block => {
+            blocks = [...blocks, ...block.querySelectorAll('ul,ol')];
+        })
+        for (const block of blocks) {
             if (!shouldApplyStyle) {
                 block.removeAttribute('dir');
             } else {
@@ -485,7 +497,8 @@ export const editorCommands = {
                 cli.tagName == 'LI' &&
                 !li.has(cli) &&
                 !cli.classList.contains('oe-nested') &&
-                cli.isContentEditable
+                cli.isContentEditable &&
+                !cli.classList.contains('nav-item')
             ) {
                 li.add(cli);
             }
@@ -512,11 +525,15 @@ export const editorCommands = {
             if (node.nodeType === Node.TEXT_NODE && isWhitespace(node) && closestElement(node).isContentEditable) {
                 node.remove();
             } else {
-                let block = closestBlock(node);
-                if (!['OL', 'UL'].includes(block.tagName) && block.isContentEditable) {
-                    block = block.closest('li') || block;
-                    const ublock = block.closest('ol, ul');
-                    ublock && getListMode(ublock) == mode ? li.add(block) : blocks.add(block);
+                // Ensure nav-item lists are excluded from toggling
+                const isNavItemList = node => node.nodeName === 'LI' && node.classList.contains('nav-item');
+                let nodeToToggle = closestBlock(node);
+                nodeToToggle = isNavItemList(nodeToToggle) ? node : nodeToToggle;
+                if (!['OL', 'UL'].includes(nodeToToggle.tagName) && (nodeToToggle.isContentEditable || nodeToToggle.nodeType === Node.TEXT_NODE)) {
+                    const closestLi = closestElement(nodeToToggle, 'li');
+                    nodeToToggle = closestLi && !isNavItemList(closestLi) ? closestLi : nodeToToggle;
+                    const ublock = nodeToToggle.nodeName === 'LI' && nodeToToggle.closest('ol, ul');
+                    ublock && getListMode(ublock) == mode ? li.add(nodeToToggle) : blocks.add(nodeToToggle);
                 }
             }
         }
@@ -569,54 +586,65 @@ export const editorCommands = {
             selectionNodes.push(range.endContainer, ...descendants(range.endContainer));
         }
         const selectedNodes = selectionNodes.filter(node => !closestElement(node, 'table.o_selected_table'))
-        const fonts = selectedNodes.flatMap(node => {
-            let font = closestElement(node, 'font') || closestElement(node, 'span');
-            const children = font && descendants(font);
-            if (font && (font.nodeName === 'FONT' || (font.nodeName === 'SPAN' && font.style[mode]))) {
-                // Partially selected <font>: split it.
-                const selectedChildren = children.filter(child => selectedNodes.includes(child));
-                if (selectedChildren.length) {
-                    font = splitAroundUntil(selectedChildren, font);
+        function getFonts(selectedNodes) {
+            return selectedNodes.flatMap(node => {
+                let font = closestElement(node, 'font') || closestElement(node, 'span');
+                const children = font && descendants(font);
+                if (font && (font.nodeName === 'FONT' || (font.nodeName === 'SPAN' && font.style[mode]))) {
+                    // Partially selected <font>: split it.
+                    const selectedChildren = children.filter(child => selectedNodes.includes(child));
+                    if (selectedChildren.length) {
+                        font = splitAroundUntil(selectedChildren, font);
+                    } else {
+                        font = [];
+                    }
+                } else if ((node.nodeType === Node.TEXT_NODE && !isWhitespace(node))
+                        || (node.nodeName === 'BR' && isEmptyBlock(node.parentNode))
+                        || (node.nodeType === Node.ELEMENT_NODE &&
+                            node.nodeName !== 'FIGURE' &&
+                            ['inline', 'inline-block'].includes(getComputedStyle(node).display) &&
+                            !isWhitespace(node.textContent) &&
+                            !node.classList.contains('btn') &&
+                            !node.querySelector('font'))) {
+                    // Node is a visible text or inline node without font nor a button:
+                    // wrap it in a <font>.
+                    const previous = node.previousSibling;
+                    const classRegex = mode === 'color' ? BG_CLASSES_REGEX : TEXT_CLASSES_REGEX;
+                    if (
+                        previous &&
+                        previous.nodeName === 'FONT' &&
+                        !previous.style[mode === 'color' ? 'backgroundColor' : 'color'] &&
+                        !classRegex.test(previous.className) &&
+                        selectedNodes.includes(previous.firstChild) &&
+                        selectedNodes.includes(previous.lastChild)
+                    ) {
+                        // Directly follows a fully selected <font> that isn't
+                        // colored in the other mode: append to that.
+                        font = previous;
+                    } else {
+                        // No <font> found: insert a new one.
+                        font = document.createElement('font');
+                        node.after(font);
+                    }
+                    if (node.textContent) {
+                        font.appendChild(node);
+                    } else {
+                        fillEmpty(font);
+                    }
                 } else {
-                    font = [];
+                    font = []; // Ignore non-text or invisible text nodes.
                 }
-            } else if ((node.nodeType === Node.TEXT_NODE && !isWhitespace(node))
-                    || (node.nodeName === 'BR' && isEmptyBlock(node.parentNode))
-                    || (node.nodeType === Node.ELEMENT_NODE &&
-                        ['inline', 'inline-block'].includes(getComputedStyle(node).display) &&
-                        !isWhitespace(node.textContent) &&
-                        !node.classList.contains('btn') &&
-                        !node.querySelector('font'))) {
-                // Node is a visible text or inline node without font nor a button:
-                // wrap it in a <font>.
-                const previous = node.previousSibling;
-                const classRegex = mode === 'color' ? BG_CLASSES_REGEX : TEXT_CLASSES_REGEX;
-                if (
-                    previous &&
-                    previous.nodeName === 'FONT' &&
-                    !previous.style[mode === 'color' ? 'backgroundColor' : 'color'] &&
-                    !classRegex.test(previous.className) &&
-                    selectedNodes.includes(previous.firstChild) &&
-                    selectedNodes.includes(previous.lastChild)
-                ) {
-                    // Directly follows a fully selected <font> that isn't
-                    // colored in the other mode: append to that.
-                    font = previous;
-                } else {
-                    // No <font> found: insert a new one.
-                    font = document.createElement('font');
-                    node.after(font);
-                }
-                if (node.textContent) {
-                    font.appendChild(node);
-                } else {
-                    fillEmpty(font);
-                }
-            } else {
-                font = []; // Ignore non-text or invisible text nodes.
-            }
-            return font;
-        });
+                return font;
+            });
+        }
+
+        let fonts = getFonts(selectedNodes);
+        // Dirty fix as the previous call could have unconnected elements
+        // because of the `splitAroundUntil`. Another call should provide he
+        // correct list of fonts.
+        if (!fonts.every((font) => font.isConnected)) {
+            fonts = getFonts(selectedNodes);
+        }
         // Color the selected <font>s and remove uncolored fonts.
         const fontsSet = new Set(fonts);
         for (const font of fontsSet) {

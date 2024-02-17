@@ -19,13 +19,13 @@ class HolidaysType(models.Model):
     timesheet_generate = fields.Boolean(
         'Generate Timesheet', compute='_compute_timesheet_generate', store=True, readonly=False,
         help="If checked, when validating a time off, timesheet will be generated in the Vacation Project of the company.")
-    timesheet_project_id = fields.Many2one('project.project', string="Project", default=_default_project_id, domain="[('company_id', '=', company_id)]")
+    timesheet_project_id = fields.Many2one('project.project', string="Project", default=_default_project_id, domain="[('company_id', 'in', [False, company_id])]")
     timesheet_task_id = fields.Many2one(
         'project.task', string="Task", compute='_compute_timesheet_task_id',
         store=True, readonly=False, default=_default_task_id,
         domain="[('project_id', '=', timesheet_project_id),"
                 "('project_id', '!=', False),"
-                "('company_id', '=', company_id)]")
+                "('company_id', 'in', [False, company_id])]")
 
     @api.depends('timesheet_task_id', 'timesheet_project_id')
     def _compute_timesheet_generate(self):
@@ -107,12 +107,29 @@ class Holidays(models.Model):
             'company_id': self.holiday_status_id.timesheet_task_id.company_id.id or self.holiday_status_id.timesheet_project_id.company_id.id,
         }
 
+    def _check_missing_global_leave_timesheets(self):
+        if not self:
+            return
+        min_date = min([leave.date_from for leave in self])
+        max_date = max([leave.date_to for leave in self])
+
+        global_leaves = self.env['resource.calendar.leaves'].search([
+            ("resource_id", "=", False),
+            ("date_to", ">=", min_date),
+            ("date_from", "<=", max_date),
+            ("company_id.internal_project_id", "!=", False),
+            ("company_id.leave_timesheet_task_id", "!=", False),
+        ])
+        if global_leaves:
+            global_leaves._generate_public_time_off_timesheets(self.employee_ids)
+
     def action_refuse(self):
         """ Remove the timesheets linked to the refused holidays """
         result = super(Holidays, self).action_refuse()
         timesheets = self.sudo().mapped('timesheet_ids')
         timesheets.write({'holiday_id': False})
         timesheets.unlink()
+        self._check_missing_global_leave_timesheets()
         return result
 
     def _action_user_cancel(self, reason):
@@ -120,4 +137,5 @@ class Holidays(models.Model):
         timesheets = self.sudo().timesheet_ids
         timesheets.write({'holiday_id': False})
         timesheets.unlink()
+        self._check_missing_global_leave_timesheets()
         return res

@@ -337,8 +337,12 @@ class TestRepair(common.TransactionCase):
         with so_form.order_line.new() as line:
             line.product_id = self.product_consu_order_repair
             line.product_uom_qty = 2.0
+        with so_form.order_line.new() as line:
+            line.display_type = 'line_section'
+            line.name = 'Dummy Section'
         sale_order = so_form.save()
         order_line = sale_order.order_line[0]
+        line_section = sale_order.order_line[1]
         self.assertEqual(len(sale_order.repair_order_ids), 0)
         sale_order.action_confirm()
         # Quantity set on the "create repair" product doesn't affect the number of RO created
@@ -349,6 +353,7 @@ class TestRepair(common.TransactionCase):
         order_line.product_uom_qty = 0
         self.assertEqual(repair_order.state, 'cancel')
         order_line.product_uom_qty = 1
+        line_section.name = 'updated section'
         self.assertEqual(repair_order.state, 'confirmed')
         repair_order.action_repair_cancel()
         self.assertTrue(float_is_zero(order_line.product_uom_qty, 2))
@@ -570,3 +575,47 @@ class TestRepair(common.TransactionCase):
         repair.action_repair_end()
         self.assertEqual(repair.state, 'done')
         self.assertEqual(len(return_picking.move_ids), 1)
+
+    def test_repair_with_product_in_package(self):
+        """
+        Test That a repair order can be validated when the repaired product is tracked and in a package
+        """
+        self.product_product_3.tracking = 'serial'
+        self.product_product_3.type = 'product'
+        # Create two serial numbers
+        sn_1 = self.env['stock.lot'].create({'name': 'sn_1', 'product_id': self.product_product_3.id})
+        sn_2 = self.env['stock.lot'].create({'name': 'sn_2', 'product_id': self.product_product_3.id})
+
+        # Create two packages
+        package_1 = self.env['stock.quant.package'].create({'name': 'Package-test-1'})
+        package_2 = self.env['stock.quant.package'].create({'name': 'Package-test-2'})
+
+        # update the quantity of the product in the stock
+        self.env['stock.quant']._update_available_quantity(self.product_product_3, self.stock_warehouse.lot_stock_id, 1, lot_id=sn_1, package_id=package_1)
+        self.env['stock.quant']._update_available_quantity(self.product_product_3, self.stock_warehouse.lot_stock_id, 1, lot_id=sn_2, package_id=package_2)
+        self.assertEqual(self.product_product_3.qty_available, 2)
+        # create a repair order
+        repair_order = self.env['repair.order'].create({
+            'product_id': self.product_product_3.id,
+            'product_uom': self.product_product_3.uom_id.id,
+            # 'guarantee_limit': '2019-01-01',
+            'location_id': self.stock_warehouse.lot_stock_id.id,
+            'lot_id': sn_1.id,
+            'picking_type_id': self.stock_warehouse.repair_type_id.id,
+            'move_ids': [
+                (0, 0, {
+                    'product_id': self.product_product_5.id,
+                    'product_uom_qty': 1.0,
+                    'state': 'draft',
+                    'repair_line_type': 'add',
+                })
+            ],
+        })
+        # Validate and complete the repair order
+        repair_order.action_validate()
+        self.assertEqual(repair_order.state, 'confirmed')
+        repair_order.action_repair_start()
+        self.assertEqual(repair_order.state, 'under_repair')
+        repair_order.move_ids.quantity_done = 1
+        repair_order.action_repair_end()
+        self.assertEqual(repair_order.state, 'done')

@@ -4,18 +4,18 @@
 # 
 # Translators:
 # Martin Trigaux, 2023
-# Wil Odoo, 2023
 # 敬雲 林 <chingyun@yuanchih-consult.com>, 2023
 # Pak Wai Ho, 2023
-# Tony Ng, 2023
+# Tony Ng, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~16.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-25 11:23+0000\n"
+"POT-Creation-Date: 2024-02-05 16:24+0000\n"
 "PO-Revision-Date: 2023-07-25 12:22+0000\n"
-"Last-Translator: Tony Ng, 2023\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -167,7 +167,7 @@ msgstr "“%s”與“%s”不同步。"
 #: code:addons/web/static/src/core/file_upload/file_upload_progress_record.js:0
 #, python-format
 msgid "(%s/%sMB)"
-msgstr ""
+msgstr "(%s/%sMB)"
 
 #. module: web
 #. odoo-javascript
@@ -188,21 +188,21 @@ msgstr "(更改)"
 #: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #, python-format
 msgid "(create)"
-msgstr ""
+msgstr "(建立)"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/burger_menu/mobile_switch_company_menu/mobile_switch_company_menu.xml:0
 #, python-format
 msgid "(current)"
-msgstr ""
+msgstr "(目前)"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_boxed
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "(document name)"
-msgstr ""
+msgstr "(文件名稱)"
 
 #. module: web
 #. odoo-javascript
@@ -229,20 +229,24 @@ msgid ""
 "                        font-style: normal;\n"
 "                    }"
 msgstr ""
+") format(\"woff\");\n"
+"                        font-weight: normal;\n"
+"                        font-style: normal;\n"
+"                    }"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
 #, python-format
 msgid "+ Add %s"
-msgstr ""
+msgstr "+ 加入 %s"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 #, python-format
 msgid "+ KEY"
-msgstr ""
+msgstr "+ KEY"
 
 #. module: web
 #. odoo-javascript
@@ -616,6 +620,11 @@ msgid "9:30"
 msgstr "9:30"
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
+msgid "<i class=\"fa fa-repeat\"/> Reset"
+msgstr "<i class=\"fa fa-repeat\"/> 重設"
+
+#. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid "<span class=\"text-nowrap\">$ 2,887.50</span>"
 msgstr "<span class=\"text-nowrap\">$ 2,887.50</span>"
@@ -668,11 +677,13 @@ msgid ""
 "<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
 "                                       Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">（範例地址）\n"
+"                                       <br/>香港西營盤<br/>118 干諾道西 32 樓</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid "<span id=\"line_tax_ids\">Tax 15%</span>"
-msgstr ""
+msgstr "<span id=\"line_tax_ids\">稅 15%</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -705,6 +716,8 @@ msgid ""
 "<span>Invoice</span>\n"
 "                           <span>INV/2023/00003</span>"
 msgstr ""
+"<span>發票</span>\n"
+"                           <span>INV/2023/00003</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -747,7 +760,7 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.address_layout
 msgid "<strong>Address block</strong>"
-msgstr ""
+msgstr "<strong>地址方塊</strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -755,7 +768,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "<strong>Company address block</strong>"
-msgstr ""
+msgstr "<strong>公司地址方塊</strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -763,7 +776,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "<strong>Company details block</strong>"
-msgstr ""
+msgstr "<strong>公司詳情方塊</strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -773,7 +786,7 @@ msgstr "<strong>到期日期:</strong>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.address_layout
 msgid "<strong>Information block</strong>"
-msgstr ""
+msgstr "<strong>資訊方塊</strong>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -788,7 +801,7 @@ msgstr "<strong>總計</strong>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid "<strong>Untaxed Amount</strong>"
-msgstr ""
+msgstr "<strong>未連稅金額</strong>"
 
 #. module: web
 #. odoo-javascript
@@ -813,6 +826,9 @@ msgid ""
 "                        font-family: \"font\";\n"
 "                        src: url(data:font/ttf;base64,"
 msgstr ""
+"@font-face {\n"
+"                        font-family: \"font\";\n"
+"                        src: url(data:font/ttf;base64,"
 
 #. module: web
 #. odoo-javascript
@@ -938,7 +954,7 @@ msgstr "存取全部企業版應用"
 #: code:addons/web/static/src/views/fields/ace/ace_field.js:0
 #, python-format
 msgid "Ace Editor"
-msgstr ""
+msgstr "Ace編輯工具"
 
 #. module: web
 #. odoo-javascript
@@ -982,7 +998,7 @@ msgstr "啟動測試資產偵錯"
 #: code:addons/web/static/src/core/debug/debug_providers.js:0
 #, python-format
 msgid "Activate debug mode (with assets)"
-msgstr ""
+msgstr "啟動除錯模式（使用資產）"
 
 #. module: web
 #. odoo-javascript
@@ -1036,7 +1052,7 @@ msgstr "加入自訂準則"
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 #, python-format
 msgid "Add New Rule"
-msgstr ""
+msgstr "加入新規則"
 
 #. module: web
 #. odoo-javascript
@@ -1082,14 +1098,14 @@ msgstr "添加列"
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 #, python-format
 msgid "Add condition"
-msgstr ""
+msgstr "加入條件"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
 #, python-format
 msgid "Add end date"
-msgstr ""
+msgstr "加入結束日期"
 
 #. module: web
 #. odoo-javascript
@@ -1125,7 +1141,7 @@ msgstr "添加 qweb 指令上下文"
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
 #, python-format
 msgid "Add start date"
-msgstr ""
+msgstr "加入開始日期"
 
 #. module: web
 #. odoo-javascript
@@ -1140,7 +1156,7 @@ msgstr "加入標籤"
 #: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
 #, python-format
 msgid "Add: %s"
-msgstr ""
+msgstr "加入：%s"
 
 #. module: web
 #. odoo-javascript
@@ -1154,7 +1170,7 @@ msgstr ""
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 #, python-format
 msgid "Adopt & Sign"
-msgstr ""
+msgstr "採納並簽署"
 
 #. module: web
 #. odoo-javascript
@@ -1184,6 +1200,7 @@ msgstr "警示"
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/search/search_arch_parser.js:0
 #: code:addons/web/static/src/search/search_panel/search_panel.xml:0
+#: code:addons/web/static/src/search/search_panel/search_panel.xml:0
 #: code:addons/web/static/src/views/list/list_controller.xml:0
 #, python-format
 msgid "All"
@@ -1209,7 +1226,7 @@ msgstr "所有使用者"
 #: code:addons/web/static/src/core/colorlist/colorlist.js:0
 #, python-format
 msgid "Almond"
-msgstr ""
+msgstr "杏仁"
 
 #. module: web
 #. odoo-javascript
@@ -1223,7 +1240,7 @@ msgstr "美洲"
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 #, python-format
 msgid "Among the"
-msgstr ""
+msgstr "在以下項目中:"
 
 #. module: web
 #. odoo-javascript
@@ -1336,7 +1353,7 @@ msgstr "您確定要刪除這些記錄嗎？"
 #: code:addons/web/static/src/views/kanban/kanban_header.js:0
 #, python-format
 msgid "Are you sure you want to delete this column?"
-msgstr ""
+msgstr "確定刪除此欄？"
 
 #. module: web
 #. odoo-javascript
@@ -1395,7 +1412,7 @@ msgstr "箭頭圖示"
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
 #, python-format
 msgid "As a default text when no value are set"
-msgstr ""
+msgstr "未設定值時，作為預設文字"
 
 #. module: web
 #. odoo-javascript
@@ -1440,7 +1457,7 @@ msgstr "附件"
 #: code:addons/web/static/src/views/fields/attachment_image/attachment_image_field.js:0
 #, python-format
 msgid "Attachment Image"
-msgstr ""
+msgstr "附件圖像"
 
 #. module: web
 #. odoo-javascript
@@ -1578,7 +1595,7 @@ msgstr "藍色"
 #: code:addons/web/static/src/views/fields/boolean_icon/boolean_icon_field.js:0
 #, python-format
 msgid "Boolean Icon"
-msgstr ""
+msgstr "真假值圖示"
 
 #. module: web
 #. odoo-javascript
@@ -1587,7 +1604,7 @@ msgstr ""
 msgid ""
 "Bootstrap classname to customize the style of the progress bar when the "
 "maximum value is exceeded"
-msgstr ""
+msgstr "Bootstrap類名，用於自訂進度列超過最大值時的樣式"
 
 #. module: web
 #. odoo-javascript
@@ -1627,14 +1644,14 @@ msgid ""
 " a valid electronic representation of my hand-written signature/initials for"
 " all purposes when it is used on documents, including legally binding "
 "contracts."
-msgstr ""
+msgstr "按下「採納並簽署」表示我同意所選的簽名/簡簽將是我手寫簽名/簡簽的有效電子表示形式，用於文件時用作所有目的，包括具有法律約束力的合約。"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/formatters.js:0
 #, python-format
 msgid "Bytes"
-msgstr ""
+msgstr "位元組"
 
 #. module: web
 #. odoo-javascript
@@ -1834,6 +1851,8 @@ msgstr "聖誕老人"
 #. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector/domain_selector_fields.xml:0
 #: code:addons/web/static/src/core/domain_selector/domain_selector_fields.xml:0
+#: code:addons/web/static/src/core/model_field_selector/model_field_selector.xml:0
+#: code:addons/web/static/src/core/model_field_selector/model_field_selector.xml:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
@@ -1849,7 +1868,7 @@ msgstr "清除"
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 #, python-format
 msgid "Clickable"
-msgstr ""
+msgstr "可點按"
 
 #. module: web
 #. odoo-javascript
@@ -1896,7 +1915,7 @@ msgstr "關閉(Esc)"
 #: code:addons/web/static/src/webclient/burger_menu/burger_menu.xml:0
 #, python-format
 msgid "Close menu"
-msgstr ""
+msgstr "關閉選單"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
@@ -1947,7 +1966,7 @@ msgstr "公司名稱"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_boxed
 msgid "Company Report Footer"
-msgstr ""
+msgstr "公司報告頁尾"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__report_header
@@ -1965,7 +1984,7 @@ msgstr "公司名稱"
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "Company tagline"
-msgstr ""
+msgstr "公司宣傳語"
 
 #. module: web
 #: model:ir.model.fields,help:web.field_base_document_layout__report_header
@@ -2032,7 +2051,7 @@ msgstr "連接已恢復。您已重新上線。"
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "Contains the company address."
-msgstr ""
+msgstr "包含公司地址。"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.external_layout_bold
@@ -2040,7 +2059,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "Contains the company details."
-msgstr ""
+msgstr "包含公司詳細資訊。"
 
 #. module: web
 #. odoo-javascript
@@ -2077,28 +2096,28 @@ msgstr "複製"
 #: code:addons/web/static/src/views/fields/copy_clipboard/copy_clipboard_field.js:0
 #, python-format
 msgid "Copy Multiline Text to Clipboard"
-msgstr ""
+msgstr "複製多行文字至剪貼簿"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/copy_clipboard/copy_clipboard_field.js:0
 #, python-format
 msgid "Copy Text to Clipboard"
-msgstr ""
+msgstr "複製文字至剪貼簿"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/copy_clipboard/copy_clipboard_field.js:0
 #, python-format
 msgid "Copy URL to Clipboard"
-msgstr ""
+msgstr "複製網址至剪貼簿"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #, python-format
 msgid "Copy error to clipboard"
-msgstr ""
+msgstr "複製錯誤訊息至剪貼簿"
 
 #. module: web
 #. odoo-javascript
@@ -2139,7 +2158,7 @@ msgstr "無法顯示所選圖像"
 #: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.js:0
 #, python-format
 msgid "Could not display the selected pdf"
-msgstr ""
+msgstr "無法顯示選取的 PDF"
 
 #. module: web
 #. odoo-javascript
@@ -2169,7 +2188,7 @@ msgstr "無法設置封面圖像：視圖中提供了不正確的欄位 （\"%s\
 #: code:addons/web/static/src/webclient/barcode/barcode_scanner.js:0
 #, python-format
 msgid "Could not start scanning. "
-msgstr ""
+msgstr "未能開始掃瞄。"
 
 #. module: web
 #. odoo-javascript
@@ -2238,7 +2257,7 @@ msgstr "建立並編輯..."
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 #, python-format
 msgid "Create and edit..."
-msgstr ""
+msgstr "建立並編輯⋯"
 
 #. module: web
 #. odoo-javascript
@@ -2284,7 +2303,7 @@ msgstr "建立使用者："
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 #, python-format
 msgid "Cumulative"
-msgstr ""
+msgstr "累積"
 
 #. module: web
 #. odoo-javascript
@@ -2305,7 +2324,7 @@ msgstr "目前狀態"
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 #, python-format
 msgid "Current value field"
-msgstr ""
+msgstr "目前值欄位"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__custom_colors
@@ -2317,14 +2336,14 @@ msgstr "自訂顏色"
 #: code:addons/web/controllers/view.py:0
 #, python-format
 msgid "Custom view %s does not belong to user %s"
-msgstr ""
+msgstr "自訂檢視畫面 %s 不屬於使用者 %s"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/colorlist/colorlist.js:0
 #, python-format
 msgid "Cyan"
-msgstr ""
+msgstr "青色"
 
 #. module: web
 #. odoo-javascript
@@ -2364,7 +2383,7 @@ msgstr "資料庫"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.neutralize_banner
 msgid "Database neutralized for testing: no emails sent, etc."
-msgstr ""
+msgstr "資料庫已中性化，以供測試，即不會發送電子郵件等。"
 
 #. module: web
 #. odoo-javascript
@@ -2462,14 +2481,14 @@ msgstr "預設值"
 #: code:addons/web/static/src/search/custom_favorite_item/custom_favorite_item.xml:0
 #, python-format
 msgid "Default filter"
-msgstr ""
+msgstr "預設篩選器"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/signature/signature_field.js:0
 #, python-format
 msgid "Default font"
-msgstr ""
+msgstr "預設字型"
 
 #. module: web
 #. odoo-javascript
@@ -2477,7 +2496,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_popover.xml:0
 #, python-format
 msgid "Default text is used when no values are set"
-msgstr ""
+msgstr "未設置值時，會使用預設文字"
 
 #. module: web
 #. odoo-javascript
@@ -2500,7 +2519,7 @@ msgstr "預設："
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
 #, python-format
 msgid "Delay the apparition of the zoomed image with a value in milliseconds"
-msgstr ""
+msgstr "延遲放大圖像出現的時間，以毫秒（ms）為單位"
 
 #. module: web
 #. odoo-javascript
@@ -2557,7 +2576,7 @@ msgstr "刪除規則"
 #: code:addons/web/static/src/views/list/list_renderer.xml:0
 #, python-format
 msgid "Delete row"
-msgstr ""
+msgstr "刪除列"
 
 #. module: web
 #. odoo-javascript
@@ -2578,7 +2597,7 @@ msgstr "開發人員工具"
 #: code:addons/web/static/src/views/list/list_renderer.js:0
 #, python-format
 msgid "Different currencies cannot be aggregated"
-msgstr ""
+msgstr "不同貨幣無法合併計算"
 
 #. module: web
 #. odoo-javascript
@@ -2594,21 +2613,21 @@ msgstr "數字"
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
 #, python-format
 msgid "Disable creation"
-msgstr ""
+msgstr "停用建立"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
 #, python-format
 msgid "Disable opening"
-msgstr ""
+msgstr "停用開啟"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/float_toggle/float_toggle_field.js:0
 #, python-format
 msgid "Disable readonly"
-msgstr ""
+msgstr "停用唯讀"
 
 #. module: web
 #. odoo-javascript
@@ -2648,21 +2667,21 @@ msgstr "顯示名稱"
 #: code:addons/web/static/src/views/fields/radio/radio_field.js:0
 #, python-format
 msgid "Display horizontally"
-msgstr ""
+msgstr "水平顯示"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #, python-format
 msgid "Display in Cards"
-msgstr ""
+msgstr "在卡片中顯示"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 #, python-format
 msgid "Displays a warning icon if the input dates are in the future."
-msgstr ""
+msgstr "若輸入將來日期，顯示警告圖示。"
 
 #. module: web
 #. odoo-javascript
@@ -2709,7 +2728,7 @@ msgstr "篩選範圍"
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.js:0
 #, python-format
 msgid "Domain is invalid. Please correct it"
-msgstr ""
+msgstr "域名無效，請更正"
 
 #. module: web
 #. odoo-javascript
@@ -2819,7 +2838,7 @@ msgstr "END箭嘴"
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 #, python-format
 msgid "Earliest accepted date"
-msgstr ""
+msgstr "最早接受日期"
 
 #. module: web
 #. odoo-javascript
@@ -2867,7 +2886,7 @@ msgstr "編輯視圖："
 #: code:addons/web/static/src/views/fields/domain/domain_field.js:0
 #, python-format
 msgid "Edit in dialog"
-msgstr ""
+msgstr "在對話框中編輯"
 
 #. module: web
 #. odoo-javascript
@@ -2904,14 +2923,14 @@ msgstr "電郵"
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 #, python-format
 msgid "Empty email address"
-msgstr ""
+msgstr "空的電子郵件地址"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/text/text_field.js:0
 #, python-format
 msgid "Enable line breaks"
-msgstr ""
+msgstr "啟用分行符號"
 
 #. module: web
 #. odoo-javascript
@@ -2925,14 +2944,14 @@ msgstr "啟用分析"
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
 #, python-format
 msgid "Enable zoom"
-msgstr ""
+msgstr "啟用放大縮小"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 #, python-format
 msgid "End date field"
-msgstr ""
+msgstr "結束日期欄位"
 
 #. module: web
 #. odoo-javascript
@@ -2946,7 +2965,7 @@ msgstr "輸入電子郵件"
 #: code:addons/web/static/src/webclient/settings_form_view/highlight_text/form_label_highlight_text.xml:0
 #, python-format
 msgid "Enterprise"
-msgstr ""
+msgstr "企業"
 
 #. module: web
 #. odoo-javascript
@@ -2961,7 +2980,7 @@ msgstr "錯誤"
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 #, python-format
 msgid "Esc"
-msgstr ""
+msgstr "Esc"
 
 #. module: web
 #. odoo-javascript
@@ -3088,7 +3107,7 @@ msgstr "FREE按鈕"
 #: code:addons/web/static/src/views/fields/float_toggle/float_toggle_field.js:0
 #, python-format
 msgid "Factor"
-msgstr ""
+msgstr "因子"
 
 #. module: web
 #. odoo-javascript
@@ -3099,6 +3118,8 @@ msgid ""
 "Failed to evaluate the context: %(context)s.\n"
 "%(error)s"
 msgstr ""
+"未能評估上下文: %(context)s。\n"
+"%(error)s"
 
 #. module: web
 #. odoo-javascript
@@ -3108,6 +3129,8 @@ msgid ""
 "Failed to evaluate the domain: %(domain)s.\n"
 "%(error)s"
 msgstr ""
+"未能評估域名: %(domain)s。\n"
+"%(error)s"
 
 #. module: web
 #. odoo-javascript
@@ -3191,7 +3214,6 @@ msgstr "文件"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
-#: code:addons/web/static/src/views/fields/file_handler.js:0
 #, python-format
 msgid "File upload"
 msgstr "文件上傳"
@@ -3229,7 +3251,7 @@ msgstr "收攏"
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 #, python-format
 msgid "Fold field"
-msgstr ""
+msgstr "摺疊欄位"
 
 #. module: web
 #. odoo-javascript
@@ -3251,7 +3273,7 @@ msgstr "字體"
 #: code:addons/web/static/src/views/fields/font_selection/font_selection_field.js:0
 #, python-format
 msgid "Font Selection"
-msgstr ""
+msgstr "字型選擇"
 
 #. module: web
 #. odoo-javascript
@@ -3289,7 +3311,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/integer/integer_field.js:0
 #, python-format
 msgid "Format number"
-msgstr ""
+msgstr "數字格式"
 
 #. module: web
 #. odoo-javascript
@@ -3299,7 +3321,7 @@ msgstr ""
 msgid ""
 "Format the value according to your language setup - e.g. thousand "
 "separators, rounding, etc."
-msgstr ""
+msgstr "根據你的語言設定，設定數值格式，例如千位分隔符號、四捨五入方式等。"
 
 #. module: web
 #. odoo-javascript
@@ -3322,7 +3344,7 @@ msgstr "法棍"
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.js:0
 #, python-format
 msgid "Frequently used"
-msgstr ""
+msgstr "常用"
 
 #. module: web
 #. odoo-javascript
@@ -3383,7 +3405,7 @@ msgstr "雙子座"
 #: code:addons/web/static/src/views/debug_items.js:0
 #, python-format
 msgid "Get View"
-msgstr ""
+msgstr "獲取視圖"
 
 #. module: web
 #. odoo-javascript
@@ -3397,7 +3419,7 @@ msgstr "通過Odoo企業版獲得該功能及其他更多！"
 #: code:addons/web/static/src/views/fields/url/url_field.xml:0
 #, python-format
 msgid "Go to URL"
-msgstr ""
+msgstr "前往網址"
 
 #. module: web
 #. odoo-javascript
@@ -3446,6 +3468,18 @@ msgstr "處理"
 #: model:ir.model.fields,help:web.field_base_document_layout__company_details
 msgid "Header text displayed at the top of all reports."
 msgstr "顯示在所有報表頂部的標題文字."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/basic_relational_model.js:0
+#, python-format
+msgid ""
+"Heads up! Your recent changes are too large to save automatically. Please "
+"click the <i class=\"fa fa-cloud-upload fa-fw\"></i> button now to ensure "
+"your work is saved before you exit this tab."
+msgstr ""
+"請留意！你最近的變更太大，未能自動儲存。請立即按一下 <i class=\"fa fa-cloud-upload fa-fw\"></i> "
+"按鈕，以確保在離開此分頁之前儲存你的工作。"
 
 #. module: web
 #. odoo-javascript
@@ -3527,7 +3561,7 @@ msgstr "ILY"
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 #, python-format
 msgid "ISO-formatted date (e.g. \"2018-12-31\") or \"today\"."
-msgstr ""
+msgstr "ISO 格式日期（例如 \"2018-12-31\"）或 \"今天\"。"
 
 #. module: web
 #. odoo-javascript
@@ -3569,7 +3603,7 @@ msgstr "於%s 天後"
 #: code:addons/web/static/src/core/domain_selector/utils.js:0
 #, python-format
 msgid "Inaccessible/missing record ID: %s"
-msgstr ""
+msgstr "無法存取/缺漏的記錄識別碼：%s"
 
 #. module: web
 #. odoo-javascript
@@ -3631,21 +3665,21 @@ msgstr "不正確的domain"
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 #, python-format
 msgid "Invalid email address: %(address)s"
-msgstr ""
+msgstr "電子郵件地址無效：%(address)s"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 #, python-format
 msgid "Invalid email addresses: %(2 addresses)s"
-msgstr ""
+msgstr "電子郵件地址無效：%(2 addresses)s"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 #, python-format
 msgid "Invalid email addresses: %(addresses)s"
-msgstr ""
+msgstr "電子郵件地址無效：%(addresses)s"
 
 #. module: web
 #. odoo-javascript
@@ -3687,14 +3721,14 @@ msgstr "無效欄位："
 #: code:addons/web/controllers/domain.py:0
 #, python-format
 msgid "Invalid model: %s"
-msgstr ""
+msgstr "無效模型：%s"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector/domain_selector_autocomplete.js:0
 #, python-format
 msgid "Invalid record ID: %s"
-msgstr ""
+msgstr "無效記錄識別碼：%s"
 
 #. module: web
 #. odoo-javascript
@@ -3715,7 +3749,7 @@ msgstr "邀請新使用者"
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.js:0
 #, python-format
 msgid "Inviting..."
-msgstr ""
+msgstr "邀請中⋯"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__is_company_details_empty
@@ -3742,6 +3776,11 @@ msgid ""
 "            compilation...). During rendering, the global time also takes part of the time to make\n"
 "            the profile as well as some part not logged in the function generated by the qweb."
 msgstr ""
+"t-call 時間可能與範本的總時間不對應。因為全域時間\n"
+"            （在下拉選單中）沒有考慮繪製過程中未包含的持續時間\n"
+"            （尋找範本、讀取、繼承、編譯等）。在繪製過程中，\n"
+"            全域時間也計及製作設定檔的部份時間，\n"
+"            以及qweb產生的函數中未記錄的部份時間。"
 
 #. module: web
 #. odoo-javascript
@@ -4028,14 +4067,14 @@ msgstr "標籤"
 #: code:addons/web/static/src/views/fields/state_selection/state_selection_field.js:0
 #, python-format
 msgid "Label Selection"
-msgstr ""
+msgstr "標籤選擇"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
 #, python-format
 msgid "Label:"
-msgstr ""
+msgstr "標籤："
 
 #. module: web
 #. odoo-python
@@ -4082,7 +4121,7 @@ msgstr "最後修改者："
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 #, python-format
 msgid "Latest accepted date"
-msgstr ""
+msgstr "最後接受日期"
 
 #. module: web
 #. odoo-javascript
@@ -4307,7 +4346,7 @@ msgstr "管理篩選"
 #: code:addons/web/static/src/views/fields/many2one_barcode/many2one_barcode_field.js:0
 #, python-format
 msgid "Many2OneBarcode"
-msgstr ""
+msgstr "多對一條碼"
 
 #. module: web
 #. odoo-javascript
@@ -4355,7 +4394,7 @@ msgstr "尋找符合以下規則的記錄："
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 #, python-format
 msgid "Max value field"
-msgstr ""
+msgstr "最大值欄位"
 
 #. module: web
 #. odoo-javascript
@@ -4554,28 +4593,28 @@ msgstr "富士山"
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #, python-format
 msgid "Move this Property down"
-msgstr ""
+msgstr "向下移動此屬性"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #, python-format
 msgid "Move this Property up"
-msgstr ""
+msgstr "向上移動此屬性"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 #, python-format
 msgid "Move to %s..."
-msgstr ""
+msgstr "移動至 %s ⋯"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/statusbar/statusbar_field.js:0
 #, python-format
 msgid "Move to next %s"
-msgstr ""
+msgstr "移至下一個 %s"
 
 #. module: web
 #. odoo-javascript
@@ -4722,7 +4761,7 @@ msgstr "新屬性"
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 #, python-format
 msgid "New Rule"
-msgstr ""
+msgstr "新規則"
 
 #. module: web
 #. odoo-javascript
@@ -4775,21 +4814,21 @@ msgstr "下一個(Right-Arrow)"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Next century"
-msgstr ""
+msgstr "下世紀"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Next decade"
-msgstr ""
+msgstr "下個十年"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Next month"
-msgstr ""
+msgstr "下月"
 
 #. module: web
 #. odoo-javascript
@@ -4804,7 +4843,7 @@ msgstr "下一頁"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Next year"
-msgstr ""
+msgstr "明年"
 
 #. module: web
 #. odoo-javascript
@@ -4852,7 +4891,7 @@ msgstr "無顏色"
 #: code:addons/web/static/src/core/commands/default_providers.js:0
 #, python-format
 msgid "No command found"
-msgstr ""
+msgstr "找不到指令"
 
 #. module: web
 #. odoo-javascript
@@ -4866,7 +4905,7 @@ msgstr ""
 #: code:addons/web/static/src/views/list/list_renderer.js:0
 #, python-format
 msgid "No currency provided"
-msgstr ""
+msgstr "未提供貨幣"
 
 #. module: web
 #. odoo-javascript
@@ -4887,14 +4926,14 @@ msgstr "無資料可供顯示"
 #: code:addons/web/static/src/core/debug/debug_menu.js:0
 #, python-format
 msgid "No debug command found"
-msgstr ""
+msgstr "找不到除錯指令"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/barcode/barcode_scanner.js:0
 #, python-format
 msgid "No device can be found."
-msgstr ""
+msgstr "找不到任何裝置。"
 
 #. module: web
 #. odoo-javascript
@@ -4922,13 +4961,6 @@ msgstr "沒有找到選單"
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
 #, python-format
 msgid "No quick create"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_panel/search_panel.xml:0
-#, python-format
-msgid "No quick filter available."
 msgstr ""
 
 #. module: web
@@ -5167,7 +5199,7 @@ msgstr "Odoo警告"
 #: code:addons/web/static/src/webclient/barcode/barcode_scanner.js:0
 #, python-format
 msgid "Odoo needs your authorization first."
-msgstr ""
+msgstr "Odoo 首先需要你的授權。"
 
 #. module: web
 #. odoo-javascript
@@ -5175,7 +5207,7 @@ msgstr ""
 #, python-format
 msgid ""
 "Of the %s records selected, only the first %s have been archived/unarchived."
-msgstr ""
+msgstr "所選 %s 項記錄中，只有最前 %s 項已封存/取消封存。"
 
 #. module: web
 #. odoo-javascript
@@ -5214,7 +5246,7 @@ msgstr "只有員工可以存取此資料庫。請聯繫管理員。"
 #: code:addons/web/static/src/views/list/list_controller.js:0
 #, python-format
 msgid "Only the first %s records have been deleted (out of %s selected)"
-msgstr ""
+msgstr "只刪除了最前 %s 項記錄（在全部 %s 項所選記錄中）"
 
 #. module: web
 #. odoo-python
@@ -5253,7 +5285,7 @@ msgstr "打開視圖"
 #: code:addons/web/static/src/core/debug/debug_menu.xml:0
 #, python-format
 msgid "Open developer tools"
-msgstr ""
+msgstr "開啟開發人員工具"
 
 #. module: web
 #. odoo-javascript
@@ -5322,7 +5354,7 @@ msgstr "其他"
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 #, python-format
 msgid "Overflow style"
-msgstr ""
+msgstr "溢出樣式"
 
 #. module: web
 #. odoo-javascript
@@ -5404,6 +5436,11 @@ msgid "Path not supported"
 msgstr ""
 
 #. module: web
+#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
+msgid "Payment Communication: <b><span>INV/2023/00003</span></b>"
+msgstr "付款通訊：<b><span>INV/2023/00003</span></b>"
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.xml:0
 #, python-format
@@ -5422,7 +5459,7 @@ msgstr "人物及身體"
 #: code:addons/web/static/src/views/fields/percent_pie/percent_pie_field.js:0
 #, python-format
 msgid "PercentPie"
-msgstr ""
+msgstr "百分比圓形圖"
 
 #. module: web
 #. odoo-javascript
@@ -5512,7 +5549,7 @@ msgstr "請先點選「儲存」按鈕"
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #, python-format
 msgid "Please complete your properties before adding a new one"
-msgstr ""
+msgstr "加入新屬性前，請完成你的屬性"
 
 #. module: web
 #. odoo-javascript
@@ -5537,18 +5574,11 @@ msgid ""
 msgstr "請使用複製按鈕將錯誤報告給您的支援服務。"
 
 #. module: web
-#: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid ""
-"Please use the following communication for your payment : <b><span>\n"
-"                           INV/2023/00003</span></b>"
-msgstr ""
-
-#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
 #, python-format
 msgid "Please, scan again!"
-msgstr ""
+msgstr "請再掃瞄"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.brand_promotion_message
@@ -5572,7 +5602,7 @@ msgstr "個人設定"
 #: code:addons/web/static/src/views/fields/signature/signature_field.js:0
 #, python-format
 msgid "Prefill with"
-msgstr ""
+msgstr "預填"
 
 #. module: web
 #. odoo-javascript
@@ -5586,7 +5616,7 @@ msgstr "Press"
 #: code:addons/web/static/src/views/fields/many2many_tags/many2many_tags_field.js:0
 #, python-format
 msgid "Prevent color edition"
-msgstr ""
+msgstr "防止編輯顏色"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__preview
@@ -5608,14 +5638,14 @@ msgstr "預覽內部報表"
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
 #, python-format
 msgid "Preview image"
-msgstr ""
+msgstr "預覽圖片"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/signature/signature_field.js:0
 #, python-format
 msgid "Preview image field"
-msgstr ""
+msgstr "預覽圖片欄位"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__preview_logo
@@ -5634,7 +5664,7 @@ msgstr "預覽logo"
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
 #, python-format
 msgid "Previous"
-msgstr "前一個"
+msgstr "上一頁"
 
 #. module: web
 #. odoo-javascript
@@ -5664,14 +5694,14 @@ msgstr "前一年"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Previous century"
-msgstr ""
+msgstr "上世紀"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Previous decade"
-msgstr ""
+msgstr "上個十年"
 
 #. module: web
 #. odoo-javascript
@@ -5685,7 +5715,7 @@ msgstr "前一個選單"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Previous month"
-msgstr ""
+msgstr "上月"
 
 #. module: web
 #. odoo-javascript
@@ -5700,7 +5730,7 @@ msgstr "上一頁"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Previous year"
-msgstr ""
+msgstr "去年"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__primary_color
@@ -5836,14 +5866,6 @@ msgstr "快速添加"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/search/search_panel/search_panel.xml:0
-#, python-format
-msgid ""
-"Quick filters will become available if the records shown can be filtered."
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector/domain_selector_autocomplete.js:0
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #: code:addons/web/static/src/views/calendar/filter_panel/calendar_filter_panel.js:0
@@ -5892,7 +5914,7 @@ msgstr "範圍"
 #: code:addons/web/static/src/core/colorlist/colorlist.js:0
 #, python-format
 msgid "Raspberry"
-msgstr ""
+msgstr "紅莓"
 
 #. module: web
 #. odoo-javascript
@@ -5920,7 +5942,7 @@ msgstr "記錄軌跡"
 #: code:addons/web/static/src/core/debug/profiling/profiling_item.xml:0
 #, python-format
 msgid "Recording..."
-msgstr ""
+msgstr "記錄中⋯"
 
 #. module: web
 #. odoo-javascript
@@ -5982,7 +6004,7 @@ msgstr "關係："
 #: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
 #, python-format
 msgid "Relational table"
-msgstr ""
+msgstr "關係表"
 
 #. module: web
 #. odoo-javascript
@@ -6082,7 +6104,7 @@ msgstr "重置縮放 (0)"
 #: code:addons/web/static/src/core/domain_selector/domain_selector.xml:0
 #, python-format
 msgid "Reset domain"
-msgstr ""
+msgstr "重設域名"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
@@ -6273,7 +6295,7 @@ msgstr "手動儲存"
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
 #, python-format
 msgid "Scan barcode"
-msgstr ""
+msgstr "掃瞄條碼"
 
 #. module: web
 #. odoo-javascript
@@ -6334,7 +6356,7 @@ msgstr "搜索命令..."
 #: code:addons/web/static/src/webclient/menus/menu_providers.js:0
 #, python-format
 msgid "Search for a menu..."
-msgstr ""
+msgstr "搜尋選單⋯"
 
 #. module: web
 #. odoo-javascript
@@ -6355,7 +6377,7 @@ msgstr "搜索用戶..."
 #: code:addons/web/static/src/views/fields/many2many_tags_avatar/many2many_tags_avatar_field.js:0
 #, python-format
 msgid "Search users..."
-msgstr ""
+msgstr "搜尋使用者⋯"
 
 #. module: web
 #. odoo-javascript
@@ -6456,14 +6478,14 @@ msgstr "全選"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Select century"
-msgstr ""
+msgstr "選擇世紀"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Select decade"
-msgstr ""
+msgstr "選擇十年期間"
 
 #. module: web
 #. odoo-javascript
@@ -6477,21 +6499,21 @@ msgstr "選擇欄位"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Select month"
-msgstr ""
+msgstr "選擇月份"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/relational_utils.js:0
 #, python-format
 msgid "Select records"
-msgstr ""
+msgstr "選取記錄"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Select year"
-msgstr ""
+msgstr "選擇年份"
 
 #. module: web
 #. odoo-javascript
@@ -6544,7 +6566,7 @@ msgstr "在使用者上設置時區"
 #: code:addons/web/static/src/views/fields/state_selection/state_selection_field.js:0
 #, python-format
 msgid "Set kanban state as %s"
-msgstr ""
+msgstr "將看板狀態設為 %s"
 
 #. module: web
 #. odoo-javascript
@@ -6603,7 +6625,7 @@ msgstr "快捷鍵"
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 #, python-format
 msgid "Show %s view"
-msgstr ""
+msgstr "顯示 %s 畫面"
 
 #. module: web
 #. odoo-javascript
@@ -6688,7 +6710,7 @@ msgstr "大衛之星"
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 #, python-format
 msgid "Start date field"
-msgstr ""
+msgstr "開始日期欄位"
 
 #. module: web
 #. odoo-javascript
@@ -6704,7 +6726,7 @@ msgstr "開始輸入⋯"
 #: code:addons/web/static/src/views/fields/stat_info/stat_info_field.js:0
 #, python-format
 msgid "Stat Info"
-msgstr ""
+msgstr "統計資料"
 
 #. module: web
 #. odoo-javascript
@@ -6771,7 +6793,7 @@ msgstr "系統仍然在運作中...<br />請耐心等候...."
 #: code:addons/web/static/src/core/errors/scss_error_dialog.js:0
 #, python-format
 msgid "Style error"
-msgstr ""
+msgstr "樣式錯誤"
 
 #. module: web
 #. odoo-javascript
@@ -6792,7 +6814,7 @@ msgstr "總數"
 #: code:addons/web/static/src/views/graph/graph_model.js:0
 #, python-format
 msgid "Sum (%s)"
-msgstr ""
+msgstr "合計（%s）"
 
 #. module: web
 #. odoo-javascript
@@ -6909,7 +6931,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "Tanabata tree"
-msgstr ""
+msgstr "七夕樹"
 
 #. module: web
 #. odoo-javascript
@@ -6948,7 +6970,7 @@ msgstr "稅務編號"
 #: code:addons/web/static/src/core/colorlist/colorlist.js:0
 #, python-format
 msgid "Teal"
-msgstr ""
+msgstr "藍綠色"
 
 #. module: web
 #. odoo-javascript
@@ -6986,7 +7008,7 @@ msgstr "稅務識別號碼。此處的值將根據國家/地區格式進行驗�
 #: code:addons/web/controllers/action.py:0
 #, python-format
 msgid "The action %r does not exist."
-msgstr ""
+msgstr "動作 %r 不存在。"
 
 #. module: web
 #. odoo-python
@@ -7019,12 +7041,18 @@ msgstr "操作被中斷了。這通常意味著目前的操作花費了太多時
 #: code:addons/web/static/src/views/fields/signature/signature_field.js:0
 #, python-format
 msgid "The selected field will be used to pre-fill the signature"
-msgstr ""
+msgstr "所選欄位將用於預填簽名"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/utils/files.js:0
+#, python-format
+msgid "The selected file (%sB) is over the maximum allowed file size (%sB)."
+msgstr "所選檔案（%s B）超過檔案大小上限（%s B）。"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
-#: code:addons/web/static/src/views/fields/file_handler.js:0
 #, python-format
 msgid "The selected file exceed the maximum file size of %s."
 msgstr "所選文件超出了文件的最大值設定：%s。"
@@ -7037,7 +7065,7 @@ msgid ""
 "The style compilation failed, see the error below. This is an administrator "
 "or developer error that must be fixed for the entire database before "
 "continuing working."
-msgstr ""
+msgstr "樣式編譯失敗，請參閱以下錯誤描述。這是管理員或開發人員的錯誤，必須修復整個資料庫的錯誤後，才能繼續工作。"
 
 #. module: web
 #. odoo-python
@@ -7067,12 +7095,12 @@ msgstr "上傳您的文件時發生了問題"
 #: code:addons/web/static/src/views/fields/file_handler.js:0
 #, python-format
 msgid "There was a problem while uploading your file."
-msgstr ""
+msgstr "上載檔案時出現問題。"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.address_layout
 msgid "This block is not always present depending on the printed document."
-msgstr ""
+msgstr "根據列印文件的不同，此區塊並非必定顯示。"
 
 #. module: web
 #. odoo-javascript
@@ -7102,14 +7130,14 @@ msgstr "系統暫未支援此篩選範圍。"
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #, python-format
 msgid "This field is already first"
-msgstr ""
+msgstr "此欄位已經是第一個"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #, python-format
 msgid "This field is already last"
-msgstr ""
+msgstr "此欄位已經是最後一個"
 
 #. module: web
 #. odoo-javascript
@@ -7142,7 +7170,7 @@ msgstr "這是內部報表的一個例子。"
 #: code:addons/web/static/src/views/fields/properties/property_tags.js:0
 #, python-format
 msgid "This tag is already available"
-msgstr ""
+msgstr "此標籤已經可用"
 
 #. module: web
 #. odoo-javascript
@@ -7183,7 +7211,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "Titania"
-msgstr ""
+msgstr "二氧化鈦"
 
 #. module: web
 #. odoo-javascript
@@ -7219,7 +7247,7 @@ msgstr "切換下拉式選單"
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 #, python-format
 msgid "Toggle Search Panel"
-msgstr ""
+msgstr "切換搜尋面板"
 
 #. module: web
 #. odoo-javascript
@@ -7227,7 +7255,7 @@ msgstr ""
 #: code:addons/web/static/src/webclient/burger_menu/burger_menu.xml:0
 #, python-format
 msgid "Toggle menu"
-msgstr ""
+msgstr "切換選單"
 
 #. module: web
 #. odoo-javascript
@@ -7293,7 +7321,7 @@ msgstr "旅遊及地點"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "Triton"
-msgstr ""
+msgstr "海王星"
 
 #. module: web
 #. odoo-javascript
@@ -7343,7 +7371,7 @@ msgstr "鍵入預設文字，或按輸入鍵"
 #: code:addons/web/static/src/legacy/xml/name_and_signature.xml:0
 #, python-format
 msgid "Type your name to sign"
-msgstr ""
+msgstr "輸入你的姓名以進行簽名"
 
 #. module: web
 #. odoo-javascript
@@ -7402,7 +7430,7 @@ msgstr "網址"
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "US12345671"
-msgstr ""
+msgstr "US12345671"
 
 #. module: web
 #. odoo-javascript
@@ -7495,10 +7523,14 @@ msgstr "未知的非字面類型 "
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/domain_selector/domain_selector_autocomplete.js:0
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
+#: code:addons/web/static/src/views/fields/formatters.js:0
+#: code:addons/web/static/src/views/fields/many2one/many2one_field.js:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
 #, python-format
 msgid "Unnamed"
 msgstr "未命名的"
@@ -7525,13 +7557,6 @@ msgstr "取消全選"
 #, python-format
 msgid "Untitled"
 msgstr "未命名"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/search/search_panel/search_panel.xml:0
-#, python-format
-msgid "Update the filters in the search bar to display more records."
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7648,12 +7673,12 @@ msgstr "操作錯誤"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.address_layout
 msgid "Usually contains a source address or a complementary address."
-msgstr ""
+msgstr "通常包含來源地址或補充地址。"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.address_layout
 msgid "Usually contains the address of the document's recipient."
-msgstr ""
+msgstr "通常包含文件收件人地址。"
 
 #. module: web
 #. odoo-javascript
@@ -7689,7 +7714,7 @@ msgstr "驗證錯誤"
 #: code:addons/web/static/src/core/domain_selector/domain_selector_fields.xml:0
 #, python-format
 msgid "Value not supported"
-msgstr ""
+msgstr "不支援該值"
 
 #. module: web
 #. odoo-javascript
@@ -7806,7 +7831,7 @@ msgstr "處女座"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "Vulcan salute"
-msgstr ""
+msgstr "瓦肯舉手禮"
 
 #. module: web
 #. odoo-javascript
@@ -7836,7 +7861,7 @@ msgstr "警告"
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 #, python-format
 msgid "Warning for future dates"
-msgstr ""
+msgstr "未來日期警告"
 
 #. module: web
 #. odoo-python
@@ -7880,6 +7905,7 @@ msgstr "三"
 #: code:addons/web/static/src/search/utils/dates.js:0
 #: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_renderer.js:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
+#: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
 #, python-format
 msgid "Week"
 msgstr "星期"
@@ -7889,7 +7915,7 @@ msgstr "星期"
 #: code:addons/web/static/src/core/datetime/datetime_picker.js:0
 #, python-format
 msgid "Week numbers"
-msgstr ""
+msgstr "週數"
 
 #. module: web
 #. odoo-javascript
@@ -7905,7 +7931,7 @@ msgstr "太好了，恭喜您 !"
 msgid ""
 "Whether or not this Property Field is displayed in the Calendar, Cards & "
 "Kanban views"
-msgstr ""
+msgstr "是否在日曆、卡片、看板檢視畫面中，顯示此屬性欄位"
 
 #. module: web
 #. odoo-javascript
@@ -7981,7 +8007,7 @@ msgstr "昨天"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_successful
 msgid "You are logged in."
-msgstr ""
+msgstr "你已登入。"
 
 #. module: web
 #. odoo-python
@@ -8031,7 +8057,7 @@ msgstr "也許您不相信，<br />但是系統真的還在運作...."
 #: code:addons/web/static/src/views/fields/properties/property_tags.js:0
 #, python-format
 msgid "You need to be able to edit parent first to add property tags"
-msgstr ""
+msgstr "你需要先獲取母項的編輯權限，才可新增屬性標籤"
 
 #. module: web
 #. odoo-javascript
@@ -8047,7 +8073,7 @@ msgstr ""
 #, python-format
 msgid ""
 "You need to select a model before opening the dynamic placeholder selector."
-msgstr ""
+msgstr "開啟動態佔位符選擇器之前，需要先選擇一個模型。"
 
 #. module: web
 #. odoo-javascript
@@ -8113,7 +8139,7 @@ msgstr "縮小(-)"
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
 #, python-format
 msgid "Zoom delay"
-msgstr ""
+msgstr "縮放延遲"
 
 #. module: web
 #. odoo-javascript
@@ -8330,7 +8356,7 @@ msgstr "飛機"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "aesculapius"
-msgstr ""
+msgstr "醫神"
 
 #. module: web
 #. odoo-javascript
@@ -9093,7 +9119,7 @@ msgstr "細菌"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "bactrian"
-msgstr ""
+msgstr "雙生的"
 
 #. module: web
 #. odoo-javascript
@@ -9135,7 +9161,7 @@ msgstr "袋"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "bagel"
-msgstr ""
+msgstr "百吉餅"
 
 #. module: web
 #. odoo-javascript
@@ -9324,7 +9350,7 @@ msgstr "膠布"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "bangbang"
-msgstr ""
+msgstr "槍戰影片"
 
 #. module: web
 #. odoo-javascript
@@ -9379,7 +9405,7 @@ msgstr "橫額"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "bar"
-msgstr ""
+msgstr "桿"
 
 #. module: web
 #. odoo-javascript
@@ -9465,7 +9491,7 @@ msgstr "浴缸"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "bathers"
-msgstr ""
+msgstr "游泳的人"
 
 #. module: web
 #. odoo-javascript
@@ -9507,7 +9533,7 @@ msgstr "浴缸"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "battered"
-msgstr ""
+msgstr "破舊不堪的"
 
 #. module: web
 #. odoo-javascript
@@ -16138,14 +16164,14 @@ msgstr "調味品"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "fleur-de-lis"
-msgstr ""
+msgstr "鳶尾花飾"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "flex"
-msgstr ""
+msgstr "彎曲"
 
 #. module: web
 #. odoo-javascript
@@ -16153,14 +16179,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "flexed biceps"
-msgstr ""
+msgstr "彎曲的二頭肌"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "flipper"
-msgstr ""
+msgstr "鰭肢"
 
 #. module: web
 #. odoo-javascript
@@ -16413,7 +16439,7 @@ msgstr "財富"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "fortune cookie"
-msgstr ""
+msgstr "籤餅"
 
 #. module: web
 #. odoo-javascript
@@ -16799,14 +16825,14 @@ msgstr "園丁"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "garlic"
-msgstr ""
+msgstr "蒜"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gas"
-msgstr ""
+msgstr "氣體"
 
 #. module: web
 #. odoo-javascript
@@ -16814,21 +16840,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gear"
-msgstr ""
+msgstr "齒輪"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "geek"
-msgstr ""
+msgstr "怪胎"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gem"
-msgstr ""
+msgstr "精華"
 
 #. module: web
 #. odoo-javascript
@@ -16836,14 +16862,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gem stone"
-msgstr ""
+msgstr "寶石"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gemstone"
-msgstr ""
+msgstr "寶石"
 
 #. module: web
 #. odoo-javascript
@@ -16852,21 +16878,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gender-neutral"
-msgstr ""
+msgstr "中性"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gene"
-msgstr ""
+msgstr "基因"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "genetics"
-msgstr ""
+msgstr "遺傳學"
 
 #. module: web
 #. odoo-javascript
@@ -16874,7 +16900,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "genie"
-msgstr ""
+msgstr "精靈"
 
 #. module: web
 #. odoo-javascript
@@ -16902,7 +16928,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "geometric"
-msgstr ""
+msgstr "幾何的"
 
 #. module: web
 #. odoo-javascript
@@ -16927,14 +16953,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gesture"
-msgstr ""
+msgstr "姿勢"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gesundheit"
-msgstr ""
+msgstr "祝你健康"
 
 #. module: web
 #. odoo-javascript
@@ -16942,7 +16968,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "ghost"
-msgstr ""
+msgstr "鬼魂"
 
 #. module: web
 #. odoo-javascript
@@ -16950,7 +16976,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gibbous"
-msgstr ""
+msgstr "盈凸的"
 
 #. module: web
 #. odoo-javascript
@@ -16958,7 +16984,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gift"
-msgstr ""
+msgstr "禮物"
 
 #. module: web
 #. odoo-javascript
@@ -16966,7 +16992,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "giraffe"
-msgstr ""
+msgstr "長頸鹿"
 
 #. module: web
 #. odoo-javascript
@@ -16989,7 +17015,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "girl"
-msgstr ""
+msgstr "女孩"
 
 #. module: web
 #. odoo-javascript
@@ -17002,7 +17028,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "glass"
-msgstr ""
+msgstr "玻璃"
 
 #. module: web
 #. odoo-javascript
@@ -17010,7 +17036,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "glass of milk"
-msgstr ""
+msgstr "一杯牛奶"
 
 #. module: web
 #. odoo-javascript
@@ -17019,14 +17045,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "glasses"
-msgstr ""
+msgstr "眼鏡"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "glittery"
-msgstr ""
+msgstr "燦爛奪目的"
 
 #. module: web
 #. odoo-javascript
@@ -17037,7 +17063,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "globe"
-msgstr ""
+msgstr "地球"
 
 #. module: web
 #. odoo-javascript
@@ -17045,7 +17071,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "globe showing Americas"
-msgstr ""
+msgstr "顯示美洲的地球儀"
 
 #. module: web
 #. odoo-javascript
@@ -17053,7 +17079,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "globe showing Asia-Australia"
-msgstr ""
+msgstr "顯示亞洲和澳洲的地球儀"
 
 #. module: web
 #. odoo-javascript
@@ -17061,7 +17087,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "globe showing Europe-Africa"
-msgstr ""
+msgstr "顯示歐洲和非洲的地球儀"
 
 #. module: web
 #. odoo-javascript
@@ -17069,7 +17095,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "globe with meridians"
-msgstr ""
+msgstr "帶經緯的地球儀"
 
 #. module: web
 #. odoo-javascript
@@ -17077,7 +17103,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "glove"
-msgstr ""
+msgstr "手套"
 
 #. module: web
 #. odoo-javascript
@@ -17085,14 +17111,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gloves"
-msgstr ""
+msgstr "手套"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "glow"
-msgstr ""
+msgstr "發光"
 
 #. module: web
 #. odoo-javascript
@@ -17100,7 +17126,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "glowing star"
-msgstr ""
+msgstr "耀星"
 
 #. module: web
 #. odoo-javascript
@@ -17108,21 +17134,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "goal"
-msgstr ""
+msgstr "目標"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "goal cage"
-msgstr ""
+msgstr "球門籠"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "goal net"
-msgstr ""
+msgstr "球門網"
 
 #. module: web
 #. odoo-javascript
@@ -17131,7 +17157,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "goat"
-msgstr ""
+msgstr "山羊"
 
 #. module: web
 #. odoo-javascript
@@ -17139,7 +17165,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "goblin"
-msgstr ""
+msgstr "小妖精"
 
 #. module: web
 #. odoo-javascript
@@ -17147,14 +17173,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "goggles"
-msgstr ""
+msgstr "護目鏡"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gold"
-msgstr ""
+msgstr "金牌"
 
 #. module: web
 #. odoo-javascript
@@ -17162,14 +17188,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "golf"
-msgstr ""
+msgstr "高爾夫"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "golfer"
-msgstr ""
+msgstr "高爾夫球手"
 
 #. module: web
 #. odoo-javascript
@@ -17177,7 +17203,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gondola"
-msgstr ""
+msgstr "威尼斯小划船"
 
 #. module: web
 #. odoo-javascript
@@ -17186,7 +17212,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "good"
-msgstr ""
+msgstr "好的"
 
 #. module: web
 #. odoo-javascript
@@ -17194,7 +17220,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "good luck"
-msgstr ""
+msgstr "祝你好運"
 
 #. module: web
 #. odoo-javascript
@@ -17204,14 +17230,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "good night"
-msgstr ""
+msgstr "晚安"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "goofy"
-msgstr ""
+msgstr "愚蠢的"
 
 #. module: web
 #. odoo-javascript
@@ -17219,7 +17245,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gorilla"
-msgstr ""
+msgstr "大猩猩"
 
 #. module: web
 #. odoo-javascript
@@ -17227,42 +17253,42 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "graduate"
-msgstr ""
+msgstr "畢業"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "graduation"
-msgstr ""
+msgstr "畢業"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "graduation cap"
-msgstr ""
+msgstr "畢業帽"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grain"
-msgstr ""
+msgstr "穀物"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "granita"
-msgstr ""
+msgstr "碎冰飲料"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grape"
-msgstr ""
+msgstr "葡萄"
 
 #. module: web
 #. odoo-javascript
@@ -17270,7 +17296,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grapes"
-msgstr ""
+msgstr "葡萄"
 
 #. module: web
 #. odoo-javascript
@@ -17287,28 +17313,28 @@ msgstr "圖表"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "graph decreasing"
-msgstr ""
+msgstr "遞減圖表"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "graph increasing"
-msgstr ""
+msgstr "遞增圖表"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "graph increasing with yen"
-msgstr ""
+msgstr "日圓遞增圖表"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grasshopper"
-msgstr ""
+msgstr "蝗蟲"
 
 #. module: web
 #. odoo-javascript
@@ -17335,28 +17361,28 @@ msgstr "大於或等於"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "green"
-msgstr ""
+msgstr "綠色"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "green apple"
-msgstr ""
+msgstr "青蘋果"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "green book"
-msgstr ""
+msgstr "綠皮書"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "green circle"
-msgstr ""
+msgstr "綠色圓圈"
 
 #. module: web
 #. odoo-javascript
@@ -17364,28 +17390,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "green heart"
-msgstr ""
+msgstr "綠色的心"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "green salad"
-msgstr ""
+msgstr "蔬菜沙拉"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "green square"
-msgstr ""
+msgstr "綠色正方形"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grimace"
-msgstr ""
+msgstr "鬼臉"
 
 #. module: web
 #. odoo-javascript
@@ -17393,7 +17419,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grimacing face"
-msgstr ""
+msgstr "做鬼臉的表情"
 
 #. module: web
 #. odoo-javascript
@@ -17402,7 +17428,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grin"
-msgstr ""
+msgstr "咧嘴笑"
 
 #. module: web
 #. odoo-javascript
@@ -17410,14 +17436,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning"
-msgstr ""
+msgstr "咧嘴笑"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning cat"
-msgstr ""
+msgstr "咧嘴笑的貓"
 
 #. module: web
 #. odoo-javascript
@@ -17425,7 +17451,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning cat with smiling eyes"
-msgstr ""
+msgstr "咧嘴、眉開眼笑的貓"
 
 #. module: web
 #. odoo-javascript
@@ -17433,7 +17459,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning face"
-msgstr ""
+msgstr "咧嘴笑的表情"
 
 #. module: web
 #. odoo-javascript
@@ -17441,7 +17467,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning face with big eyes"
-msgstr ""
+msgstr "大眼睛、咧嘴笑的臉"
 
 #. module: web
 #. odoo-javascript
@@ -17449,7 +17475,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning face with smiling eyes"
-msgstr ""
+msgstr "咧嘴、眉開眼笑的表情"
 
 #. module: web
 #. odoo-javascript
@@ -17457,7 +17483,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning face with sweat"
-msgstr ""
+msgstr "咧嘴笑、流汗的臉"
 
 #. module: web
 #. odoo-javascript
@@ -17465,21 +17491,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "grinning squinting face"
-msgstr ""
+msgstr "眯眼、咧嘴笑的表情"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "groom"
-msgstr ""
+msgstr "新郎"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "growing"
-msgstr ""
+msgstr "成長"
 
 #. module: web
 #. odoo-javascript
@@ -17487,7 +17513,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "growing heart"
-msgstr ""
+msgstr "成長的心"
 
 #. module: web
 #. odoo-javascript
@@ -17495,21 +17521,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "growth"
-msgstr ""
+msgstr "成長"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gua pi mao"
-msgstr ""
+msgstr "瓜皮帽"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "guanaco"
-msgstr ""
+msgstr "大羊駝"
 
 #. module: web
 #. odoo-javascript
@@ -17519,21 +17545,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "guard"
-msgstr ""
+msgstr "警衛"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "guide"
-msgstr ""
+msgstr "嚮導"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "guide cane"
-msgstr ""
+msgstr "盲人杖"
 
 #. module: web
 #. odoo-javascript
@@ -17541,7 +17567,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "guide dog"
-msgstr ""
+msgstr "導盲犬"
 
 #. module: web
 #. odoo-javascript
@@ -17549,14 +17575,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "guitar"
-msgstr ""
+msgstr "吉他"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gun"
-msgstr ""
+msgstr "槍"
 
 #. module: web
 #. odoo-javascript
@@ -17565,21 +17591,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gymnastics"
-msgstr ""
+msgstr "體操"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gyro"
-msgstr ""
+msgstr "陀螺"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "gyōza"
-msgstr ""
+msgstr "日本餃子"
 
 #. module: web
 #. odoo-javascript
@@ -17588,7 +17614,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hair"
-msgstr ""
+msgstr "毛髮"
 
 #. module: web
 #. odoo-javascript
@@ -17598,7 +17624,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "haircut"
-msgstr ""
+msgstr "理髮"
 
 #. module: web
 #. odoo-javascript
@@ -17606,105 +17632,105 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hairdresser"
-msgstr ""
+msgstr "理髮師"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past eight"
-msgstr ""
+msgstr "八點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past eleven"
-msgstr ""
+msgstr "十一點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past five"
-msgstr ""
+msgstr "五點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past four"
-msgstr ""
+msgstr "四點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past nine"
-msgstr ""
+msgstr "九點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past one"
-msgstr ""
+msgstr "一點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past seven"
-msgstr ""
+msgstr "七點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past six"
-msgstr ""
+msgstr "六點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past ten"
-msgstr ""
+msgstr "十點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past three"
-msgstr ""
+msgstr "三點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past twelve"
-msgstr ""
+msgstr "十二點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "half past two"
-msgstr ""
+msgstr "兩點半"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "halloween"
-msgstr ""
+msgstr "萬聖節前夕"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "halo"
-msgstr ""
+msgstr "光環"
 
 #. module: web
 #. odoo-javascript
@@ -17712,7 +17738,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hamburger"
-msgstr ""
+msgstr "漢堡"
 
 #. module: web
 #. odoo-javascript
@@ -17722,7 +17748,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hammer"
-msgstr ""
+msgstr "錘子"
 
 #. module: web
 #. odoo-javascript
@@ -17730,14 +17756,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hammer and pick"
-msgstr ""
+msgstr "錘子和鎬"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hammer and spanner"
-msgstr ""
+msgstr "錘子和扳手"
 
 #. module: web
 #. odoo-javascript
@@ -17745,7 +17771,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hammer and wrench"
-msgstr ""
+msgstr "錘子和扳手"
 
 #. module: web
 #. odoo-javascript
@@ -17753,7 +17779,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hamster"
-msgstr ""
+msgstr "倉鼠"
 
 #. module: web
 #. odoo-javascript
@@ -17797,7 +17823,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hand"
-msgstr ""
+msgstr "手"
 
 #. module: web
 #. odoo-javascript
@@ -17805,7 +17831,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hand with fingers splayed"
-msgstr ""
+msgstr "手指張開的手"
 
 #. module: web
 #. odoo-javascript
@@ -17813,7 +17839,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "handbag"
-msgstr ""
+msgstr "手提包"
 
 #. module: web
 #. odoo-javascript
@@ -17822,14 +17848,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "handball"
-msgstr ""
+msgstr "手球"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "handgun"
-msgstr ""
+msgstr "手槍"
 
 #. module: web
 #. odoo-javascript
@@ -17837,21 +17863,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "handshake"
-msgstr ""
+msgstr "握手"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hang loose"
-msgstr ""
+msgstr "披散"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hang-glide"
-msgstr ""
+msgstr "滑翔"
 
 #. module: web
 #. odoo-javascript
@@ -17865,14 +17891,14 @@ msgstr "快樂"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hard of hearing"
-msgstr ""
+msgstr "聽障"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hashi"
-msgstr ""
+msgstr "日本竹筷"
 
 #. module: web
 #. odoo-javascript
@@ -17886,35 +17912,35 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hat"
-msgstr ""
+msgstr "帽"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hatchet"
-msgstr ""
+msgstr "短柄小斧"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hatching"
-msgstr ""
+msgstr "孵出"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hatching chick"
-msgstr ""
+msgstr "孵出的小雞"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "head"
-msgstr ""
+msgstr "頭"
 
 #. module: web
 #. odoo-javascript
@@ -17922,14 +17948,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "headphone"
-msgstr ""
+msgstr "耳機"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "headscarf"
-msgstr ""
+msgstr "方頭巾"
 
 #. module: web
 #. odoo-javascript
@@ -17937,7 +17963,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "health care"
-msgstr ""
+msgstr "醫療"
 
 #. module: web
 #. odoo-javascript
@@ -17945,7 +17971,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "healthcare"
-msgstr ""
+msgstr "醫療"
 
 #. module: web
 #. odoo-javascript
@@ -17953,7 +17979,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hear"
-msgstr ""
+msgstr "聽"
 
 #. module: web
 #. odoo-javascript
@@ -17961,7 +17987,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hear-no-evil monkey"
-msgstr ""
+msgstr "猴子捂耳朵"
 
 #. module: web
 #. odoo-javascript
@@ -17969,7 +17995,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hearing impaired"
-msgstr ""
+msgstr "聽力障礙"
 
 #. module: web
 #. odoo-javascript
@@ -17982,7 +18008,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heart"
-msgstr ""
+msgstr "心形"
 
 #. module: web
 #. odoo-javascript
@@ -17990,7 +18016,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heart decoration"
-msgstr ""
+msgstr "心形裝飾"
 
 #. module: web
 #. odoo-javascript
@@ -17998,7 +18024,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heart exclamation"
-msgstr ""
+msgstr "心形感嘆號"
 
 #. module: web
 #. odoo-javascript
@@ -18006,7 +18032,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heart suit"
-msgstr ""
+msgstr "紅心花色"
 
 #. module: web
 #. odoo-javascript
@@ -18014,7 +18040,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heart with arrow"
-msgstr ""
+msgstr "帶箭頭的心"
 
 #. module: web
 #. odoo-javascript
@@ -18022,28 +18048,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heart with ribbon"
-msgstr ""
+msgstr "帶蝴蝶結的心"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heartbeat"
-msgstr ""
+msgstr "心跳"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hearts"
-msgstr ""
+msgstr "紅心"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heat stroke"
-msgstr ""
+msgstr "中暑"
 
 #. module: web
 #. odoo-javascript
@@ -18051,28 +18077,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heavy dollar sign"
-msgstr ""
+msgstr "粗體美元符號"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heavy minus sign"
-msgstr ""
+msgstr "粗體負號"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heavy multiplication sign"
-msgstr ""
+msgstr "粗體乘法符號"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heavy tick mark"
-msgstr ""
+msgstr "粗體剔號/勾選符號"
 
 #. module: web
 #. odoo-javascript
@@ -18080,14 +18106,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hedgehog"
-msgstr ""
+msgstr "刺猬"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heel"
-msgstr ""
+msgstr "腳跟"
 
 #. module: web
 #. odoo-javascript
@@ -18095,14 +18121,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "helicopter"
-msgstr ""
+msgstr "直升機"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "helmet"
-msgstr ""
+msgstr "頭盔"
 
 #. module: web
 #. odoo-javascript
@@ -18118,7 +18144,7 @@ msgstr "幫助"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "herb"
-msgstr ""
+msgstr "草藥"
 
 #. module: web
 #. odoo-javascript
@@ -18127,7 +18153,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hero"
-msgstr ""
+msgstr "英雄"
 
 #. module: web
 #. odoo-javascript
@@ -18135,7 +18161,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "heroine"
-msgstr ""
+msgstr "女主角"
 
 #. module: web
 #. odoo-javascript
@@ -18157,7 +18183,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hibiscus"
-msgstr ""
+msgstr "木槿"
 
 #. module: web
 #. odoo-javascript
@@ -18181,7 +18207,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "high voltage"
-msgstr ""
+msgstr "高電壓"
 
 #. module: web
 #. odoo-javascript
@@ -18189,7 +18215,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "high-heeled shoe"
-msgstr ""
+msgstr "高跟鞋"
 
 #. module: web
 #. odoo-javascript
@@ -18197,28 +18223,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "high-speed train"
-msgstr ""
+msgstr "高速列車"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "high-vis"
-msgstr ""
+msgstr "高可見度"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "highway"
-msgstr ""
+msgstr "公路"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hijab"
-msgstr ""
+msgstr "穆斯林頭巾"
 
 #. module: web
 #. odoo-javascript
@@ -18227,42 +18253,42 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hike"
-msgstr ""
+msgstr "遠足"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hiking"
-msgstr ""
+msgstr "遠足"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hiking boot"
-msgstr ""
+msgstr "遠足鞋"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hindu"
-msgstr ""
+msgstr "印度教"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hindu temple"
-msgstr ""
+msgstr "印度教寺廟"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hippo"
-msgstr ""
+msgstr "河馬"
 
 #. module: web
 #. odoo-javascript
@@ -18270,14 +18296,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hippopotamus"
-msgstr ""
+msgstr "河馬"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hit"
-msgstr ""
+msgstr "打"
 
 #. module: web
 #. odoo-javascript
@@ -18292,7 +18318,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hockey"
-msgstr ""
+msgstr "曲棍球"
 
 #. module: web
 #. odoo-javascript
@@ -18300,7 +18326,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hold"
-msgstr ""
+msgstr "持有"
 
 #. module: web
 #. odoo-javascript
@@ -18310,7 +18336,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "holding hands"
-msgstr ""
+msgstr "牽手"
 
 #. module: web
 #. odoo-javascript
@@ -18319,7 +18345,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hole"
-msgstr ""
+msgstr "洞"
 
 #. module: web
 #. odoo-javascript
@@ -18327,7 +18353,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hollow red circle"
-msgstr ""
+msgstr "空心紅圈"
 
 #. module: web
 #. odoo-javascript
@@ -18335,28 +18361,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "home"
-msgstr ""
+msgstr "家"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "honey"
-msgstr ""
+msgstr "蜂蜜"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "honey badger"
-msgstr ""
+msgstr "蜜獾"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "honey pot"
-msgstr ""
+msgstr "蜂蜜罐"
 
 #. module: web
 #. odoo-javascript
@@ -18364,28 +18390,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "honeybee"
-msgstr ""
+msgstr "蜜蜂"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "honeypot"
-msgstr ""
+msgstr "蜂蜜罐"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hoop"
-msgstr ""
+msgstr "鐵環"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hooray"
-msgstr ""
+msgstr "萬歲"
 
 #. module: web
 #. odoo-javascript
@@ -18393,14 +18419,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horizontal traffic light"
-msgstr ""
+msgstr "橫向交通燈"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horizontal traffic lights"
-msgstr ""
+msgstr "橫向交通燈"
 
 #. module: web
 #. odoo-javascript
@@ -18408,7 +18434,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horn"
-msgstr ""
+msgstr "喇叭"
 
 #. module: web
 #. odoo-javascript
@@ -18416,14 +18442,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horns"
-msgstr ""
+msgstr "喇叭"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horrible"
-msgstr ""
+msgstr "可怕的"
 
 #. module: web
 #. odoo-javascript
@@ -18434,28 +18460,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horse"
-msgstr ""
+msgstr "馬"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horse face"
-msgstr ""
+msgstr "馬面"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horse racing"
-msgstr ""
+msgstr "賽馬"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "horseshoe"
-msgstr ""
+msgstr "馬蹄鐵"
 
 #. module: web
 #. odoo-javascript
@@ -18463,7 +18489,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hospital"
-msgstr ""
+msgstr "醫院"
 
 #. module: web
 #. odoo-javascript
@@ -18473,14 +18499,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hot"
-msgstr ""
+msgstr "熱"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hot beverage"
-msgstr ""
+msgstr "熱飲"
 
 #. module: web
 #. odoo-javascript
@@ -18488,7 +18514,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hot dog"
-msgstr ""
+msgstr "熱狗"
 
 #. module: web
 #. odoo-javascript
@@ -18496,7 +18522,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hot face"
-msgstr ""
+msgstr "熱的臉"
 
 #. module: web
 #. odoo-javascript
@@ -18504,14 +18530,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hot pepper"
-msgstr ""
+msgstr "辣椒"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hot springs"
-msgstr ""
+msgstr "溫泉"
 
 #. module: web
 #. odoo-javascript
@@ -18525,7 +18551,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hotdog"
-msgstr ""
+msgstr "熱狗"
 
 #. module: web
 #. odoo-javascript
@@ -18539,14 +18565,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hotel"
-msgstr ""
+msgstr "旅館"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hotsprings"
-msgstr ""
+msgstr "溫泉"
 
 #. module: web
 #. odoo-javascript
@@ -18561,7 +18587,7 @@ msgstr "小時"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hourglass"
-msgstr ""
+msgstr "沙漏"
 
 #. module: web
 #. odoo-javascript
@@ -18569,7 +18595,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hourglass done"
-msgstr ""
+msgstr "沙漏漏完"
 
 #. module: web
 #. odoo-javascript
@@ -18577,7 +18603,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hourglass not done"
-msgstr ""
+msgstr "沙漏未漏完"
 
 #. module: web
 #. odoo-javascript
@@ -18594,7 +18620,7 @@ msgstr "小時"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "house"
-msgstr ""
+msgstr "屋"
 
 #. module: web
 #. odoo-javascript
@@ -18602,7 +18628,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "house with garden"
-msgstr ""
+msgstr "屋連花園"
 
 #. module: web
 #. odoo-javascript
@@ -18610,21 +18636,21 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "houses"
-msgstr ""
+msgstr "房屋"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hug"
-msgstr ""
+msgstr "擁抱"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hugging"
-msgstr ""
+msgstr "擁抱"
 
 #. module: web
 #. odoo-javascript
@@ -18632,14 +18658,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hump"
-msgstr ""
+msgstr "駝峰"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hundred"
-msgstr ""
+msgstr "一百"
 
 #. module: web
 #. odoo-javascript
@@ -18647,28 +18673,28 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hundred points"
-msgstr ""
+msgstr "一百分"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hurricane"
-msgstr ""
+msgstr "颶風"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hurt"
-msgstr ""
+msgstr "傷痛"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hushed"
-msgstr ""
+msgstr "寂靜的"
 
 #. module: web
 #. odoo-javascript
@@ -18682,7 +18708,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "hóngbāo"
-msgstr ""
+msgstr "紅包"
 
 #. module: web
 #. odoo-javascript
@@ -18695,7 +18721,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "ice"
-msgstr ""
+msgstr "冰"
 
 #. module: web
 #. odoo-javascript
@@ -18704,14 +18730,14 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "ice cream"
-msgstr ""
+msgstr "雪糕"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "ice cube"
-msgstr ""
+msgstr "冰塊"
 
 #. module: web
 #. odoo-javascript
@@ -19484,8 +19510,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/utils/numbers.js:0
 #: code:addons/web/static/src/legacy/js/core/utils.js:0
-#: code:addons/web/static/src/views/fields/formatters.js:0
 #, python-format
 msgid "kMGTPE"
 msgstr "kMGTPE"
@@ -22039,7 +22065,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "microphone"
-msgstr ""
+msgstr "咪高峰"
 
 #. module: web
 #. odoo-javascript
@@ -22969,7 +22995,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "night with stars"
-msgstr ""
+msgstr "星夜"
 
 #. module: web
 #. odoo-javascript
@@ -28337,7 +28363,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "slot machine"
-msgstr ""
+msgstr "老虎機/角子機"
 
 #. module: web
 #. odoo-javascript
@@ -31927,7 +31953,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "warning"
-msgstr ""
+msgstr "警告"
 
 #. module: web
 #. odoo-javascript
@@ -33773,7 +33799,7 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "“secret”"
-msgstr ""
+msgstr "“secret”"
 
 #. module: web
 #. odoo-javascript
@@ -33794,4 +33820,4 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 #, python-format
 msgid "ココ"
-msgstr ""
+msgstr "ココ"

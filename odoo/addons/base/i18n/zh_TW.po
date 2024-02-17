@@ -6,7 +6,7 @@
 # 敬雲 林 <chingyun@yuanchih-consult.com>, 2023
 # Martin Trigaux, 2023
 # Wil Odoo, 2023
-# Tony Ng, 2023
+# Tony Ng, 2024
 # 
 msgid ""
 msgstr ""
@@ -14,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-25 11:35+0000\n"
 "PO-Revision-Date: 2023-07-25 12:22+0000\n"
-"Last-Translator: Tony Ng, 2023\n"
+"Last-Translator: Tony Ng, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1194,6 +1194,9 @@ msgid ""
 "        E-Invoicing, Universal Business Language\n"
 "    "
 msgstr ""
+"\n"
+"        電子發票，通用商業語言\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_edi
@@ -6290,27 +6293,26 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Includes the following data for the Chinese localization\n"
-"包含以下中文本地化數據\n"
+"包括以下中文本地化數據\n"
 "========================================================\n"
 "\n"
-"Account Type/科目类型\n"
+"賬戶類型\n"
 "\n"
-"State Data/省份数据\n"
+"省份數據\n"
 "\n"
-"    科目类型\\会计科目表模板\\增值税\\辅助核算类别\\管理会计凭证簿\\财务会计凭证簿\n"
+"    科目/賬戶類型 / 會計科目表/賬目總表範本 / 增值稅 / 輔助核算類別 / 管理會計憑證簿 / 財務會計憑證簿\n"
 "\n"
-"    添加中文省份数据\n"
+"    加入中文省份數據\n"
 "\n"
-"    增加小企业会计科目表\n"
+"    增加小企業會計科目表\n"
 "\n"
-"    修改小企业会计科目表\n"
+"    修改小企業會計科目表\n"
 "\n"
-"    修改小企业会计税率\n"
+"    修改小企業會計稅率\n"
 "\n"
-"We added the option to print a voucher which will also\n"
-"print the amount in words (special Chinese characters for numbers)\n"
-"correctly when the cn2an library is installed. (e.g. with pip3 install cn2an)\n"
+"我們新增了列印憑證的選項，\n"
+"若有安裝 cn2an 程式庫，該選項會\n"
+"列印正確的文字金額（記數的特殊中文字）。（例如使用 pip3 安裝 cn2an）\n"
 "    "
 
 #. module: base
@@ -7902,11 +7904,11 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"巴拿马会计科目表和税收本地化.\n"
+"Panamenian accounting chart and tax localization.\n"
 "\n"
-"计划承诺 panameño e impuestos de acuerdo a disposiciones vigentes\n"
+"Plan contable panameño e impuestos de acuerdo a disposiciones vigentes\n"
 "\n"
-"Con la Colaboración de \n"
+"Con la Colaboración de\n"
 "- AHMNET CORP http://www.ahmnet.com\n"
 "\n"
 "    "
@@ -9699,9 +9701,10 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-" 此模組會為「事件」管理系統增加條碼掃瞄支援.\n"
-" 為每位與會者建立一個條碼，並將其印在徽章上. 掃瞄時，\n"
-" 會確認報名. "
+"此模組為活動管理系統新增條碼掃瞄支援功能。\n"
+"系統會為每位參加者產生一個條碼，並列印在識別證上。掃瞄該條碼後，\n"
+"登記即獲確認。\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_margin
@@ -10973,12 +10976,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_mondialrelay
 msgid " Let's choose Point Relais® on your ecommerce "
-msgstr ""
+msgstr " 讓我們在你的電子商務中選擇 Point Relais® "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_delivery_mondialrelay
 msgid " Let's choose a Point Relais® as shipping address "
-msgstr " Let's choose a Point Relais® as shipping address "
+msgstr " 讓我們選擇 Point Relais® 作為送貨地址"
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_purchase_inter_company_rules
@@ -13786,7 +13789,7 @@ msgstr "進行財務整合所需的一切"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_holidays
 msgid "Allocate PTOs and follow leaves requests"
-msgstr "分配 PTO 並遵循休假請求"
+msgstr "分配有薪假，並追蹤休假申請"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_helpdesk_fsm
@@ -14144,23 +14147,23 @@ msgstr "預約"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_appraisal_skills
 msgid "Appraisal - Skills"
-msgstr "審批 - 技能"
+msgstr "表現評核 - 技能"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_appraisal_survey
 msgid "Appraisal - Survey"
-msgstr "審批 - 問卷"
+msgstr "表現評核 - 問卷"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_appraisal_contract
 msgid "Appraisal Contract"
-msgstr "評價合同"
+msgstr "表現評核合約"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_appraisals
 #: model:ir.module.module,shortdesc:base.module_hr_appraisal
 msgid "Appraisals"
-msgstr "評價"
+msgstr "表現評核"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_approvals
@@ -14220,7 +14223,7 @@ msgstr "Arch 檔案名稱"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__arch_to_compare
 msgid "Arch To Compare To"
-msgstr ""
+msgstr "要比較的架構"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_view_form
@@ -15059,7 +15062,7 @@ msgstr "Belgium - Payroll - Export to SD Worx"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_hr_payroll_fleet
 msgid "Belgium - Payroll - Fleet"
-msgstr "比利時 - 薪資表 - 車隊管理"
+msgstr "比利時 - 薪酬管理 - 車隊"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_hr_payroll_account
@@ -15504,7 +15507,7 @@ msgstr "客戶關係管理"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_data_merge_crm
 msgid "CRM Deduplication"
-msgstr "客戶關係管理重複資料刪除"
+msgstr "消除重複客戶關係"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_gamification_sale_crm
@@ -17318,7 +17321,7 @@ msgstr "貨幣字段沒有 many2one 類型"
 #: code:addons/base/models/ir_model.py:0
 #, python-format
 msgid "Currency field is empty and there is no fallback field in the model"
-msgstr "貨幣字段為空，且模型中沒有後備字段"
+msgstr "貨幣欄位為空，而且模型中沒有後備欄位"
 
 #. module: base
 #. odoo-python
@@ -17337,7 +17340,7 @@ msgstr "列印金額時使用的貨幣符號。"
 #: code:addons/base/models/ir_ui_view.py:0
 #, python-format
 msgid "Current Arch"
-msgstr ""
+msgstr "當前架構"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__current_line_id
@@ -17501,7 +17504,7 @@ msgstr "DLE 26 110 x 220 公厘"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Dash"
-msgstr ""
+msgstr "Dash"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_board
@@ -17686,12 +17689,12 @@ msgstr "已化為十進制數字"
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_deduplicate
 msgid "Deduplicate Contacts"
-msgstr "刪除重複聯繫人"
+msgstr "消除重複聯絡人"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
 msgid "Deduplicate the other Contacts"
-msgstr "刪除重複其他聯繫人"
+msgstr "消除重複其他聯絡人"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_form
@@ -20223,7 +20226,7 @@ msgstr "法屬圭亞那"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_hr_payroll
 msgid "French Payroll"
-msgstr "法國薪資表"
+msgstr "法國薪酬管理"
 
 #. module: base
 #: model:res.country,name:base.pf
@@ -21810,7 +21813,7 @@ msgstr "印度 - 庫存報表 (GST)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_hr_payroll
 msgid "Indian Payroll"
-msgstr "印度薪資表"
+msgstr "印度薪酬管理"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__company_type__person
@@ -21825,7 +21828,7 @@ msgstr "個人"
 #. module: base
 #: model:res.country,name:base.id
 msgid "Indonesia"
-msgstr "印度尼西亞"
+msgstr "印尼"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur
@@ -22288,7 +22291,7 @@ msgstr "%s.%s: %s 的無效值"
 msgid ""
 "Invalid value for %s.%s: %s is out of bounds (integers should be between "
 "-2,147,483,648 and 2,147,483,647)"
-msgstr ""
+msgstr "數值無效： %s.%s： %s 超出範圍（整數應介乎 -2,147,483,648 與 2,147,483,647 之間）"
 
 #. module: base
 #. odoo-python
@@ -23886,7 +23889,7 @@ msgstr "管理您的文件以簽署合約"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_payroll
 msgid "Manage your employee payroll records"
-msgstr "管理您的員工薪資表記錄"
+msgstr "管理你的員工薪酬記錄"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_planning
@@ -27851,7 +27854,7 @@ msgstr ""
 "###組織\n"
 "\n"
 "- 高級規劃\n"
-"- 打印徽章\n"
+"- 打印識別證\n"
 "- 自動化跟進電子郵件\n"
 "- 最小/最大容量\n"
 "- 管理課程和資源\n"
@@ -28532,7 +28535,7 @@ msgstr "付款與網站整合"
 #: model:ir.module.category,name:base.module_category_human_resources_payroll
 #: model:ir.module.module,shortdesc:base.module_hr_payroll
 msgid "Payroll"
-msgstr "薪資表"
+msgstr "薪酬管理"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_payroll_attendance
@@ -28552,7 +28555,7 @@ msgstr "工資冊 - 規劃"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_payroll_account
 msgid "Payroll Accounting"
-msgstr "薪資表會計"
+msgstr "薪酬管理會計"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_payroll_localization
@@ -28900,7 +28903,7 @@ msgstr "預覽pdf src"
 #: code:addons/base/models/ir_ui_view.py:0
 #, python-format
 msgid "Previous Arch"
-msgstr ""
+msgstr "上一個架構"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view__arch_prev
@@ -29735,7 +29738,7 @@ msgstr "QWeb"
 #. module: base
 #: model:ir.model,name:base.model_ir_qweb_field_time
 msgid "QWeb Field Time"
-msgstr ""
+msgstr "QWeb FieldTime"
 
 #. module: base
 #: model:res.country,name:base.qa
@@ -34243,7 +34246,7 @@ msgid ""
 "This technical module allows to define lease prices on a product template "
 "and use them in sale order according to a duration, a quantity, a price "
 "list."
-msgstr ""
+msgstr "此技術模組允許在產品範本上定義租賃價格，並根據期限、數量、價目表等，在銷售訂單中使用它們。"
 
 #. module: base
 #. odoo-python
@@ -34751,7 +34754,7 @@ msgstr "英國 - 會計報表"
 #: model:ir.module.module,shortdesc:base.module_product_unspsc
 #: model:ir.module.module,summary:base.module_product_unspsc
 msgid "UNSPSC product codes"
-msgstr "UNSPSC product codes"
+msgstr "UNSPSC 產品代碼"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
@@ -34798,7 +34801,7 @@ msgstr "USt"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_data_merge_utm
 msgid "UTM Deduplication"
-msgstr "UTM 刪除重複資料"
+msgstr "UTM 消除重複"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_utm
@@ -35245,7 +35248,7 @@ msgstr "使用組來組織經常被選擇在一起的國家(例如\"LATAM\"、\"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_tax_python
 msgid "Use python code to define taxes"
-msgstr "使用python程式碼定義税"
+msgstr "使用 Python 程式碼定義稅項"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence__use_date_range
@@ -36476,6 +36479,14 @@ msgstr ""
 
 #. module: base
 #. odoo-python
+#: code:addons/base/models/res_lang.py:0
+#, python-format
+msgid ""
+"You cannot archive the language in which Odoo was setup as it is used by "
+"automated processes."
+msgstr "您不能將設置 Odoo 時使用的語言存檔，因為自動程序會使用該語言."
+
+#. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid "You cannot create recursive Partner hierarchies."
@@ -37178,7 +37189,7 @@ msgstr "專案盈利項目計算"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__ttype__properties
 msgid "properties"
-msgstr ""
+msgstr "屬性"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__ttype__properties_definition

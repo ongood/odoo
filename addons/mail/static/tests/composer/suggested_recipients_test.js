@@ -12,6 +12,14 @@ const views = {
                 <field name="message_follower_ids"/>
             </div>
         </form>`,
+    "res.partner,false,form": `
+        <form string="Partner">
+            <sheet>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+            </sheet>
+        </form>`,
 };
 
 QUnit.module("suggested_recipients");
@@ -42,6 +50,7 @@ QUnit.test(
         });
         const fakeId = pyEnv["res.fake"].create({
             email_cc: "john@test.be",
+            phone: "123456789",
             partner_ids: [partnerId],
         });
         const { env, openFormView } = await start();
@@ -54,6 +63,7 @@ QUnit.test(
                 assert.strictEqual(action.context.default_partner_ids.length, 2);
                 const johnTestPartnerId = pyEnv["res.partner"].search([
                     ["email", "=", "john@test.be"],
+                    ["phone", "=", "123456789"],
                 ])[0];
                 assert.deepEqual(action.context.default_partner_ids, [
                     johnTestPartnerId,
@@ -210,6 +220,7 @@ QUnit.test(
         const fakeId = pyEnv["res.fake"].create({
             email_cc: "john@test.be",
             partner_ids: [partnerId],
+            phone: "123456789",
         });
         const { openFormView } = await start({ serverData: { views } });
         await openFormView("res.fake", fakeId);
@@ -222,6 +233,50 @@ QUnit.test(
             $(`.o-mail-SuggestedRecipient[data-partner-id="${partnerId}"] input[type=checkbox]`)[0]
                 .checked
         );
+        // Ensure that partner `john@test.be` is created while sending the message (not before)
+        let partner = pyEnv["res.partner"].searchRead([
+            ["email", "=", "john@test.be"],
+            ["phone", "=", "123456789"],
+        ]);
+        assert.strictEqual(partner.length, 0);
+        await insertText(".o-mail-Composer-input", "Dummy Message");
+        await click(".o-mail-Composer-send");
+        partner = pyEnv["res.partner"].searchRead([
+            ["email", "=", "john@test.be"],
+            ["phone", "=", "123456789"],
+        ]);
+        assert.strictEqual(partner.length, 1);
+        assert.strictEqual($(".o-mail-Followers-counter").text(), "2");
+    }
+);
+
+QUnit.test(
+    "suggest recipient on 'Send message' composer (recipient checked/unchecked)",
+    async (assert) => {
+        const pyEnv = await startServer();
+        const fakeId = pyEnv["res.fake"].create({
+            email_cc: "john@test.be",
+            phone: "123456789",
+        });
+        const { openFormView } = await start({ serverData: { views } });
+        await openFormView("res.fake", fakeId);
+        await click("button:contains(Send message)");
+        assert.containsN($, ".o-mail-SuggestedRecipient input:checked", 1);
+        assert.ok(
+            $(".o-mail-SuggestedRecipient:not([data-partner-id]) input[type=checkbox]")[0].checked
+        );
+        // Ensure that partner `john@test.be` is created before sending the message
+        await click(".o-mail-SuggestedRecipient input");
+        await click(".o-mail-SuggestedRecipient input");
+        await click(".o_dialog .o_form_button_save");
+        const partner = pyEnv["res.partner"].searchRead([
+            ["email", "=", "john@test.be"],
+            ["phone", "=", "123456789"],
+        ]);
+        assert.strictEqual(partner.length, 1);
+        await insertText(".o-mail-Composer-input", "Dummy Message");
+        await click(".o-mail-Composer-send");
+        assert.strictEqual($(".o-mail-Followers-counter").text(), "1");
     }
 );
 

@@ -235,7 +235,6 @@ registry
             startSteps();
 
             ProductScreen.do.clickHomeCategory();
-
             ProductScreen.exec.addOrderline("Test Product 1", "1.00", "100");
             PosLoyalty.do.clickDiscountButton();
             PosLoyalty.do.clickConfirmButton();
@@ -303,11 +302,36 @@ registry
         ProductScreen.do.clickCustomer('AAA Partner');
         ProductScreen.do.clickDisplayedProduct('Product B');
         ProductScreen.do.clickDisplayedProduct('Product A');
+        ProductScreen.check.totalAmountIs('210.00');
+        PosLoyalty.check.isRewardButtonHighlighted(true);
         PosLoyalty.do.clickRewardButton();
         SelectionPopup.do.clickItem("$ 5");
         ProductScreen.check.totalAmountIs('205.00');
+        PosLoyalty.check.isRewardButtonHighlighted(true);
         PosLoyalty.do.clickRewardButton();
         SelectionPopup.do.clickItem("$ 5");
         ProductScreen.check.totalAmountIs('200.00');
+        return getSteps();
+    }});
+
+registry
+    .category("web_tour.tours")
+    .add('PosLoyaltyTour10', { test: true, url: '/pos/web', steps: () => {
+        ProductScreen.do.clickHomeCategory();
+        ProductScreen.do.confirmOpeningPopup();
+
+        ProductScreen.do.clickPartnerButton();
+        ProductScreen.do.clickCustomer('AAA Partner');
+        PosLoyalty.check.customerIs('AAA Partner');
+        ProductScreen.do.clickDisplayedProduct('Product Test');
+        ProductScreen.check.totalAmountIs('1.00');
+        ProductScreen.check.selectedOrderlineHas("Product Test", "1.00");
+        PosLoyalty.check.isRewardButtonHighlighted(true);
+        PosLoyalty.do.clickRewardButton();
+        SelectionPopup.do.clickItem('Free Product with Tag');
+        SelectionPopup.do.clickItem('Free Product B');
+        PosLoyalty.check.hasRewardLine('Free Product B', '-1.00');
+        ProductScreen.check.totalAmountIs('1.00');
+        PosLoyalty.check.isRewardButtonHighlighted(false);
         return getSteps();
     }});

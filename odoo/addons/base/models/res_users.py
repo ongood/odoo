@@ -131,6 +131,7 @@ class Groups(models.Model):
     _description = "Access Groups"
     _rec_name = 'full_name'
     _order = 'name'
+    _allow_sudo_commands = False
 
     name = fields.Char(required=True, translate=True)
     users = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid')
@@ -230,7 +231,7 @@ class Groups(models.Model):
         result = self.get_external_id()
         missings = {group_id: f'__custom__.group_{group_id}' for group_id, ext_id in result.items() if not ext_id}
         if missings:
-            self.env['ir.model.data'].create(
+            self.env['ir.model.data'].sudo().create(
                 [
                     {
                         'name': name.split('.')[1],
@@ -277,9 +278,12 @@ class Users(models.Model):
     _description = 'User'
     _inherits = {'res.partner': 'partner_id'}
     _order = 'name, login'
+    _allow_sudo_commands = False
 
-    def _check_company_domain(self, companies=None):
-        return [('company_ids', 'in', models.to_company_ids(companies))] if companies else []
+    def _check_company_domain(self, companies):
+        if not companies:
+            return []
+        return [('company_ids', 'in', models.to_company_ids(companies))]
 
     @property
     def SELF_READABLE_FIELDS(self):
@@ -933,8 +937,8 @@ class Users(models.Model):
             user.write({
                 'login': f'__deleted_user_{user.id}_{time.time()}',
                 'password': '',
-                'api_key_ids': Command.clear(),
             })
+            user.api_key_ids._remove()
 
             res_users_deletion_values.append({
                 'user_id': user.id,
@@ -1323,7 +1327,7 @@ class UsersImplied(models.Model):
                 user = self.new(values)
                 gs = user.groups_id._origin
                 gs = gs | gs.trans_implied_ids
-                values['groups_id'] = type(self).groups_id.convert_to_write(gs, user)
+                values['groups_id'] = self._fields['groups_id'].convert_to_write(gs, user)
         return super(UsersImplied, self).create(vals_list)
 
     def write(self, values):
@@ -2063,6 +2067,7 @@ class APIKeys(models.Model):
     _name = 'res.users.apikeys'
     _description = 'Users API Keys'
     _auto = False # so we can have a secret column
+    _allow_sudo_commands = False
 
     name = fields.Char("Description", required=True, readonly=True)
     user_id = fields.Many2one('res.users', index=True, required=True, readonly=True, ondelete="cascade")

@@ -81,7 +81,7 @@ class SaleOrderLine(models.Model):
     product_id = fields.Many2one(
         comodel_name='product.product',
         string="Product",
-        change_default=True, ondelete='restrict', check_company=True, index='btree_not_null',
+        change_default=True, ondelete='restrict', index='btree_not_null',
         domain="[('sale_ok', '=', True)]")
     product_template_id = fields.Many2one(
         string="Product Template",
@@ -455,12 +455,13 @@ class SaleOrderLine(models.Model):
         for line in self:
             # check if there is already invoiced amount. if so, the price shouldn't change as it might have been
             # manually edited
-            if line.qty_invoiced > 0:
+            if line.qty_invoiced > 0 or (line.product_id.expense_policy == 'cost' and line.is_expense):
                 continue
             if not line.product_uom or not line.product_id:
                 line.price_unit = 0.0
             else:
-                price = line.with_company(line.company_id)._get_display_price()
+                line = line.with_company(line.company_id)
+                price = line._get_display_price()
                 line.price_unit = line.product_id._get_tax_included_unit_price(
                     line.company_id or line.env.company,
                     line.order_id.currency_id,

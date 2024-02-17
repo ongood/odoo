@@ -183,6 +183,10 @@ export class Record extends DataPoint {
         return !this.resId;
     }
 
+    get __isDeleted() {
+        return this.model.__bm__.localData[this.__bm_handle__].__isDeleted;
+    }
+
     get isValid() {
         return !this._invalidFields.size;
     }
@@ -257,6 +261,14 @@ export class Record extends DataPoint {
                 case "one2many":
                 case "many2many":
                     if (!(await this.checkX2ManyValidity(fieldName, urgent))) {
+                        this._setInvalidField(fieldName);
+                    }
+                    break;
+                case "json":
+                    if (
+                        this._isRequired(fieldName) &&
+                        (!this.data[fieldName] || !Object.keys(this.data[fieldName]).length)
+                    ) {
                         this._setInvalidField(fieldName);
                     }
                     break;
@@ -624,6 +636,9 @@ export class Record extends DataPoint {
      * @returns {Promise<boolean>}
      */
     async save(options = {}) {
+        if (this._closeUrgentSaveNotification) {
+            this._closeUrgentSaveNotification();
+        }
         options = Object.assign(
             {
                 stayInEdition: true,
@@ -719,15 +734,36 @@ export class Record extends DataPoint {
         this.model.bus.trigger("WILL_SAVE_URGENTLY");
         await Promise.resolve();
         this.__syncData();
-        let isValid = true;
+        let succeeded = true;
         if (this.isDirty) {
-            isValid = await this.checkValidity(true);
-            if (isValid) {
-                this.model.__bm__.save(this.__bm_handle__, { reload: false });
+            succeeded = await this.checkValidity(true);
+            if (succeeded) {
+                this.model.__bm__.useSendBeacon = true;
+                try {
+                    await this.model.__bm__.save(this.__bm_handle__, { reload: false });
+                } catch (e) {
+                    if (e === "send beacon failed") {
+                        if (this._closeUrgentSaveNotification) {
+                            this._closeUrgentSaveNotification();
+                        }
+                        this._closeUrgentSaveNotification = this.model.notificationService.add(
+                            markup(
+                                this.model.env._t(
+                                    `Heads up! Your recent changes are too large to save automatically. Please click the <i class="fa fa-cloud-upload fa-fw"></i> button now to ensure your work is saved before you exit this tab.`
+                                )
+                            ),
+                            { sticky: true }
+                        );
+                        succeeded = false;
+                    } else {
+                        throw e;
+                    }
+                }
+                delete this.model.__bm__.useSendBeacon;
             }
         }
         this.model.__bm__.bypassMutex = false;
-        return isValid;
+        return succeeded;
     }
 
     async archive() {
@@ -770,6 +806,9 @@ export class Record extends DataPoint {
     }
 
     async discard() {
+        if (this._closeUrgentSaveNotification) {
+            this._closeUrgentSaveNotification();
+        }
         await this._savePromise;
         this._closeInvalidFieldsNotification();
         this.model.__bm__.discardChanges(this.__bm_handle__);

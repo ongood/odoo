@@ -286,7 +286,7 @@
                         </button>
                         <button name="%(project_task_action_sub_task)d" type="action" class="oe_stat_button" icon="fa-tasks"
                             attrs="{'invisible' : ['|', ('id', '=', False), ('subtask_count', '=', 0)]}"
-                            context="{'default_user_ids': user_ids, 'default_project_id': project_id, 'default_milestone_id': milestone_id, 'subtask_action': True}">
+                            context="{'default_user_ids': user_ids, 'default_milestone_id': milestone_id, 'subtask_action': True}">
                             <field name="subtask_count" widget="statinfo" string="Sub-tasks"/>
                         </button>
                         <button name="action_dependent_tasks" type="object" attrs="{'invisible': [('dependent_tasks_count', '=', 0)]}" class="oe_stat_button" icon="fa-tasks" groups="project.group_project_task_dependencies">
@@ -713,6 +713,7 @@
                           scales="month,year">
                     <field name="allow_milestones" invisible="1" />
                     <field name="project_id" widget="project" invisible="context.get('default_project_id', False)"/>
+                    <field name="display_in_project" invisible="1"/>
                     <field name="milestone_id" attrs="{'invisible': ['|', ('allow_milestones', '=', False), ('milestone_id', '=', False)]}"/>
                     <field name="user_ids" widget="many2many_avatar_user" attrs="{'invisible': [('user_ids', '=', [])]}"/>
                     <field name="partner_id" attrs="{'invisible': [('partner_id', '=', False)]}"/>
@@ -720,7 +721,7 @@
                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" attrs="{'invisible': [('tag_ids', '=', [])]}"/>
                     <field name="stage_id" attrs="{'invisible': ['|', ('project_id', '=', False), ('stage_id', '=', False)]}"/>
                     <field name="state" widget="project_task_state_selection" readonly="1"/>
-                    <field name="personal_stage_id" string="Personal Stage" attrs="{'invisible': ['|', ('project_id', '!=', False), ('personal_stage_id', '=', False)]}"/>
+                    <field name="personal_stage_id" string="Personal Stage" attrs="{'invisible': ['|', ('project_id', '!=', False), ('personal_stage_id', '=', False)]}" options="{'no_open': True}"/>
                 </calendar>
             </field>
         </record>

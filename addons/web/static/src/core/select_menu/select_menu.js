@@ -90,6 +90,7 @@ export class SelectMenu extends Component {
             () => this.onInput(this.inputRef.el ? this.inputRef.el.value.trim() : ""),
             250
         );
+        this.isOpen = false;
 
         this.selectedChoice = this.getSelectedChoice(this.props);
         onWillUpdateProps((nextProps) => {
@@ -99,8 +100,10 @@ export class SelectMenu extends Component {
         });
         useEffect(
             () => {
-                const groups = [{ choices: this.props.choices }, ...this.props.groups];
-                this.filterOptions(this.state.searchValue, groups);
+                if (this.isOpen) {
+                    const groups = [{ choices: this.props.choices }, ...this.props.groups];
+                    this.filterOptions(this.state.searchValue, groups);
+                }
             },
             () => [this.props.choices, this.props.groups]
         );
@@ -114,8 +117,7 @@ export class SelectMenu extends Component {
     get canDeselect() {
         return (
             !this.props.required &&
-            this.selectedChoice !== undefined &&
-            this.selectedChoice !== null
+            this.selectedChoice !== undefined
         );
     }
 
@@ -137,12 +139,25 @@ export class SelectMenu extends Component {
         });
     }
 
-    onOpened() {
-        this.state.searchValue = "";
+    async onBeforeOpen() {
+        if (this.state.searchValue.length) {
+            this.state.searchValue = "";
+            if (this.props.onInput) {
+                // This props can be used by the parent to fetch items dynamically depending
+                // the search value. It must be called with the empty search value.
+                await this.executeOnInput("");
+            }
+        }
+        this.filterOptions();
+    }
 
-        const selectedElement = document.querySelector(".o_select_active");
-        if (selectedElement) {
-            scrollTo(selectedElement);
+    onStateChanged({ open }) {
+        this.isOpen = open;
+        if (open) {
+            const selectedElement = document.querySelector(".o_select_active");
+            if (selectedElement) {
+                scrollTo(selectedElement);
+            }
         }
     }
 
@@ -155,7 +170,7 @@ export class SelectMenu extends Component {
 
     getItemClass(choice) {
         if (this.isOptionSelected(choice)) {
-            return "o_select_menu_item mb-1 o_select_active bg-primary text-light fw-bolder fst-italic";
+            return "o_select_menu_item mb-1 o_select_active bg-primary fw-bolder fst-italic";
         } else {
             return "o_select_menu_item mb-1";
         }
@@ -195,12 +210,8 @@ export class SelectMenu extends Component {
     }
 
     getSelectedChoice(props) {
-        if (props.value) {
-            const choices = [...props.choices, ...props.groups.flatMap((g) => g.choices)];
-            return choices.find((c) => c.value === props.value);
-        } else {
-            return undefined;
-        }
+        const choices = [...props.choices, ...props.groups.flatMap((g) => g.choices)];
+        return choices.find((c) => c.value === props.value);
     }
 
     onItemSelected(value) {

@@ -71,7 +71,7 @@ class HrExpense(models.Model):
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True, string="UoM Category")
     unit_amount = fields.Float("Unit Price", compute='_compute_unit_amount', readonly=False, store=True, precompute=True, required=True, copy=True,
         states={'done': [('readonly', True)]}, digits='Product Price')
-    unit_amount_display = fields.Float("Unit Price Display", compute='_compute_unit_amount_display')
+    unit_amount_display = fields.Float("Unit Price Display", compute='_compute_unit_amount_display', digits='Product Price')
     quantity = fields.Float(required=True, states={'done': [('readonly', True)]}, digits='Product Unit of Measure', default=1)
     tax_ids = fields.Many2many('account.tax', 'expense_tax', 'expense_id', 'tax_id',
         compute='_compute_tax_ids', store=True, readonly=False, precompute=True,
@@ -102,6 +102,7 @@ class HrExpense(models.Model):
         ("company_account", "Company")
     ], default='own_account', tracking=True, states={'done': [('readonly', True)], 'approved': [('readonly', True)], 'reported': [('readonly', True)]}, string="Paid By")
     attachment_number = fields.Integer('Number of Attachments', compute='_compute_attachment_number')
+    attachment_ids = fields.One2many('ir.attachment', 'res_id', domain="[('res_model', '=', 'hr.expense')]", string="Attachments")
     state = fields.Selection(
         selection=[
             ('draft', 'To Report'),
@@ -336,8 +337,13 @@ class HrExpense(models.Model):
     @api.depends('product_id', 'attachment_number', 'currency_rate')
     def _compute_unit_amount(self):
         for expense in self:
-            if expense.product_id and expense.product_has_cost and not expense.attachment_number or (expense.attachment_number and not expense.unit_amount):
-                expense.unit_amount = expense.product_id._price_compute('standard_price', currency=expense.currency_id)[expense.product_id.id]
+            product_id = expense.product_id
+            if product_id and expense.product_has_cost and not expense.attachment_number or (expense.attachment_number and not expense.unit_amount):
+                expense.unit_amount = product_id._price_compute(
+                    'standard_price',
+                    uom=expense.product_uom_id,
+                    company=expense.company_id,
+                )[product_id.id]
             else:  # Even if we don't add a product, the unit_amount is still used for the move.line balance computation
                 expense.unit_amount = expense.company_currency_id.round(expense.total_amount_company / (expense.quantity or 1))
 
@@ -346,7 +352,6 @@ class HrExpense(models.Model):
         for expense in self:
             expense = expense.with_company(expense.company_id)
             expense.tax_ids = expense.product_id.supplier_taxes_id.filtered_domain(self.env['account.tax']._check_company_domain(expense.company_id))
-
 
     @api.depends('product_id', 'company_id')
     def _compute_account_id(self):
@@ -479,8 +484,11 @@ class HrExpense(models.Model):
                 raise UserError(_('You cannot delete a posted or approved expense.'))
 
     def write(self, vals):
+        expense_to_previous_sheet = {}
         if 'sheet_id' in vals:
             self.env['hr.expense.sheet'].browse(vals['sheet_id']).check_access_rule('write')
+            for expense in self:
+                expense_to_previous_sheet[expense] = expense.sheet_id
         if 'tax_ids' in vals or 'analytic_distribution' in vals or 'account_id' in vals:
             if any(not expense.is_editable for expense in self):
                 raise UserError(_('You are not authorized to edit this expense report.'))
@@ -498,7 +506,34 @@ class HrExpense(models.Model):
                     self.sheet_id.write({'employee_id': vals['employee_id']})
                 elif len(employees) > 1:
                     self.sheet_id = False
+        if 'sheet_id' in vals:
+            # The sheet_id has been modified, either by an explicit write on sheet_id of the expense,
+            # or by processing a command on the sheet's expense_line_ids.
+            # We need to delete the attachments on the previous sheet coming from the expenses that were modified,
+            # and copy the attachments of the expenses to the new sheet,
+            # if it's a no-op (writing same sheet_id as the current sheet_id of the expense),
+            # nothing should be done (no unlink then copy of the same attachments)
+            attachments_to_unlink = self.env['ir.attachment']
+            for expense in self:
+                previous_sheet = expense_to_previous_sheet[expense]
+                checksums = set((expense.attachment_ids - previous_sheet.expense_line_ids.attachment_ids).mapped('checksum'))
+                attachments_to_unlink += previous_sheet.attachment_ids.filtered(lambda att: att.checksum in checksums)
+                if vals['sheet_id'] and expense.sheet_id != previous_sheet:
+                    for attachment in expense.attachment_ids.with_context(sync_attachment=False):
+                        attachment.copy({
+                            'res_model': 'hr.expense.sheet',
+                            'res_id': vals['sheet_id'],
+                        })
+            attachments_to_unlink.with_context(sync_attachment=False).unlink()
         return res
+
+    def unlink(self):
+        attachments_to_unlink = self.env['ir.attachment']
+        for sheet in self.sheet_id:
+            checksums = set((sheet.expense_line_ids.attachment_ids & self.attachment_ids).mapped('checksum'))
+            attachments_to_unlink += sheet.attachment_ids.filtered(lambda att: att.checksum in checksums)
+        attachments_to_unlink.with_context(sync_attachment=False).unlink()
+        return super().unlink()
 
     @api.model
     def get_empty_list_help(self, help_message):
@@ -558,19 +593,28 @@ class HrExpense(models.Model):
 
         sheets = [own_expenses, company_expenses] if create_two_reports else [expenses_with_amount]
         values = []
+
+        # We use a fallback name only when several expense sheets are created,
+        # else we use the form view required name to force the user to set a name
         for todo in sheets:
+            paid_by = 'company' if todo[0].payment_mode == 'company_account' else 'employee'
+            sheet_name = _("New Expense Report, paid by %(paid_by)s", paid_by=paid_by) if len(sheets) > 1 else False
             if len(todo) == 1:
-                expense_name = todo.name
+                sheet_name = todo.name
             else:
                 dates = todo.mapped('date')
-                min_date = format_date(self.env, min(dates))
-                max_date = format_date(self.env, max(dates))
-                expense_name = min_date if max_date == min_date else f'{min_date} - {max_date}'
+                if False not in dates:  # If at least one date isn't set, we don't set a default name
+                    min_date = format_date(self.env, min(dates))
+                    max_date = format_date(self.env, max(dates))
+                    if min_date == max_date:
+                        sheet_name = min_date
+                    else:
+                        sheet_name = _("%(date_from)s - %(date_to)s", date_from=min_date, date_to=max_date)
 
             vals = {
                 'company_id': self.company_id.id,
                 'employee_id': self[0].employee_id.id,
-                'name': expense_name,
+                'name': sheet_name,
                 'expense_line_ids': [Command.set(todo.ids)],
                 'state': 'draft',
             }
@@ -1067,6 +1111,8 @@ class HrExpenseSheet(models.Model):
         readonly=False,
         help="The payment method used when the expense is paid by the company.",
     )
+    attachment_ids = fields.One2many('ir.attachment', 'res_id', domain="[('res_model', '=', 'hr.expense.sheet')]", string='Attachments of expenses')
+    message_main_attachment_id = fields.Many2one(compute='_compute_main_attachment', store=True)
     accounting_date = fields.Date(
         string='Accounting Date',
         compute='_compute_accounting_date',
@@ -1156,6 +1202,12 @@ class HrExpenseSheet(models.Model):
                 sheet.state = sheet.approval_state
             else:
                 sheet.state = 'draft'
+
+    @api.depends('expense_line_ids.attachment_ids')
+    def _compute_main_attachment(self):
+        for sheet in self:
+            if not sheet.message_main_attachment_id or sheet.message_main_attachment_id not in sheet.attachment_ids:
+                sheet.message_main_attachment_id = sheet.attachment_ids[:1]
 
     @api.depends('expense_line_ids.currency_id', 'company_currency_id')
     def _compute_currency_id(self):
@@ -1302,17 +1354,6 @@ class HrExpenseSheet(models.Model):
     # --------------------------------------------
     # Mail Thread
     # --------------------------------------------
-
-    def _get_mail_thread_data_attachments(self):
-        """
-        In order to see in the sheet attachment preview the corresponding
-        expenses' attachments, the latter attachments are added to the fetched data for the sheet record.
-        """
-        self.ensure_one()
-        res = super()._get_mail_thread_data_attachments()
-        expense_ids = self.expense_line_ids
-        expense_attachments = self.env['ir.attachment'].search([('res_id', 'in', expense_ids.ids), ('res_model', '=', 'hr.expense')], order='id desc')
-        return res | expense_attachments
 
     def _track_subtype(self, init_values):
         self.ensure_one()

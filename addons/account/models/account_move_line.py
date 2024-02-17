@@ -459,13 +459,15 @@ class AccountMoveLine(models.Model):
 
     @api.depends('product_id')
     def _compute_name(self):
+        term_by_move = (self.move_id.line_ids | self).filtered(lambda l: l.display_type == 'payment_term').sorted(lambda l: l.date_maturity if l.date_maturity else date.max).grouped('move_id')
         for line in self.filtered(lambda l: l.move_id.inalterable_hash is False):
             if line.display_type == 'payment_term':
-                term_lines = line.move_id.line_ids.filtered(lambda l: l.display_type == 'payment_term') | line
+                term_lines = term_by_move.get(line.move_id, self.env['account.move.line'])
+                n_terms = len(line.move_id.invoice_payment_term_id.line_ids)
                 name = line.move_id.payment_reference or ''
-                if len(term_lines) > 1:
-                    index = term_lines._ids.index(line.id) + 1
-                    name = _('%s installment #%s', name, index).lstrip()
+                if n_terms > 1:
+                    index = term_lines._ids.index(line.id) if line in term_lines else len(term_lines)
+                    name = _('%s installment #%s', name, index+1).lstrip()
                 line.name = name
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
                 continue
@@ -759,14 +761,16 @@ class AccountMoveLine(models.Model):
                 and foreign_curr.is_zero(line.amount_residual_currency)
             )
 
-    @api.depends('move_id.move_type', 'tax_ids', 'tax_repartition_line_id', 'debit', 'credit', 'tax_tag_ids', 'is_refund')
+    @api.depends('move_id.move_type', 'tax_ids', 'tax_repartition_line_id', 'debit', 'credit', 'tax_tag_ids', 'is_refund',
+                 'move_id.tax_cash_basis_origin_move_id')
     def _compute_tax_tag_invert(self):
         for record in self:
+            origin_move_id = record.move_id.tax_cash_basis_origin_move_id or record.move_id
             if not record.tax_repartition_line_id and not record.tax_ids:
                 # Invoices imported from other softwares might only have kept the tags, not the taxes.
-                record.tax_tag_invert = record.tax_tag_ids and record.move_id.is_inbound()
+                record.tax_tag_invert = record.tax_tag_ids and origin_move_id.is_inbound()
 
-            elif record.move_id.move_type == 'entry':
+            elif origin_move_id.move_type == 'entry':
                 # For misc operations, cash basis entries and write-offs from the bank reconciliation widget
                 tax = record.tax_repartition_line_id.tax_id or record.tax_ids[:1]
                 is_refund = record.is_refund
@@ -774,7 +778,7 @@ class AccountMoveLine(models.Model):
                 record.tax_tag_invert = (tax_type == 'purchase' and is_refund) or (tax_type == 'sale' and not is_refund)
             else:
                 # For invoices with taxes
-                record.tax_tag_invert = record.move_id.is_inbound()
+                record.tax_tag_invert = origin_move_id.is_inbound()
 
     @api.depends('product_id')
     def _compute_product_uom_id(self):
@@ -871,7 +875,7 @@ class AccountMoveLine(models.Model):
                 tax_ids = self.account_id.tax_ids.filtered(lambda tax: tax.type_tax_use == 'purchase')
 
         else:
-            tax_ids = self.account_id.tax_ids
+            tax_ids = False if self.env.context.get('skip_computed_taxes') else self.account_id.tax_ids
 
         if self.company_id and tax_ids:
             tax_ids = tax_ids.filtered_domain(company_domain)
@@ -1111,7 +1115,6 @@ class AccountMoveLine(models.Model):
                 line.debit = 0
             line.balance = line.debit - line.credit
 
-    @api.onchange('analytic_distribution')
     def _inverse_analytic_distribution(self):
         """ Unlink and recreate analytic_lines when modifying the distribution."""
         lines_to_modify = self.env['account.move.line'].browse([
@@ -1625,12 +1628,12 @@ class AccountMoveLine(models.Model):
             return aml.move_id.payment_id or aml.move_id.statement_line_id
 
         def get_odoo_rate(aml, other_aml, currency):
+            if other_aml and not is_payment(aml) and is_payment(other_aml):
+                return get_accounting_rate(other_aml, currency)
             if aml.move_id.is_invoice(include_receipts=True):
                 exchange_rate_date = aml.move_id.invoice_date
             else:
                 exchange_rate_date = aml._get_reconciliation_aml_field_value('date', shadowed_aml_values)
-            if other_aml and not is_payment(aml) and is_payment(other_aml):
-                exchange_rate_date = other_aml._get_reconciliation_aml_field_value('date', shadowed_aml_values)
             return currency._get_conversion_rate(aml.company_currency_id, currency, aml.company_id, exchange_rate_date)
 
         def get_accounting_rate(aml, currency):

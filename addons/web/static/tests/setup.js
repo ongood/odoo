@@ -5,7 +5,7 @@ import LegacyBus from "web.Bus";
 import session from "web.session";
 import { assets, templates } from "@web/core/assets";
 import { browser, makeRAMLocalStorage } from "@web/core/browser/browser";
-import { nextTick, patchTimeZone, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { patchTimeZone, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { memoize } from "@web/core/utils/functions";
 import { registerCleanup } from "./helpers/cleanup";
 import { prepareRegistriesWithCleanup } from "./helpers/mock_env";
@@ -161,7 +161,9 @@ function patchBrowserWithCleanup() {
                 mediaDevices: browser.navigator.mediaDevices,
                 permissions: browser.navigator.permissions,
                 userAgent: browser.navigator.userAgent.replace(/\([^)]*\)/, "(X11; Linux x86_64)"),
-                sendBeacon: () => {},
+                sendBeacon: () => {
+                    throw new Error("sendBeacon called in test but not mocked");
+                },
             },
             // in tests, we never want to interact with the real url or reload the page
             location: mockLocation,
@@ -327,7 +329,7 @@ function patchAssets() {
                     "%c[assets] fetch (mock) JS ressource: " + ressource,
                     "color: #66e; font-weight: bold;"
                 );
-                return nextTick();
+                return Promise.resolve();
             }
             console.log(
                 "%c[assets] fetch JS ressource: " + ressource,
@@ -341,7 +343,7 @@ function patchAssets() {
                     "%c[assets] fetch (mock) CSS ressource: " + ressource,
                     "color: #66e; font-weight: bold;"
                 );
-                return nextTick();
+                return Promise.resolve();
             }
             console.log(
                 "%c[assets] fetch CSS ressource: " + ressource,

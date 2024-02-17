@@ -740,7 +740,12 @@ export function getSelectedNodes(editable) {
  */
 export function getDeepRange(editable, { range, sel, splitText, select, correctTripleClick } = {}) {
     sel = sel || editable.parentElement && editable.ownerDocument.getSelection();
-    if (sel && sel.isCollapsed && sel.anchorNode && sel.anchorNode.nodeName === "BR") {
+    if (
+        sel &&
+        sel.isCollapsed &&
+        sel.anchorNode &&
+        (sel.anchorNode.nodeName === "BR" || (sel.anchorNode.nodeType === Node.TEXT_NODE && sel.anchorNode.textContent === ''))
+    ) {
         setCursorStart(sel.anchorNode.parentElement, false);
     }
     range = range ? range.cloneRange() : sel && sel.rangeCount && sel.getRangeAt(0).cloneRange();
@@ -830,7 +835,7 @@ export function getDeepestPosition(node, offset) {
     let direction = DIRECTIONS.RIGHT;
     let next = node;
     while (next) {
-        if (isVisible(next) || isZWS(next)) {
+        if ((isVisible(next) || isZWS(next)) && (!isBlock(next) || next.isContentEditable)) {
             // Valid node: update position then try to go deeper.
             if (next !== node) {
                 [node, offset] = [next, direction ? 0 : nodeSize(next)];
@@ -838,7 +843,7 @@ export function getDeepestPosition(node, offset) {
             // First switch direction to left if offset is at the end.
             direction = offset < node.childNodes.length;
             next = node.childNodes[direction ? offset : offset - 1];
-        } else if (direction && next.nextSibling && !isBlock(next.nextSibling)) {
+        } else if (direction && next.nextSibling) {
             // Invalid node: skip to next sibling (without crossing blocks).
             next = next.nextSibling;
         } else {
@@ -1088,6 +1093,7 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
     if (zws) {
         const siblings = [...zws.parentElement.childNodes];
         if (
+            !isBlock(zws.parentElement) &&
             selectedTextNodes.includes(siblings[0]) &&
             selectedTextNodes.includes(siblings[siblings.length - 1])
         ) {
@@ -1305,9 +1311,9 @@ export function isFontSize(node, props) {
  */
 export function isSelectionFormat(editable, format) {
     const selectedNodes = getTraversedNodes(editable)
-        .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length);
+        .filter(n => n.nodeType === Node.TEXT_NODE);
     const isFormatted = formatsSpecs[format].isFormatted;
-    return selectedNodes && selectedNodes.every(n => isFormatted(n, editable));
+    return selectedNodes.length && selectedNodes.every(n => isFormatted(n, editable));
 }
 
 export function isUnbreakable(node) {
@@ -1767,7 +1773,7 @@ export function isEmptyBlock(blockEl) {
     if (!blockEl || blockEl.nodeType !== Node.ELEMENT_NODE) {
         return false;
     }
-    if (visibleCharRegex.test(blockEl.textContent)) {
+    if (isFontAwesome(blockEl) || visibleCharRegex.test(blockEl.textContent)) {
         return false;
     }
     if (blockEl.querySelectorAll('br').length >= 2) {
@@ -1866,6 +1872,11 @@ export function splitElement(element, offset) {
     for (const child of [...element.childNodes]) {
         index < offset ? before.appendChild(child) : after.appendChild(child);
         index++;
+    }
+    // e.g.: <p>Test/banner</p> + ENTER <=> <p>Test</p><div class="o_editor_banner>...</div><p><br></p>
+    const blockEl = closestBlock(after);
+    if (blockEl) {
+        fillEmpty(blockEl);
     }
     element.before(before);
     element.after(after);
@@ -1995,10 +2006,12 @@ export function setTagName(el, newTagName) {
     if (el.tagName === newTagName) {
         return el;
     }
-    var n = document.createElement(newTagName);
-    var attr = el.attributes;
-    for (var i = 0, len = attr.length; i < len; ++i) {
-        n.setAttribute(attr[i].name, attr[i].value);
+    const n = document.createElement(newTagName);
+    if (paragraphRelatedElements.includes(el.nodeName)) {
+        const attributes = el.attributes;
+        for (const attr of attributes) {
+            n.setAttribute(attr.name, attr.value);
+        }
     }
     while (el.firstChild) {
         n.append(el.firstChild);
@@ -2557,7 +2570,8 @@ export function enforceWhitespace(el, offset, direction, rule) {
         if (
             spaceVisibility &&
             !foundVisibleSpaceTextNode &&
-            getState(...rightPos(spaceNode), DIRECTIONS.RIGHT).cType & CTGROUPS.BLOCK
+            getState(...rightPos(spaceNode), DIRECTIONS.RIGHT).cType & CTGROUPS.BLOCK &&
+            getState(...leftPos(spaceNode), DIRECTIONS.LEFT).cType !== CTYPES.CONTENT
         ) {
             spaceVisibility = false;
         }

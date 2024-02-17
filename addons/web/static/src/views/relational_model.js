@@ -593,6 +593,14 @@ export class Record extends DataPoint {
                         this.setInvalidField(fieldName);
                     }
                     break;
+                case "json":
+                    if (
+                        this._isRequired(fieldName) &&
+                        (!this.data[fieldName] || !Object.keys(this.data[fieldName]).length)
+                    ) {
+                        this.setInvalidField(fieldName);
+                    }
+                    break;
                 default:
                     if (!isSet && this._isRequired(fieldName) && !this.data[fieldName]) {
                         this.setInvalidField(fieldName);
@@ -2176,7 +2184,8 @@ export class DynamicGroupList extends DynamicList {
         this.groupByInfo = params.groupByInfo || {}; // FIXME: is this something specific to the list view?
         this.openGroupsByDefault = params.openGroupsByDefault || false;
         /** @type {Group[]} */
-        this.groups = state.groups || [];
+        this.groups = [];
+        this.previousGroupsStates = state.groups || [];
         this.isGrouped = true;
         this.expand = params.expand;
         this.limitByGroup = this.limit;
@@ -2303,7 +2312,7 @@ export class DynamicGroupList extends DynamicList {
     exportState() {
         const state = {
             ...super.exportState(),
-            groups: this.groups,
+            groups: this.groups.map((g) => g.exportState()),
         };
         delete state.limit;
         return state;
@@ -2539,16 +2548,20 @@ export class DynamicGroupList extends DynamicList {
                 }
             }
             const groupValue = groupParams.__rawValue;
-            const previousGroup = this.groups.find((g) => {
+            const isPrevGroup = (g) => {
                 if (g.deleted) {
                     return false;
                 }
                 return Array.isArray(g.__rawValue) && Array.isArray(groupValue)
                     ? g.__rawValue[0] === groupValue[0]
                     : g.__rawValue === groupValue;
-            });
-            const state = previousGroup ? previousGroup.exportState() : {};
-            return [groupParams, state];
+            };
+            if (this._isLoaded) {
+                const prevGroup = this.groups.find(isPrevGroup);
+                return [groupParams, prevGroup ? prevGroup.exportState() : {}];
+            }
+            const state = this.previousGroupsStates.find(isPrevGroup);
+            return [groupParams, state || {}];
         });
 
         // Unfold groups that can still be unfolded by default
@@ -2566,6 +2579,7 @@ export class DynamicGroupList extends DynamicList {
             }
         }
 
+        this._isLoaded = true;
         return groupsParams.map(([params, state]) =>
             this.model.createDataPoint("group", params, state)
         );
@@ -2699,7 +2713,12 @@ export class Group extends DataPoint {
 
     exportState() {
         return {
+            __rawValue: this.__rawValue,
+            value: this.value,
+            deleted: this.deleted,
             isFolded: this.isFolded,
+            displayName: this.displayName,
+            groupDomain: this.groupDomain,
             listState: this.list.exportState(),
             groupFilterDomain: this.groupFilterDomain,
         };

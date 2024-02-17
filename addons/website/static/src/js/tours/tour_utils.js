@@ -2,6 +2,7 @@
 
 import {_t} from "web.core";
 import "web.legacy_tranlations_loaded";
+import { markup } from "@odoo/owl";
 import {Markup} from "web.utils";
 import { registry } from "@web/core/registry";
 import { sprintf } from "@web/core/utils/strings";
@@ -161,7 +162,7 @@ function clickOnElement(elementName, selector) {
  */
 function clickOnEditAndWaitEditMode(position = "bottom") {
     return [{
-        content: _t("<b>Click Edit</b> to start designing your homepage."),
+        content: markup(_t("<b>Click Edit</b> to start designing your homepage.")),
         trigger: ".o_menu_systray .o_edit_website_container a",
         position: position,
     }, {
@@ -400,6 +401,31 @@ function selectElementInWeSelectWidget(widgetName, elementName, searchNeeded = f
     return steps;
 }
 
+/**
+ * Switches to a different website by clicking on the website switcher.
+ *
+ * @param {number} websiteId - The ID of the website to switch to.
+ * @param {string} websiteName - The name of the website to switch to.
+ * @returns {Array} - The steps required to perform the website switch.
+ */
+function switchWebsite(websiteId, websiteName) {
+    return [{
+        content: `Click on the website switch to switch to website '${websiteName}'`,
+        trigger: '.o_website_switcher_container button',
+    }, {
+        content: `Switch to website '${websiteName}'`,
+        extra_trigger: `iframe html:not([data-website-id="${websiteId}"])`,
+        trigger: `.o_website_switcher_container .dropdown-item:contains("${websiteName}")`,
+    }, {
+        content: "Wait for the iframe to be loaded",
+        // The page reload generates assets for the new website, it may take
+        // some time
+        timeout: 20000,
+        trigger: `iframe html[data-website-id="${websiteId}"]`,
+        isCheck: true,
+    }];
+}
+
 export default {
     addMedia,
     assertCssVariable,
@@ -411,22 +437,23 @@ export default {
     changeImage,
     changeOption,
     changePaddingSize,
-    clickOnElement,
     clickOnEditAndWaitEditMode,
+    clickOnElement,
+    clickOnExtraMenuItem,
     clickOnSave,
     clickOnSnippet,
     clickOnText,
     dragNDrop,
+    getClientActionUrl,
     goBackToBlocks,
     goToTheme,
+    registerBackendAndFrontendTour,
+    registerThemeHomepageTour,
+    registerWebsitePreviewTour,
     selectColorPalette,
+    selectElementInWeSelectWidget,
     selectHeader,
     selectNested,
     selectSnippetColumn,
-    getClientActionUrl,
-    registerThemeHomepageTour,
-    clickOnExtraMenuItem,
-    registerWebsitePreviewTour,
-    registerBackendAndFrontendTour,
-    selectElementInWeSelectWidget,
+    switchWebsite,
 };

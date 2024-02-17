@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
 import {PageControllerMixin, PageRendererMixin} from "./page_views_mixin";
+import {PageSearchModel} from "./page_search_model";
 import {registry} from '@web/core/registry';
 import {listView} from '@web/views/list/list_view';
 import {ConfirmationDialog} from "@web/core/confirmation_dialog/confirmation_dialog";
-import {useService} from "@web/core/utils/hooks";
 import {sprintf} from "@web/core/utils/strings";
 import {DeletePageDialog} from '@website/components/dialog/page_properties';
 import {SearchDropdownItem} from "@web/search/search_dropdown_item/search_dropdown_item";
@@ -16,7 +16,6 @@ export class PageListController extends PageControllerMixin(listView.Controller)
      */
     setup() {
         super.setup();
-        this.orm = useService('orm');
         if (this.props.resModel === "website.page") {
             this.archiveEnabled = false;
         }
@@ -86,6 +85,7 @@ PageListController.components = {
     SearchDropdownItem,
 };
 
+// TODO master: remove `PageRendererMixin` extend and props override
 export class PageListRenderer extends PageRendererMixin(listView.Renderer) {}
 PageListRenderer.props = [
     ...listView.Renderer.props,
@@ -97,6 +97,7 @@ export const PageListView = {
     ...listView,
     Renderer: PageListRenderer,
     Controller: PageListController,
+    SearchModel: PageSearchModel,
 };
 
 registry.category("views").add("website_pages_list", PageListView);

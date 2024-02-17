@@ -4512,8 +4512,8 @@ registry.sizing = SnippetOptionWidget.extend({
             if (rowEl.classList.contains('o_grid_mode')) {
                 self.options.wysiwyg.odooEditor.observerUnactive('displayBackgroundGrid');
                 backgroundGridEl = gridUtils._addBackgroundGrid(rowEl, 0);
-                self.options.wysiwyg.odooEditor.observerActive('displayBackgroundGrid');
                 gridUtils._setElementToMaxZindex(backgroundGridEl, rowEl);
+                self.options.wysiwyg.odooEditor.observerActive('displayBackgroundGrid');
             }
 
             // For loop to handle the cases where it is ne, nw, se or sw. Since
@@ -5875,11 +5875,15 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         }
     },
     /**
-     * Returns a list of valid formats for a given image.
+     * Returns a list of valid formats for a given image or an empty list if
+     * there is no mimetypeBeforeConversion data attribute on the image.
      *
      * @private
      */
     async _computeAvailableFormats() {
+        if (!this.mimetypeBeforeConversion) {
+            return [];
+        }
         const img = this._getImg();
         const original = await loadImage(this.originalSrc);
         const maxWidth = img.dataset.width ? img.naturalWidth : original.naturalWidth;
@@ -5955,6 +5959,7 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         }
         this.originalId = img.dataset.originalId;
         this.originalSrc = img.dataset.originalSrc;
+        this.mimetypeBeforeConversion = img.dataset.mimetypeBeforeConversion;
     },
     /**
      * Sets the image's width to its suggested size.
@@ -6027,6 +6032,9 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * @override
      */
     _computeWidgetVisibility(widgetName, params) {
+        if (widgetName === "format_select_opt" && !this.mimetypeBeforeConversion) {
+            return false;
+        }
         if (this._isImageProcessingWidget(widgetName, params)) {
             const img = this._getImg();
             return this._isImageSupportedForProcessing(img, true);
@@ -8098,11 +8106,24 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                                 onSuccess: async () => {
                                     const defaultSnippetName = sprintf(_t("Custom %s"), this.data.snippetName);
                                     const targetCopyEl = this.$target[0].cloneNode(true);
+                                    targetCopyEl.classList.add('s_custom_snippet');
                                     delete targetCopyEl.dataset.name;
                                     // By the time onSuccess is called after request_save, the
                                     // current widget has been destroyed and is orphaned, so this._rpc
                                     // will not work as it can't trigger_up. For this reason, we need
                                     // to bypass the service provider and use the global RPC directly
+
+                                    // Get editable parent TODO find proper method to get it directly
+                                    let editableParentEl;
+                                    for (parent of this.options.getContentEditableAreas()) {
+                                        if (parent.contains(this.$target[0])) {
+                                            editableParentEl = parent;
+                                            break;
+                                        }
+                                    }
+                                    context['model'] = editableParentEl.dataset.oeModel;
+                                    context['field'] = editableParentEl.dataset.oeField;
+                                    context['resId'] = editableParentEl.dataset.oeId;
                                     await rpc.query({
                                         model: 'ir.ui.view',
                                         method: 'save_snippet',

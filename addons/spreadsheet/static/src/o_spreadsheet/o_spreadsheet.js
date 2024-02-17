@@ -448,7 +448,7 @@
         const upperCased = str.toUpperCase();
         return upperCased === "TRUE" || upperCased === "FALSE";
     }
-    const MARKDOWN_LINK_REGEX = /^\[([^\[]+)\]\((.+)\)$/;
+    const MARKDOWN_LINK_REGEX = /^\[(.+)\]\((.+)\)$/;
     //link must start with http or https
     //https://stackoverflow.com/a/3809435/4760614
     const WEB_LINK_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/;
@@ -702,18 +702,18 @@
         return true;
     }
     class JetSet extends Set {
-        add(...iterable) {
+        addMany(iterable) {
             for (const element of iterable) {
                 super.add(element);
             }
             return this;
         }
-        delete(...iterable) {
-            let deleted = false;
+        deleteMany(iterable) {
+            let wasDeleted = false;
             for (const element of iterable) {
-                deleted ||= super.delete(element);
+                wasDeleted ||= super.delete(element);
             }
-            return deleted;
+            return wasDeleted;
         }
     }
     /**
@@ -1167,16 +1167,81 @@
     }
 
     // -----------------------------------------------------------------------------
+    /**
+     * A DateTime object that can be used to manipulate spreadsheet dates.
+     * Conceptually, a spreadsheet date is simply a number with a date format,
+     * and it is timezone-agnostic.
+     * This DateTime object consistently uses UTC time to represent a naive date and time.
+     */
+    class DateTime {
+        jsDate;
+        constructor(year, month, day, hours = 0, minutes = 0, seconds = 0) {
+            this.jsDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, 0));
+        }
+        static fromTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return new DateTime(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
+        }
+        static now() {
+            const now = new Date();
+            return new DateTime(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+        }
+        toString() {
+            return this.jsDate.toString();
+        }
+        toLocaleDateString() {
+            return this.jsDate.toLocaleDateString();
+        }
+        getTime() {
+            return this.jsDate.getTime();
+        }
+        getFullYear() {
+            return this.jsDate.getUTCFullYear();
+        }
+        getMonth() {
+            return this.jsDate.getUTCMonth();
+        }
+        getDate() {
+            return this.jsDate.getUTCDate();
+        }
+        getDay() {
+            return this.jsDate.getUTCDay();
+        }
+        getHours() {
+            return this.jsDate.getUTCHours();
+        }
+        getMinutes() {
+            return this.jsDate.getUTCMinutes();
+        }
+        getSeconds() {
+            return this.jsDate.getUTCSeconds();
+        }
+        setFullYear(year) {
+            this.jsDate.setFullYear(year);
+        }
+        setDate(date) {
+            this.jsDate.setUTCDate(date);
+        }
+        setHours(hours) {
+            this.jsDate.setUTCHours(hours);
+        }
+        setMinutes(minutes) {
+            this.jsDate.setUTCMinutes(minutes);
+        }
+        setSeconds(seconds) {
+            this.jsDate.setUTCSeconds(seconds);
+        }
+    }
     // -----------------------------------------------------------------------------
     // Parsing
     // -----------------------------------------------------------------------------
-    const INITIAL_1900_DAY = new Date(1899, 11, 30);
+    const INITIAL_1900_DAY = new DateTime(1899, 11, 30);
     const MS_PER_DAY = 24 * 60 * 60 * 1000;
     const CURRENT_MILLENIAL = 2000; // note: don't forget to update this in 2999
-    const CURRENT_YEAR = new Date().getFullYear();
-    const CURRENT_MONTH = new Date().getMonth();
-    const INITIAL_JS_DAY = new Date(0);
-    const DATE_JS_1900_OFFSET = INITIAL_JS_DAY - INITIAL_1900_DAY;
+    const CURRENT_YEAR = DateTime.now().getFullYear();
+    const CURRENT_MONTH = DateTime.now().getMonth();
+    const INITIAL_JS_DAY = DateTime.fromTimestamp(0);
+    const DATE_JS_1900_OFFSET = INITIAL_JS_DAY.getTime() - INITIAL_1900_DAY.getTime();
     const mdyDateRegexp = /^\d{1,2}(\/|-|\s)\d{1,2}((\/|-|\s)\d{1,4})?$/;
     const ymdDateRegexp = /^\d{3,4}(\/|-|\s)\d{1,2}(\/|-|\s)\d{1,2}$/;
     const dateSeparatorsRegex = /\/|-|\s/;
@@ -1223,7 +1288,7 @@
             return {
                 value: date.value + time.value,
                 format: date.format + " " + (time.format === "hhhh:mm:ss" ? "hh:mm:ss" : time.format),
-                jsDate: new Date(date.jsDate.getFullYear() + time.jsDate.getFullYear() - 1899, date.jsDate.getMonth() + time.jsDate.getMonth() - 11, date.jsDate.getDate() + time.jsDate.getDate() - 30, date.jsDate.getHours() + time.jsDate.getHours(), date.jsDate.getMinutes() + time.jsDate.getMinutes(), date.jsDate.getSeconds() + time.jsDate.getSeconds()),
+                jsDate: new DateTime(date.jsDate.getFullYear() + time.jsDate.getFullYear() - 1899, date.jsDate.getMonth() + time.jsDate.getMonth() - 11, date.jsDate.getDate() + time.jsDate.getDate() - 30, date.jsDate.getHours() + time.jsDate.getHours(), date.jsDate.getMinutes() + time.jsDate.getMinutes(), date.jsDate.getSeconds() + time.jsDate.getSeconds()),
             };
         }
         return date || time;
@@ -1295,12 +1360,12 @@
         // month + 1: months are 0-indexed in JS
         const leadingZero = (monthStr?.length === 2 && month + 1 < 10) || (dayStr?.length === 2 && day < 10);
         const fullYear = yearStr?.length !== 2;
-        const jsDate = new Date(year, month, day);
+        const jsDate = new DateTime(year, month, day);
         if (jsDate.getMonth() !== month || jsDate.getDate() !== day) {
             // invalid date
             return null;
         }
-        const delta = jsDate - INITIAL_1900_DAY;
+        const delta = jsDate.getTime() - INITIAL_1900_DAY.getTime();
         const format = getFormatFromDateParts(parts, separator, leadingZero, fullYear);
         return {
             value: Math.round(delta / MS_PER_DAY),
@@ -1391,7 +1456,7 @@
             if (hours >= 24) {
                 format = "hhhh:mm:ss";
             }
-            const jsDate = new Date(1899, 11, 30, hours, minutes, seconds);
+            const jsDate = new DateTime(1899, 11, 30, hours, minutes, seconds);
             return {
                 value: hours / 24 + minutes / 1440 + seconds / 86400,
                 format: format,
@@ -1405,7 +1470,7 @@
     // -----------------------------------------------------------------------------
     function numberToJsDate(value) {
         const truncValue = Math.trunc(value);
-        let date = new Date(truncValue * MS_PER_DAY - DATE_JS_1900_OFFSET);
+        let date = DateTime.fromTimestamp(truncValue * MS_PER_DAY - DATE_JS_1900_OFFSET);
         let time = value - truncValue;
         time = time < 0 ? 1 + time : time;
         const hours = Math.round(time * 24);
@@ -1422,7 +1487,7 @@
     }
     /** Return the number of days in the current month of the given date */
     function getDaysInMonth(date) {
-        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        return new DateTime(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     }
     function isLastDayOfMonth(date) {
         return getDaysInMonth(date) === date.getDate();
@@ -1440,7 +1505,7 @@
         const yStart = date.getFullYear();
         const mStart = date.getMonth();
         const dStart = date.getDate();
-        const jsDate = new Date(yStart, mStart + months);
+        const jsDate = new DateTime(yStart, mStart + months, 1);
         if (keepEndOfMonth && dStart === getDaysInMonth(date)) {
             jsDate.setDate(getDaysInMonth(jsDate));
         }
@@ -1774,6 +1839,9 @@
     function formatValue(value, { format, locale }) {
         switch (typeof value) {
             case "string":
+                if (value.includes('\\"')) {
+                    return value.replace(/\\"/g, '"');
+                }
                 return value;
             case "boolean":
                 return value ? "TRUE" : "FALSE";
@@ -2044,7 +2112,7 @@
             .map((p) => {
             switch (p) {
                 case "hhhh":
-                    const helapsedHours = Math.floor((jsDate.getTime() - INITIAL_1900_DAY) / (60 * 60 * 1000));
+                    const helapsedHours = Math.floor((jsDate.getTime() - INITIAL_1900_DAY.getTime()) / (60 * 60 * 1000));
                     return helapsedHours.toString();
                 case "hh":
                     return hours.toString().padStart(2, "0");
@@ -2151,27 +2219,30 @@
     }
     function createLargeNumberFormat(format, magnitude, postFix, locale) {
         const internalFormat = parseFormat(format || "#,##0");
-        const largeNumberFormat = internalFormat
-            .map((formatPart) => {
-            if (formatPart.type === "NUMBER") {
-                return [
-                    {
-                        ...formatPart,
-                        format: {
-                            ...formatPart.format,
-                            magnitude,
-                            decimalPart: undefined,
-                        },
-                    },
-                    {
-                        type: "STRING",
-                        format: postFix,
-                    },
-                ];
+        const largeNumberFormat = [];
+        for (let i = 0; i < internalFormat.length; i++) {
+            const formatPart = internalFormat[i];
+            if (formatPart.type !== "NUMBER") {
+                largeNumberFormat.push(formatPart);
+                continue;
             }
-            return formatPart;
-        })
-            .flat();
+            largeNumberFormat.push({
+                ...formatPart,
+                format: {
+                    ...formatPart.format,
+                    magnitude,
+                    decimalPart: undefined,
+                },
+            });
+            largeNumberFormat.push({
+                type: "STRING",
+                format: postFix,
+            });
+            const nextFormatPart = internalFormat[i + 1];
+            if (nextFormatPart?.type === "STRING" && ["k", "m", "b"].includes(nextFormatPart.format)) {
+                i++;
+            }
+        }
         return convertInternalFormatToFormat(largeNumberFormat);
     }
     function changeDecimalPlaces(format, step, locale) {
@@ -4190,71 +4261,72 @@
         CommandResult[CommandResult["InputAlreadyFocused"] = 30] = "InputAlreadyFocused";
         CommandResult[CommandResult["MaximumRangesReached"] = 31] = "MaximumRangesReached";
         CommandResult[CommandResult["MinimumRangesReached"] = 32] = "MinimumRangesReached";
-        CommandResult[CommandResult["InvalidChartDefinition"] = 33] = "InvalidChartDefinition";
-        CommandResult[CommandResult["InvalidDataSet"] = 34] = "InvalidDataSet";
-        CommandResult[CommandResult["InvalidLabelRange"] = 35] = "InvalidLabelRange";
-        CommandResult[CommandResult["InvalidScorecardKeyValue"] = 36] = "InvalidScorecardKeyValue";
-        CommandResult[CommandResult["InvalidScorecardBaseline"] = 37] = "InvalidScorecardBaseline";
-        CommandResult[CommandResult["InvalidGaugeDataRange"] = 38] = "InvalidGaugeDataRange";
-        CommandResult[CommandResult["EmptyGaugeRangeMin"] = 39] = "EmptyGaugeRangeMin";
-        CommandResult[CommandResult["GaugeRangeMinNaN"] = 40] = "GaugeRangeMinNaN";
-        CommandResult[CommandResult["EmptyGaugeRangeMax"] = 41] = "EmptyGaugeRangeMax";
-        CommandResult[CommandResult["GaugeRangeMaxNaN"] = 42] = "GaugeRangeMaxNaN";
-        CommandResult[CommandResult["GaugeRangeMinBiggerThanRangeMax"] = 43] = "GaugeRangeMinBiggerThanRangeMax";
-        CommandResult[CommandResult["GaugeLowerInflectionPointNaN"] = 44] = "GaugeLowerInflectionPointNaN";
-        CommandResult[CommandResult["GaugeUpperInflectionPointNaN"] = 45] = "GaugeUpperInflectionPointNaN";
-        CommandResult[CommandResult["GaugeLowerBiggerThanUpper"] = 46] = "GaugeLowerBiggerThanUpper";
-        CommandResult[CommandResult["InvalidAutofillSelection"] = 47] = "InvalidAutofillSelection";
-        CommandResult[CommandResult["WrongComposerSelection"] = 48] = "WrongComposerSelection";
-        CommandResult[CommandResult["MinBiggerThanMax"] = 49] = "MinBiggerThanMax";
-        CommandResult[CommandResult["LowerBiggerThanUpper"] = 50] = "LowerBiggerThanUpper";
-        CommandResult[CommandResult["MidBiggerThanMax"] = 51] = "MidBiggerThanMax";
-        CommandResult[CommandResult["MinBiggerThanMid"] = 52] = "MinBiggerThanMid";
-        CommandResult[CommandResult["FirstArgMissing"] = 53] = "FirstArgMissing";
-        CommandResult[CommandResult["SecondArgMissing"] = 54] = "SecondArgMissing";
-        CommandResult[CommandResult["MinNaN"] = 55] = "MinNaN";
-        CommandResult[CommandResult["MidNaN"] = 56] = "MidNaN";
-        CommandResult[CommandResult["MaxNaN"] = 57] = "MaxNaN";
-        CommandResult[CommandResult["ValueUpperInflectionNaN"] = 58] = "ValueUpperInflectionNaN";
-        CommandResult[CommandResult["ValueLowerInflectionNaN"] = 59] = "ValueLowerInflectionNaN";
-        CommandResult[CommandResult["MinInvalidFormula"] = 60] = "MinInvalidFormula";
-        CommandResult[CommandResult["MidInvalidFormula"] = 61] = "MidInvalidFormula";
-        CommandResult[CommandResult["MaxInvalidFormula"] = 62] = "MaxInvalidFormula";
-        CommandResult[CommandResult["ValueUpperInvalidFormula"] = 63] = "ValueUpperInvalidFormula";
-        CommandResult[CommandResult["ValueLowerInvalidFormula"] = 64] = "ValueLowerInvalidFormula";
-        CommandResult[CommandResult["InvalidSortZone"] = 65] = "InvalidSortZone";
-        CommandResult[CommandResult["WaitingSessionConfirmation"] = 66] = "WaitingSessionConfirmation";
-        CommandResult[CommandResult["MergeOverlap"] = 67] = "MergeOverlap";
-        CommandResult[CommandResult["TooManyHiddenElements"] = 68] = "TooManyHiddenElements";
-        CommandResult[CommandResult["Readonly"] = 69] = "Readonly";
-        CommandResult[CommandResult["InvalidViewportSize"] = 70] = "InvalidViewportSize";
-        CommandResult[CommandResult["InvalidScrollingDirection"] = 71] = "InvalidScrollingDirection";
-        CommandResult[CommandResult["FigureDoesNotExist"] = 72] = "FigureDoesNotExist";
-        CommandResult[CommandResult["InvalidConditionalFormatId"] = 73] = "InvalidConditionalFormatId";
-        CommandResult[CommandResult["InvalidCellPopover"] = 74] = "InvalidCellPopover";
-        CommandResult[CommandResult["EmptyTarget"] = 75] = "EmptyTarget";
-        CommandResult[CommandResult["InvalidFreezeQuantity"] = 76] = "InvalidFreezeQuantity";
-        CommandResult[CommandResult["FrozenPaneOverlap"] = 77] = "FrozenPaneOverlap";
-        CommandResult[CommandResult["ValuesNotChanged"] = 78] = "ValuesNotChanged";
-        CommandResult[CommandResult["InvalidFilterZone"] = 79] = "InvalidFilterZone";
-        CommandResult[CommandResult["FilterOverlap"] = 80] = "FilterOverlap";
-        CommandResult[CommandResult["FilterNotFound"] = 81] = "FilterNotFound";
-        CommandResult[CommandResult["MergeInFilter"] = 82] = "MergeInFilter";
-        CommandResult[CommandResult["NonContinuousTargets"] = 83] = "NonContinuousTargets";
-        CommandResult[CommandResult["DuplicatedFigureId"] = 84] = "DuplicatedFigureId";
-        CommandResult[CommandResult["InvalidSelectionStep"] = 85] = "InvalidSelectionStep";
-        CommandResult[CommandResult["DuplicatedChartId"] = 86] = "DuplicatedChartId";
-        CommandResult[CommandResult["ChartDoesNotExist"] = 87] = "ChartDoesNotExist";
-        CommandResult[CommandResult["InvalidHeaderIndex"] = 88] = "InvalidHeaderIndex";
-        CommandResult[CommandResult["InvalidQuantity"] = 89] = "InvalidQuantity";
-        CommandResult[CommandResult["MoreThanOneColumnSelected"] = 90] = "MoreThanOneColumnSelected";
-        CommandResult[CommandResult["EmptySplitSeparator"] = 91] = "EmptySplitSeparator";
-        CommandResult[CommandResult["SplitWillOverwriteContent"] = 92] = "SplitWillOverwriteContent";
-        CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 93] = "NoSplitSeparatorInSelection";
-        CommandResult[CommandResult["NoActiveSheet"] = 94] = "NoActiveSheet";
-        CommandResult[CommandResult["InvalidLocale"] = 95] = "InvalidLocale";
-        CommandResult[CommandResult["AlreadyInPaintingFormatMode"] = 96] = "AlreadyInPaintingFormatMode";
-        CommandResult[CommandResult["NoChanges"] = 97] = "NoChanges";
+        CommandResult[CommandResult["InvalidInputId"] = 33] = "InvalidInputId";
+        CommandResult[CommandResult["InvalidChartDefinition"] = 34] = "InvalidChartDefinition";
+        CommandResult[CommandResult["InvalidDataSet"] = 35] = "InvalidDataSet";
+        CommandResult[CommandResult["InvalidLabelRange"] = 36] = "InvalidLabelRange";
+        CommandResult[CommandResult["InvalidScorecardKeyValue"] = 37] = "InvalidScorecardKeyValue";
+        CommandResult[CommandResult["InvalidScorecardBaseline"] = 38] = "InvalidScorecardBaseline";
+        CommandResult[CommandResult["InvalidGaugeDataRange"] = 39] = "InvalidGaugeDataRange";
+        CommandResult[CommandResult["EmptyGaugeRangeMin"] = 40] = "EmptyGaugeRangeMin";
+        CommandResult[CommandResult["GaugeRangeMinNaN"] = 41] = "GaugeRangeMinNaN";
+        CommandResult[CommandResult["EmptyGaugeRangeMax"] = 42] = "EmptyGaugeRangeMax";
+        CommandResult[CommandResult["GaugeRangeMaxNaN"] = 43] = "GaugeRangeMaxNaN";
+        CommandResult[CommandResult["GaugeRangeMinBiggerThanRangeMax"] = 44] = "GaugeRangeMinBiggerThanRangeMax";
+        CommandResult[CommandResult["GaugeLowerInflectionPointNaN"] = 45] = "GaugeLowerInflectionPointNaN";
+        CommandResult[CommandResult["GaugeUpperInflectionPointNaN"] = 46] = "GaugeUpperInflectionPointNaN";
+        CommandResult[CommandResult["GaugeLowerBiggerThanUpper"] = 47] = "GaugeLowerBiggerThanUpper";
+        CommandResult[CommandResult["InvalidAutofillSelection"] = 48] = "InvalidAutofillSelection";
+        CommandResult[CommandResult["WrongComposerSelection"] = 49] = "WrongComposerSelection";
+        CommandResult[CommandResult["MinBiggerThanMax"] = 50] = "MinBiggerThanMax";
+        CommandResult[CommandResult["LowerBiggerThanUpper"] = 51] = "LowerBiggerThanUpper";
+        CommandResult[CommandResult["MidBiggerThanMax"] = 52] = "MidBiggerThanMax";
+        CommandResult[CommandResult["MinBiggerThanMid"] = 53] = "MinBiggerThanMid";
+        CommandResult[CommandResult["FirstArgMissing"] = 54] = "FirstArgMissing";
+        CommandResult[CommandResult["SecondArgMissing"] = 55] = "SecondArgMissing";
+        CommandResult[CommandResult["MinNaN"] = 56] = "MinNaN";
+        CommandResult[CommandResult["MidNaN"] = 57] = "MidNaN";
+        CommandResult[CommandResult["MaxNaN"] = 58] = "MaxNaN";
+        CommandResult[CommandResult["ValueUpperInflectionNaN"] = 59] = "ValueUpperInflectionNaN";
+        CommandResult[CommandResult["ValueLowerInflectionNaN"] = 60] = "ValueLowerInflectionNaN";
+        CommandResult[CommandResult["MinInvalidFormula"] = 61] = "MinInvalidFormula";
+        CommandResult[CommandResult["MidInvalidFormula"] = 62] = "MidInvalidFormula";
+        CommandResult[CommandResult["MaxInvalidFormula"] = 63] = "MaxInvalidFormula";
+        CommandResult[CommandResult["ValueUpperInvalidFormula"] = 64] = "ValueUpperInvalidFormula";
+        CommandResult[CommandResult["ValueLowerInvalidFormula"] = 65] = "ValueLowerInvalidFormula";
+        CommandResult[CommandResult["InvalidSortZone"] = 66] = "InvalidSortZone";
+        CommandResult[CommandResult["WaitingSessionConfirmation"] = 67] = "WaitingSessionConfirmation";
+        CommandResult[CommandResult["MergeOverlap"] = 68] = "MergeOverlap";
+        CommandResult[CommandResult["TooManyHiddenElements"] = 69] = "TooManyHiddenElements";
+        CommandResult[CommandResult["Readonly"] = 70] = "Readonly";
+        CommandResult[CommandResult["InvalidViewportSize"] = 71] = "InvalidViewportSize";
+        CommandResult[CommandResult["InvalidScrollingDirection"] = 72] = "InvalidScrollingDirection";
+        CommandResult[CommandResult["FigureDoesNotExist"] = 73] = "FigureDoesNotExist";
+        CommandResult[CommandResult["InvalidConditionalFormatId"] = 74] = "InvalidConditionalFormatId";
+        CommandResult[CommandResult["InvalidCellPopover"] = 75] = "InvalidCellPopover";
+        CommandResult[CommandResult["EmptyTarget"] = 76] = "EmptyTarget";
+        CommandResult[CommandResult["InvalidFreezeQuantity"] = 77] = "InvalidFreezeQuantity";
+        CommandResult[CommandResult["FrozenPaneOverlap"] = 78] = "FrozenPaneOverlap";
+        CommandResult[CommandResult["ValuesNotChanged"] = 79] = "ValuesNotChanged";
+        CommandResult[CommandResult["InvalidFilterZone"] = 80] = "InvalidFilterZone";
+        CommandResult[CommandResult["FilterOverlap"] = 81] = "FilterOverlap";
+        CommandResult[CommandResult["FilterNotFound"] = 82] = "FilterNotFound";
+        CommandResult[CommandResult["MergeInFilter"] = 83] = "MergeInFilter";
+        CommandResult[CommandResult["NonContinuousTargets"] = 84] = "NonContinuousTargets";
+        CommandResult[CommandResult["DuplicatedFigureId"] = 85] = "DuplicatedFigureId";
+        CommandResult[CommandResult["InvalidSelectionStep"] = 86] = "InvalidSelectionStep";
+        CommandResult[CommandResult["DuplicatedChartId"] = 87] = "DuplicatedChartId";
+        CommandResult[CommandResult["ChartDoesNotExist"] = 88] = "ChartDoesNotExist";
+        CommandResult[CommandResult["InvalidHeaderIndex"] = 89] = "InvalidHeaderIndex";
+        CommandResult[CommandResult["InvalidQuantity"] = 90] = "InvalidQuantity";
+        CommandResult[CommandResult["MoreThanOneColumnSelected"] = 91] = "MoreThanOneColumnSelected";
+        CommandResult[CommandResult["EmptySplitSeparator"] = 92] = "EmptySplitSeparator";
+        CommandResult[CommandResult["SplitWillOverwriteContent"] = 93] = "SplitWillOverwriteContent";
+        CommandResult[CommandResult["NoSplitSeparatorInSelection"] = 94] = "NoSplitSeparatorInSelection";
+        CommandResult[CommandResult["NoActiveSheet"] = 95] = "NoActiveSheet";
+        CommandResult[CommandResult["InvalidLocale"] = 96] = "InvalidLocale";
+        CommandResult[CommandResult["AlreadyInPaintingFormatMode"] = 97] = "AlreadyInPaintingFormatMode";
+        CommandResult[CommandResult["NoChanges"] = 98] = "NoChanges";
     })(exports.CommandResult || (exports.CommandResult = {}));
 
     const borderStyles = ["thin", "medium", "thick", "dashed", "dotted"];
@@ -5598,6 +5670,7 @@
         },
     };
 
+    const macRegex = /Mac/i;
     /**
      * Return true if the event was triggered from
      * a child element.
@@ -5637,7 +5710,15 @@
         return Array.from(document.querySelectorAll(".o-spreadsheet .o-menu"));
     }
     function isMacOS() {
-        return navigator.userAgent.toUpperCase().indexOf("MAC") >= 0;
+        return Boolean(macRegex.test(navigator.userAgent));
+    }
+    /**
+     * @param {KeyboardEvent | MouseEvent} ev
+     * @returns Returns true if the event was triggered with the "ctrl" modifier pressed.
+     * On Mac, this is the "meta" or "command" key.
+     */
+    function isCtrlKey(ev) {
+        return isMacOS() ? ev.metaKey : ev.ctrlKey;
     }
 
     /**
@@ -5977,6 +6058,10 @@
         justify-content: space-between;
       }
 
+      .o-menu-item-name {
+        min-width: 40%;
+      }
+
       .o-menu-item-icon {
         display: inline-block;
         margin: 0px 8px 0px 0px;
@@ -6311,6 +6396,9 @@
     function makeArg(str, description) {
         let parts = str.match(ARG_REGEXP);
         let name = parts[1].trim();
+        if (!name) {
+            throw new Error(`Function argument definition is missing a name: '${str}'.`);
+        }
         let types = [];
         let isOptional = false;
         let isRepeating = false;
@@ -9561,7 +9649,7 @@
             if (_year < 1900) {
                 _year += 1900;
             }
-            const jsDate = new Date(_year, _month - 1, _day);
+            const jsDate = new DateTime(_year, _month - 1, _day);
             const result = jsDateToRoundNumber(jsDate);
             assert(() => result >= 0, _lt(`The function [[FUNCTION_NAME]] result must be greater than or equal 01/01/1900.`));
             return result;
@@ -9604,7 +9692,7 @@
                     // See: https://support.microsoft.com/en-us/office/datedif-function-25dba1a4-2812-480b-84dd-8b32a451b35c
                     let days = jsEndDate.getDate() - jsStartDate.getDate();
                     if (days < 0) {
-                        const monthBeforeEndMonth = new Date(jsEndDate.getFullYear(), jsEndDate.getMonth() - 1, 1);
+                        const monthBeforeEndMonth = new DateTime(jsEndDate.getFullYear(), jsEndDate.getMonth() - 1, 1);
                         const daysInMonthBeforeEndMonth = getDaysInMonth(monthBeforeEndMonth);
                         days = daysInMonthBeforeEndMonth - Math.abs(days);
                     }
@@ -9613,7 +9701,7 @@
                     if (areTwoDatesWithinOneYear(_startDate, _endDate)) {
                         return getTimeDifferenceInWholeDays(jsStartDate, jsEndDate);
                     }
-                    const endDateWithinOneYear = new Date(jsStartDate.getFullYear(), jsEndDate.getMonth(), jsEndDate.getDate());
+                    const endDateWithinOneYear = new DateTime(jsStartDate.getFullYear(), jsEndDate.getMonth(), jsEndDate.getDate());
                     let days = getTimeDifferenceInWholeDays(jsStartDate, endDateWithinOneYear);
                     if (days < 0) {
                         endDateWithinOneYear.setFullYear(jsStartDate.getFullYear() + 1);
@@ -9730,7 +9818,7 @@
             const _months = Math.trunc(toNumber(months, this.locale));
             const yStart = _startDate.getFullYear();
             const mStart = _startDate.getMonth();
-            const jsDate = new Date(yStart, mStart + _months + 1, 0);
+            const jsDate = new DateTime(yStart, mStart + _months + 1, 0);
             return jsDateToRoundNumber(jsDate);
         },
         isExported: true,
@@ -9767,17 +9855,17 @@
             // The first week of the year is the week that contains the first
             // Thursday of the year.
             let firstThursday = 1;
-            while (new Date(y, 0, firstThursday).getDay() !== 4) {
+            while (new DateTime(y, 0, firstThursday).getDay() !== 4) {
                 firstThursday += 1;
             }
-            const firstDayOfFirstWeek = new Date(y, 0, firstThursday - 3);
+            const firstDayOfFirstWeek = new DateTime(y, 0, firstThursday - 3);
             // The last week of the year is the week that contains the last Thursday of
             // the year.
             let lastThursday = 31;
-            while (new Date(y, 11, lastThursday).getDay() !== 4) {
+            while (new DateTime(y, 11, lastThursday).getDay() !== 4) {
                 lastThursday -= 1;
             }
-            const lastDayOfLastWeek = new Date(y, 11, lastThursday + 3);
+            const lastDayOfLastWeek = new DateTime(y, 11, lastThursday + 3);
             // B - If our date > lastDayOfLastWeek then it's in the weeks of the year after
             // If our date < firstDayOfFirstWeek then it's in the weeks of the year before
             let offsetYear;
@@ -9803,17 +9891,17 @@
                 case 1:
                     // firstDay is the 1st day of the 1st week of the year after
                     // firstDay = lastDayOfLastWeek + 1 Day
-                    firstDay = new Date(y, 11, lastThursday + 3 + 1);
+                    firstDay = new DateTime(y, 11, lastThursday + 3 + 1);
                     break;
                 case -1:
                     // firstDay is the 1st day of the 1st week of the previous year.
                     // The first week of the previous year is the week that contains the
                     // first Thursday of the previous year.
                     let firstThursdayPreviousYear = 1;
-                    while (new Date(y - 1, 0, firstThursdayPreviousYear).getDay() !== 4) {
+                    while (new DateTime(y - 1, 0, firstThursdayPreviousYear).getDay() !== 4) {
                         firstThursdayPreviousYear += 1;
                     }
-                    firstDay = new Date(y - 1, 0, firstThursdayPreviousYear - 3);
+                    firstDay = new DateTime(y - 1, 0, firstThursdayPreviousYear - 3);
                     break;
             }
             const diff = (_date.getTime() - firstDay.getTime()) / MS_PER_DAY;
@@ -9948,8 +10036,8 @@
                 });
             }
             const invertDate = _startDate.getTime() > _endDate.getTime();
-            const stopDate = new Date((invertDate ? _startDate : _endDate).getTime());
-            let stepDate = new Date((invertDate ? _endDate : _startDate).getTime());
+            const stopDate = DateTime.fromTimestamp((invertDate ? _startDate : _endDate).getTime());
+            let stepDate = DateTime.fromTimestamp((invertDate ? _endDate : _startDate).getTime());
             const timeStopDate = stopDate.getTime();
             let timeStepDate = stepDate.getTime();
             let netWorkingDay = 0;
@@ -9975,8 +10063,7 @@
             return this.locale.dateFormat + " " + this.locale.timeFormat;
         },
         compute: function () {
-            let today = new Date();
-            today.setMilliseconds(0);
+            let today = DateTime.now();
             const delta = today.getTime() - INITIAL_1900_DAY.getTime();
             const time = today.getHours() / 24 + today.getMinutes() / 1440 + today.getSeconds() / 86400;
             return Math.floor(delta / MS_PER_DAY) + time;
@@ -10050,8 +10137,8 @@
             return this.locale.dateFormat;
         },
         compute: function () {
-            const today = new Date();
-            const jsDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const today = DateTime.now();
+            const jsDate = new DateTime(today.getFullYear(), today.getMonth(), today.getDate());
             return jsDateToRoundNumber(jsDate);
         },
         isExported: true,
@@ -10106,10 +10193,10 @@
             }
             const y = _date.getFullYear();
             let dayStart = 1;
-            let startDayOfFirstWeek = new Date(y, 0, dayStart);
+            let startDayOfFirstWeek = new DateTime(y, 0, dayStart);
             while (startDayOfFirstWeek.getDay() !== startDayOfWeek) {
                 dayStart += 1;
-                startDayOfFirstWeek = new Date(y, 0, dayStart);
+                startDayOfFirstWeek = new DateTime(y, 0, dayStart);
             }
             const dif = (_date.getTime() - startDayOfFirstWeek.getTime()) / MS_PER_DAY;
             if (dif < 0) {
@@ -10167,7 +10254,7 @@
                     timesHoliday.add(holiday.getTime());
                 });
             }
-            let stepDate = new Date(_startDate.getTime());
+            let stepDate = DateTime.fromTimestamp(_startDate.getTime());
             let timeStepDate = stepDate.getTime();
             const unitDay = Math.sign(_numDays);
             let stepDay = Math.abs(_numDays);
@@ -10231,7 +10318,7 @@
             const _startDate = toJsDate(date, this.locale);
             const yStart = _startDate.getFullYear();
             const mStart = _startDate.getMonth();
-            const jsDate = new Date(yStart, mStart, 1);
+            const jsDate = new DateTime(yStart, mStart, 1);
             return jsDateToRoundNumber(jsDate);
         },
     };
@@ -10273,7 +10360,7 @@
         compute: function (date) {
             const quarter = QUARTER.compute.bind(this)(date);
             const year = YEAR.compute.bind(this)(date);
-            const jsDate = new Date(year, (quarter - 1) * 3, 1);
+            const jsDate = new DateTime(year, (quarter - 1) * 3, 1);
             return jsDateToRoundNumber(jsDate);
         },
     };
@@ -10290,7 +10377,7 @@
         compute: function (date) {
             const quarter = QUARTER.compute.bind(this)(date);
             const year = YEAR.compute.bind(this)(date);
-            const jsDate = new Date(year, quarter * 3, 0);
+            const jsDate = new DateTime(year, quarter * 3, 0);
             return jsDateToRoundNumber(jsDate);
         },
     };
@@ -10306,7 +10393,7 @@
         },
         compute: function (date) {
             const year = YEAR.compute.bind(this)(date);
-            const jsDate = new Date(year, 0, 1);
+            const jsDate = new DateTime(year, 0, 1);
             return jsDateToRoundNumber(jsDate);
         },
     };
@@ -10322,7 +10409,7 @@
         },
         compute: function (date) {
             const year = YEAR.compute.bind(this)(date);
-            const jsDate = new Date(year + 1, 0, 0);
+            const jsDate = new DateTime(year + 1, 0, 0);
             return jsDateToRoundNumber(jsDate);
         },
     };
@@ -10370,8 +10457,8 @@
     const DELTA = {
         description: _lt("Compare two numeric values, returning 1 if they're equal."),
         args: [
-            arg(" (number)", _lt("The first number to compare.")),
-            arg(` (number, default=${DEFAULT_DELTA_ARG})`, _lt("The second number to compare.")),
+            arg("number1 (number)", _lt("The first number to compare.")),
+            arg(`number2 (number, default=${DEFAULT_DELTA_ARG})`, _lt("The second number to compare.")),
         ],
         returns: ["NUMBER"],
         compute: function (number1, number2 = DEFAULT_DELTA_ARG) {
@@ -10540,7 +10627,7 @@
     function assertSettlementLessThanOneYearBeforeMaturity(settlement, maturity, locale) {
         const startDate = toJsDate(settlement, locale);
         const endDate = toJsDate(maturity, locale);
-        const startDatePlusOneYear = new Date(startDate);
+        const startDatePlusOneYear = toJsDate(settlement, locale);
         startDatePlusOneYear.setFullYear(startDate.getFullYear() + 1);
         assert(() => endDate.getTime() <= startDatePlusOneYear.getTime(), _lt("The settlement date (%s) must at most one year after the maturity date (%s).", settlement.toString(), maturity.toString()));
     }
@@ -10675,7 +10762,7 @@
             arg("salvage (number)", _lt("The value of the asset at the end of depreciation.")),
             arg("period (number)", _lt("The single period within life for which to calculate depreciation.")),
             arg("rate (number)", _lt("The deprecation rate.")),
-            arg(" (number, optional)", _lt("An indicator of what day count method to use.")),
+            arg("day_count_convention (number, optional)", _lt("An indicator of what day count method to use.")),
         ],
         returns: ["NUMBER"],
         compute: function (cost, purchaseDate, firstPeriodEnd, salvage, period, rate, dayCountConvention = DEFAULT_DAY_COUNT_CONVENTION) {
@@ -13694,8 +13781,8 @@
         description: _lt("A segment of a string."),
         args: [
             arg("text (string)", _lt("The string to extract a segment from.")),
-            arg(" (number)", _lt("The index from the left of string from which to begin extracting. The first character in string has the index 1.")),
-            arg(" (number)", _lt("The length of the segment to extract.")),
+            arg("starting_at (number)", _lt("The index from the left of string from which to begin extracting. The first character in string has the index 1.")),
+            arg("extract_length (number)", _lt("The length of the segment to extract.")),
         ],
         returns: ["STRING"],
         compute: function (text, starting_at, extract_length) {
@@ -15152,6 +15239,9 @@
         if (locale.formulaArgSeparator === locale.decimalSeparator) {
             return false;
         }
+        if (locale.thousandsSeparator === locale.decimalSeparator) {
+            return false;
+        }
         try {
             formatValue(1, { locale, format: "#,##0.00" });
             formatValue(1, { locale, format: locale.dateFormat });
@@ -15242,7 +15332,7 @@
         if (locale.decimalSeparator === "." || !isNumber(content, locale)) {
             return content;
         }
-        return content.replace(locale.decimalSeparator, ".");
+        return content.replace(locale.thousandsSeparator, "").replace(locale.decimalSeparator, ".");
     }
     /**
      * Change a content string from the given locale to its canonical form (en_US locale). Also convert date string.
@@ -15888,14 +15978,8 @@
                         : undefined));
                 }
             }
-            else if (zone.left === zone.right && zone.top === zone.bottom) {
-                // A single cell. If it's only the title, the dataset is not added.
-                if (!dataSetsHaveTitle) {
-                    dataSets.push(createDataSet(getters, dataSetSheetId, zone, undefined));
-                }
-            }
             else {
-                /* 1 row or 1 column */
+                /* 1 cell, 1 row or 1 column */
                 dataSets.push(createDataSet(getters, dataSetSheetId, zone, dataSetsHaveTitle
                     ? {
                         top: zone.top,
@@ -15944,8 +16028,10 @@
         }
         const dataRange = ds.dataRange.clone({ zone: dataZone });
         return {
-            label: ds.labelCell ? getters.getRangeString(ds.labelCell, "forceSheetReference") : undefined,
-            range: getters.getRangeString(dataRange, "forceSheetReference"),
+            label: ds.labelCell
+                ? getters.getRangeString(ds.labelCell, "forceSheetReference", true)
+                : undefined,
+            range: getters.getRangeString(dataRange, "forceSheetReference", true),
         };
     }
     function toExcelLabelRange(getters, labelRange, shouldRemoveFirstLabel) {
@@ -15958,7 +16044,7 @@
             zone.top = zone.top + 1;
         }
         const range = labelRange.clone({ zone });
-        return getters.getRangeString(range, "forceSheetReference");
+        return getters.getRangeString(range, "forceSheetReference", true);
     }
     /**
      * Transform a chart definition which supports dataSets (dataSets and LabelRange)
@@ -16024,11 +16110,11 @@
         if (definition.dataSets) {
             const invalidRanges = definition.dataSets.find((range) => !rangeReference.test(range)) !== undefined;
             if (invalidRanges) {
-                return 34 /* CommandResult.InvalidDataSet */;
+                return 35 /* CommandResult.InvalidDataSet */;
             }
             const zones = definition.dataSets.map(toUnboundedZone);
             if (zones.some((zone) => zone.top !== zone.bottom && isFullRow(zone))) {
-                return 34 /* CommandResult.InvalidDataSet */;
+                return 35 /* CommandResult.InvalidDataSet */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -16037,7 +16123,7 @@
         if (definition.labelRange) {
             const invalidLabels = !rangeReference.test(definition.labelRange || "");
             if (invalidLabels) {
-                return 35 /* CommandResult.InvalidLabelRange */;
+                return 36 /* CommandResult.InvalidLabelRange */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -16124,22 +16210,22 @@
     const CfTerms = {
         Errors: {
             [26 /* CommandResult.InvalidRange */]: _lt("The range is invalid"),
-            [53 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
-            [54 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
-            [55 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
-            [56 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
-            [57 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
-            [58 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
-            [59 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
-            [49 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
-            [52 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
-            [51 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
-            [50 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
-            [60 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
-            [62 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
-            [61 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
-            [63 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
-            [64 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
+            [54 /* CommandResult.FirstArgMissing */]: _lt("The argument is missing. Please provide a value"),
+            [55 /* CommandResult.SecondArgMissing */]: _lt("The second argument is missing. Please provide a value"),
+            [56 /* CommandResult.MinNaN */]: _lt("The minpoint must be a number"),
+            [57 /* CommandResult.MidNaN */]: _lt("The midpoint must be a number"),
+            [58 /* CommandResult.MaxNaN */]: _lt("The maxpoint must be a number"),
+            [59 /* CommandResult.ValueUpperInflectionNaN */]: _lt("The first value must be a number"),
+            [60 /* CommandResult.ValueLowerInflectionNaN */]: _lt("The second value must be a number"),
+            [50 /* CommandResult.MinBiggerThanMax */]: _lt("Minimum must be smaller then Maximum"),
+            [53 /* CommandResult.MinBiggerThanMid */]: _lt("Minimum must be smaller then Midpoint"),
+            [52 /* CommandResult.MidBiggerThanMax */]: _lt("Midpoint must be smaller then Maximum"),
+            [51 /* CommandResult.LowerBiggerThanUpper */]: _lt("Lower inflection point must be smaller than upper inflection point"),
+            [61 /* CommandResult.MinInvalidFormula */]: _lt("Invalid Minpoint formula"),
+            [63 /* CommandResult.MaxInvalidFormula */]: _lt("Invalid Maxpoint formula"),
+            [62 /* CommandResult.MidInvalidFormula */]: _lt("Invalid Midpoint formula"),
+            [64 /* CommandResult.ValueUpperInvalidFormula */]: _lt("Invalid upper inflection point formula"),
+            [65 /* CommandResult.ValueLowerInvalidFormula */]: _lt("Invalid lower inflection point formula"),
             [25 /* CommandResult.EmptyRange */]: _lt("A range needs to be defined"),
             Unexpected: _lt("The rule is invalid for an unknown reason"),
         },
@@ -16167,20 +16253,20 @@
         Errors: {
             Unexpected: _lt("The chart definition is invalid for an unknown reason"),
             // BASIC CHART ERRORS (LINE | BAR | PIE)
-            [34 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
-            [35 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
+            [35 /* CommandResult.InvalidDataSet */]: _lt("The dataset is invalid"),
+            [36 /* CommandResult.InvalidLabelRange */]: _lt("Labels are invalid"),
             // SCORECARD CHART ERRORS
-            [36 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
-            [37 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
+            [37 /* CommandResult.InvalidScorecardKeyValue */]: _lt("The key value is invalid"),
+            [38 /* CommandResult.InvalidScorecardBaseline */]: _lt("The baseline value is invalid"),
             // GAUGE CHART ERRORS
-            [38 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
-            [39 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
-            [40 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
-            [41 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
-            [42 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
-            [43 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
-            [44 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
-            [45 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
+            [39 /* CommandResult.InvalidGaugeDataRange */]: _lt("The data range is invalid"),
+            [40 /* CommandResult.EmptyGaugeRangeMin */]: _lt("A minimum range limit value is needed"),
+            [41 /* CommandResult.GaugeRangeMinNaN */]: _lt("The minimum range limit value must be a number"),
+            [42 /* CommandResult.EmptyGaugeRangeMax */]: _lt("A maximum range limit value is needed"),
+            [43 /* CommandResult.GaugeRangeMaxNaN */]: _lt("The maximum range limit value must be a number"),
+            [44 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */]: _lt("Minimum range limit must be smaller than maximum range limit"),
+            [45 /* CommandResult.GaugeLowerInflectionPointNaN */]: _lt("The lower inflection point value must be a number"),
+            [46 /* CommandResult.GaugeUpperInflectionPointNaN */]: _lt("The upper inflection point value must be a number"),
         },
     };
     const CustomCurrencyTerms = {
@@ -16190,9 +16276,9 @@
     const SplitToColumnsTerms = {
         Errors: {
             Unexpected: _lt("Cannot split the selection for an unknown reason"),
-            [93 /* CommandResult.NoSplitSeparatorInSelection */]: _lt("There is no match for the selected separator in the selection"),
-            [90 /* CommandResult.MoreThanOneColumnSelected */]: _lt("Only a selection from a single column can be split"),
-            [92 /* CommandResult.SplitWillOverwriteContent */]: _lt("Splitting will overwrite existing content"),
+            [94 /* CommandResult.NoSplitSeparatorInSelection */]: _lt("There is no match for the selected separator in the selection"),
+            [91 /* CommandResult.MoreThanOneColumnSelected */]: _lt("Only a selection from a single column can be split"),
+            [93 /* CommandResult.SplitWillOverwriteContent */]: _lt("Splitting will overwrite existing content"),
         },
     };
 
@@ -16495,7 +16581,7 @@
                 return undefined;
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
-                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+                .filter((ds) => ds.range !== "" && ds.range !== INCORRECT_RANGE_STRING);
             const labelRange = toExcelLabelRange(this.getters, this.labelRange, shouldRemoveFirstLabel(this.labelRange, this.dataSets[0], this.dataSetsHaveTitle));
             return {
                 ...this.getDefinition(),
@@ -16597,7 +16683,7 @@
 
     function isDataRangeValid(definition) {
         return definition.dataRange && !rangeReference.test(definition.dataRange)
-            ? 38 /* CommandResult.InvalidGaugeDataRange */
+            ? 39 /* CommandResult.InvalidGaugeDataRange */
             : 0 /* CommandResult.Success */;
     }
     function checkRangeLimits(check, batchValidations) {
@@ -16629,7 +16715,7 @@
     function checkRangeMinBiggerThanRangeMax(definition) {
         if (definition.sectionRule) {
             if (Number(definition.sectionRule.rangeMin) >= Number(definition.sectionRule.rangeMax)) {
-                return 43 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */;
+                return 44 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -16638,9 +16724,9 @@
         if (value === "") {
             switch (valueName) {
                 case "rangeMin":
-                    return 39 /* CommandResult.EmptyGaugeRangeMin */;
+                    return 40 /* CommandResult.EmptyGaugeRangeMin */;
                 case "rangeMax":
-                    return 41 /* CommandResult.EmptyGaugeRangeMax */;
+                    return 42 /* CommandResult.EmptyGaugeRangeMax */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -16649,13 +16735,13 @@
         if (isNaN(value)) {
             switch (valueName) {
                 case "rangeMin":
-                    return 40 /* CommandResult.GaugeRangeMinNaN */;
+                    return 41 /* CommandResult.GaugeRangeMinNaN */;
                 case "rangeMax":
-                    return 42 /* CommandResult.GaugeRangeMaxNaN */;
+                    return 43 /* CommandResult.GaugeRangeMaxNaN */;
                 case "lowerInflectionPointValue":
-                    return 44 /* CommandResult.GaugeLowerInflectionPointNaN */;
+                    return 45 /* CommandResult.GaugeLowerInflectionPointNaN */;
                 case "upperInflectionPointValue":
-                    return 45 /* CommandResult.GaugeUpperInflectionPointNaN */;
+                    return 46 /* CommandResult.GaugeUpperInflectionPointNaN */;
             }
         }
         return 0 /* CommandResult.Success */;
@@ -17083,7 +17169,7 @@
                 return undefined;
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
-                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+                .filter((ds) => ds.range !== "" && ds.range !== INCORRECT_RANGE_STRING);
             const labelRange = toExcelLabelRange(this.getters, this.labelRange, shouldRemoveFirstLabel(this.labelRange, this.dataSets[0], this.dataSetsHaveTitle));
             return {
                 ...this.getDefinition(),
@@ -17370,7 +17456,7 @@
                 return undefined;
             const dataSets = this.dataSets
                 .map((ds) => toExcelDataset(this.getters, ds))
-                .filter((ds) => ds.range !== ""); // && range !== INCORRECT_RANGE_STRING ? show incorrect #ref ?
+                .filter((ds) => ds.range !== "" && ds.range !== INCORRECT_RANGE_STRING);
             const labelRange = toExcelLabelRange(this.getters, this.labelRange, shouldRemoveFirstLabel(this.labelRange, this.dataSets[0], this.dataSetsHaveTitle));
             return {
                 ...this.getDefinition(),
@@ -17451,12 +17537,12 @@
 
     function checkKeyValue(definition) {
         return definition.keyValue && !rangeReference.test(definition.keyValue)
-            ? 36 /* CommandResult.InvalidScorecardKeyValue */
+            ? 37 /* CommandResult.InvalidScorecardKeyValue */
             : 0 /* CommandResult.Success */;
     }
     function checkBaseline(definition) {
         return definition.baseline && !rangeReference.test(definition.baseline)
-            ? 37 /* CommandResult.InvalidScorecardBaseline */
+            ? 38 /* CommandResult.InvalidScorecardBaseline */
             : 0 /* CommandResult.Success */;
     }
     class ScorecardChart extends AbstractChart {
@@ -17983,7 +18069,7 @@
     };
     function interactiveAddMerge(env, sheetId, target) {
         const result = env.model.dispatch("ADD_MERGE", { sheetId, target });
-        if (result.isCancelledBecause(82 /* CommandResult.MergeInFilter */)) {
+        if (result.isCancelledBecause(83 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddMergeInteractiveContent.MergeInFilter);
         }
         else if (result.isCancelledBecause(3 /* CommandResult.MergeIsDestructive */)) {
@@ -18010,7 +18096,7 @@
             else if (result.reasons.includes(23 /* CommandResult.WrongFigurePasteOption */)) {
                 env.raiseError(PasteInteractiveContent.wrongFigurePasteOption);
             }
-            else if (result.reasons.includes(77 /* CommandResult.FrozenPaneOverlap */)) {
+            else if (result.reasons.includes(78 /* CommandResult.FrozenPaneOverlap */)) {
                 env.raiseError(PasteInteractiveContent.frozenPaneOverlap);
             }
         }
@@ -18547,6 +18633,12 @@
     const INSERT_LINK = (env) => {
         let { col, row } = env.model.getters.getActivePosition();
         env.model.dispatch("OPEN_CELL_POPOVER", { col, row, popoverType: "LinkEditor" });
+    };
+    const INSERT_LINK_NAME = (env) => {
+        const sheetId = env.model.getters.getActiveSheetId();
+        const { col, row } = env.model.getters.getActivePosition();
+        const cell = env.model.getters.getEvaluatedCell({ sheetId, col, row });
+        return cell && cell.link ? _lt("Edit link") : _lt("Insert link");
     };
     //------------------------------------------------------------------------------
     // Filters action
@@ -19088,7 +19180,7 @@
     })
         .add("insert_link", {
         ...insertLink,
-        name: _lt("Insert link"),
+        name: INSERT_LINK_NAME,
         sequence: 150,
         separator: true,
     });
@@ -19185,7 +19277,7 @@
                 });
             }
         }
-        if (result.isCancelledBecause(65 /* CommandResult.InvalidSortZone */)) {
+        if (result.isCancelledBecause(66 /* CommandResult.InvalidSortZone */)) {
             const { col, row } = anchor;
             env.model.selection.selectZone({ cell: { col, row }, zone });
             env.raiseError(_lt("Cannot sort. To sort, select only cells or only merges that have the same size."));
@@ -19199,13 +19291,13 @@
     };
     function interactiveAddFilter(env, sheetId, target) {
         const result = env.model.dispatch("CREATE_FILTER_TABLE", { target, sheetId });
-        if (result.isCancelledBecause(80 /* CommandResult.FilterOverlap */)) {
+        if (result.isCancelledBecause(81 /* CommandResult.FilterOverlap */)) {
             env.raiseError(AddFilterInteractiveContent.filterOverlap);
         }
-        else if (result.isCancelledBecause(82 /* CommandResult.MergeInFilter */)) {
+        else if (result.isCancelledBecause(83 /* CommandResult.MergeInFilter */)) {
             env.raiseError(AddFilterInteractiveContent.mergeInFilter);
         }
-        else if (result.isCancelledBecause(83 /* CommandResult.NonContinuousTargets */)) {
+        else if (result.isCancelledBecause(84 /* CommandResult.NonContinuousTargets */)) {
             env.raiseError(AddFilterInteractiveContent.nonContinuousTargets);
         }
     }
@@ -19642,7 +19734,7 @@
         const sheetId = env.model.getters.getActiveSheetId();
         const cmd = dimension === "COL" ? "FREEZE_COLUMNS" : "FREEZE_ROWS";
         const result = env.model.dispatch(cmd, { sheetId, quantity: base });
-        if (result.isCancelledBecause(67 /* CommandResult.MergeOverlap */)) {
+        if (result.isCancelledBecause(68 /* CommandResult.MergeOverlap */)) {
             env.raiseError(MergeErrorMessage);
         }
     }
@@ -20491,10 +20583,10 @@
     function updateSelectionWithArrowKeys(ev, selection) {
         const direction = arrowMap[ev.key];
         if (ev.shiftKey) {
-            selection.resizeAnchorZone(direction, ev.ctrlKey ? "end" : 1);
+            selection.resizeAnchorZone(direction, isCtrlKey(ev) ? "end" : 1);
         }
         else {
-            selection.moveAnchorCell(direction, ev.ctrlKey ? "end" : 1);
+            selection.moveAnchorCell(direction, isCtrlKey(ev) ? "end" : 1);
         }
     }
 
@@ -20782,10 +20874,10 @@
             return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
         }
         get isDatasetInvalid() {
-            return !!this.state.datasetDispatchResult?.isCancelledBecause(34 /* CommandResult.InvalidDataSet */);
+            return !!this.state.datasetDispatchResult?.isCancelledBecause(35 /* CommandResult.InvalidDataSet */);
         }
         get isLabelInvalid() {
-            return !!this.state.labelsDispatchResult?.isCancelledBecause(35 /* CommandResult.InvalidLabelRange */);
+            return !!this.state.labelsDispatchResult?.isCancelledBecause(36 /* CommandResult.InvalidLabelRange */);
         }
         onUpdateDataSetsHaveTitle(ev) {
             this.props.updateChart(this.props.figureId, {
@@ -21459,7 +21551,7 @@
             return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
         }
         get isDataRangeInvalid() {
-            return !!this.state.dataRangeDispatchResult?.isCancelledBecause(38 /* CommandResult.InvalidGaugeDataRange */);
+            return !!this.state.dataRangeDispatchResult?.isCancelledBecause(39 /* CommandResult.InvalidGaugeDataRange */);
         }
         onDataRangeChanged(ranges) {
             this.dataRange = ranges[0];
@@ -21543,25 +21635,25 @@
             });
         }
         isRangeMinInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(39 /* CommandResult.EmptyGaugeRangeMin */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(40 /* CommandResult.GaugeRangeMinNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(43 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(40 /* CommandResult.EmptyGaugeRangeMin */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(41 /* CommandResult.GaugeRangeMinNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(44 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
         }
         isRangeMaxInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(41 /* CommandResult.EmptyGaugeRangeMax */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(42 /* CommandResult.GaugeRangeMaxNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(43 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(42 /* CommandResult.EmptyGaugeRangeMax */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(43 /* CommandResult.GaugeRangeMaxNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(44 /* CommandResult.GaugeRangeMinBiggerThanRangeMax */));
         }
         // ---------------------------------------------------------------------------
         // COLOR_SECTION_TEMPLATE
         // ---------------------------------------------------------------------------
         get isLowerInflectionPointInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(44 /* CommandResult.GaugeLowerInflectionPointNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(46 /* CommandResult.GaugeLowerBiggerThanUpper */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(45 /* CommandResult.GaugeLowerInflectionPointNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(47 /* CommandResult.GaugeLowerBiggerThanUpper */));
         }
         get isUpperInflectionPointInvalid() {
-            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(45 /* CommandResult.GaugeUpperInflectionPointNaN */) ||
-                this.state.sectionRuleDispatchResult?.isCancelledBecause(46 /* CommandResult.GaugeLowerBiggerThanUpper */));
+            return !!(this.state.sectionRuleDispatchResult?.isCancelledBecause(46 /* CommandResult.GaugeUpperInflectionPointNaN */) ||
+                this.state.sectionRuleDispatchResult?.isCancelledBecause(47 /* CommandResult.GaugeLowerBiggerThanUpper */));
         }
         updateSectionColor(target, color) {
             const sectionRule = deepCopy(this.state.sectionRule);
@@ -21649,10 +21741,10 @@
             return cancelledReasons.map((error) => ChartTerms.Errors[error] || ChartTerms.Errors.Unexpected);
         }
         get isKeyValueInvalid() {
-            return !!this.state.keyValueDispatchResult?.isCancelledBecause(36 /* CommandResult.InvalidScorecardKeyValue */);
+            return !!this.state.keyValueDispatchResult?.isCancelledBecause(37 /* CommandResult.InvalidScorecardKeyValue */);
         }
         get isBaselineInvalid() {
-            return !!this.state.keyValueDispatchResult?.isCancelledBecause(37 /* CommandResult.InvalidScorecardBaseline */);
+            return !!this.state.keyValueDispatchResult?.isCancelledBecause(38 /* CommandResult.InvalidScorecardBaseline */);
         }
         onKeyValueRangeChanged(ranges) {
             this.keyValue = ranges[0];
@@ -22547,10 +22639,10 @@
          * Cell Is Rule
          ****************************************************************************/
         get isValue1Invalid() {
-            return !!this.state.errors?.includes(53 /* CommandResult.FirstArgMissing */);
+            return !!this.state.errors?.includes(54 /* CommandResult.FirstArgMissing */);
         }
         get isValue2Invalid() {
-            return !!this.state.errors?.includes(54 /* CommandResult.SecondArgMissing */);
+            return !!this.state.errors?.includes(55 /* CommandResult.SecondArgMissing */);
         }
         toggleStyle(tool) {
             const style = this.state.rules.cellIs.style;
@@ -22567,17 +22659,17 @@
         isValueInvalid(threshold) {
             switch (threshold) {
                 case "minimum":
-                    return (this.state.errors.includes(60 /* CommandResult.MinInvalidFormula */) ||
-                        this.state.errors.includes(52 /* CommandResult.MinBiggerThanMid */) ||
-                        this.state.errors.includes(49 /* CommandResult.MinBiggerThanMax */) ||
-                        this.state.errors.includes(55 /* CommandResult.MinNaN */));
+                    return (this.state.errors.includes(61 /* CommandResult.MinInvalidFormula */) ||
+                        this.state.errors.includes(53 /* CommandResult.MinBiggerThanMid */) ||
+                        this.state.errors.includes(50 /* CommandResult.MinBiggerThanMax */) ||
+                        this.state.errors.includes(56 /* CommandResult.MinNaN */));
                 case "midpoint":
-                    return (this.state.errors.includes(61 /* CommandResult.MidInvalidFormula */) ||
-                        this.state.errors.includes(56 /* CommandResult.MidNaN */) ||
-                        this.state.errors.includes(51 /* CommandResult.MidBiggerThanMax */));
+                    return (this.state.errors.includes(62 /* CommandResult.MidInvalidFormula */) ||
+                        this.state.errors.includes(57 /* CommandResult.MidNaN */) ||
+                        this.state.errors.includes(52 /* CommandResult.MidBiggerThanMax */));
                 case "maximum":
-                    return (this.state.errors.includes(62 /* CommandResult.MaxInvalidFormula */) ||
-                        this.state.errors.includes(57 /* CommandResult.MaxNaN */));
+                    return (this.state.errors.includes(63 /* CommandResult.MaxInvalidFormula */) ||
+                        this.state.errors.includes(58 /* CommandResult.MaxNaN */));
                 default:
                     return false;
             }
@@ -22625,13 +22717,13 @@
         isInflectionPointInvalid(inflectionPoint) {
             switch (inflectionPoint) {
                 case "lowerInflectionPoint":
-                    return (this.state.errors.includes(59 /* CommandResult.ValueLowerInflectionNaN */) ||
-                        this.state.errors.includes(64 /* CommandResult.ValueLowerInvalidFormula */) ||
-                        this.state.errors.includes(50 /* CommandResult.LowerBiggerThanUpper */));
+                    return (this.state.errors.includes(60 /* CommandResult.ValueLowerInflectionNaN */) ||
+                        this.state.errors.includes(65 /* CommandResult.ValueLowerInvalidFormula */) ||
+                        this.state.errors.includes(51 /* CommandResult.LowerBiggerThanUpper */));
                 case "upperInflectionPoint":
-                    return (this.state.errors.includes(58 /* CommandResult.ValueUpperInflectionNaN */) ||
-                        this.state.errors.includes(63 /* CommandResult.ValueUpperInvalidFormula */) ||
-                        this.state.errors.includes(50 /* CommandResult.LowerBiggerThanUpper */));
+                    return (this.state.errors.includes(59 /* CommandResult.ValueUpperInflectionNaN */) ||
+                        this.state.errors.includes(64 /* CommandResult.ValueUpperInvalidFormula */) ||
+                        this.state.errors.includes(51 /* CommandResult.LowerBiggerThanUpper */));
                 default:
                     return true;
             }
@@ -22994,7 +23086,7 @@
     };
     function interactiveSplitToColumns(env, separator, addNewColumns) {
         let result = env.model.dispatch("SPLIT_TEXT_INTO_COLUMNS", { separator, addNewColumns });
-        if (result.isCancelledBecause(92 /* CommandResult.SplitWillOverwriteContent */)) {
+        if (result.isCancelledBecause(93 /* CommandResult.SplitWillOverwriteContent */)) {
             env.askConfirmation(SplitToColumnsInteractiveContent.SplitIsDestructive, () => {
                 result = env.model.dispatch("SPLIT_TEXT_INTO_COLUMNS", {
                     separator,
@@ -23058,8 +23150,8 @@
             const errors = new Set();
             for (const reason of cancelledReasons) {
                 switch (reason) {
-                    case 92 /* CommandResult.SplitWillOverwriteContent */:
-                    case 91 /* CommandResult.EmptySplitSeparator */:
+                    case 93 /* CommandResult.SplitWillOverwriteContent */:
+                    case 92 /* CommandResult.EmptySplitSeparator */:
                         break;
                     default:
                         errors.add(SplitToColumnsTerms.Errors[reason] || SplitToColumnsTerms.Errors.Unexpected);
@@ -23074,8 +23166,8 @@
                 addNewColumns: this.state.addNewColumns,
                 force: false,
             }).reasons;
-            if (cancelledReasons.includes(92 /* CommandResult.SplitWillOverwriteContent */)) {
-                warnings.push(SplitToColumnsTerms.Errors[92 /* CommandResult.SplitWillOverwriteContent */]);
+            if (cancelledReasons.includes(93 /* CommandResult.SplitWillOverwriteContent */)) {
+                warnings.push(SplitToColumnsTerms.Errors[93 /* CommandResult.SplitWillOverwriteContent */]);
             }
             return warnings;
         }
@@ -23999,6 +24091,7 @@
         static components = { TextValueProvider, FunctionDescriptionProvider };
         static defaultProps = {
             inputStyle: "",
+            isDefaultFocus: false,
         };
         composerRef = owl.useRef("o_composer");
         contentHelper = new ContentEditableHelper(this.composerRef.el);
@@ -24051,7 +24144,6 @@
             F2: () => console.warn("Not implemented"),
             F4: this.processF4Key,
             Tab: (ev) => this.processTabKey(ev),
-            " ": (ev) => this.processSpaceKey(ev),
         };
         keyCodeMapping = {
             NumpadDecimal: this.processNumpadDecimal,
@@ -24059,10 +24151,10 @@
         setup() {
             owl.onMounted(() => {
                 const el = this.composerRef.el;
+                if (this.props.isDefaultFocus) {
+                    this.env.focusableElement.setFocusableElement(el);
+                }
                 this.contentHelper.updateEl(el);
-            });
-            owl.onWillUnmount(() => {
-                this.props.onComposerUnmounted?.();
             });
             owl.useEffect(() => {
                 this.processContent();
@@ -24072,7 +24164,8 @@
         // Handlers
         // ---------------------------------------------------------------------------
         processArrowKeys(ev) {
-            if (this.env.model.getters.isSelectingForComposer()) {
+            if (this.env.model.getters.isSelectingForComposer() ||
+                this.env.model.getters.getEditionMode() === "inactive") {
                 this.functionDescriptionState.showDescription = false;
                 // Prevent the default content editable behavior which moves the cursor
                 ev.preventDefault();
@@ -24111,24 +24204,18 @@
         processTabKey(ev) {
             ev.preventDefault();
             ev.stopPropagation();
-            if (this.autoCompleteState.showProvider) {
-                const autoCompleteValue = this.autoCompleteState.values[this.autoCompleteState.selectedIndex]?.text;
-                if (autoCompleteValue) {
-                    this.autoComplete(autoCompleteValue);
-                    return;
+            if (this.env.model.getters.getEditionMode() !== "inactive") {
+                if (this.autoCompleteState.showProvider) {
+                    const autoCompleteValue = this.autoCompleteState.values[this.autoCompleteState.selectedIndex]?.text;
+                    if (autoCompleteValue) {
+                        this.autoComplete(autoCompleteValue);
+                        return;
+                    }
                 }
+                this.env.model.dispatch("STOP_EDITION");
             }
             const direction = ev.shiftKey ? "left" : "right";
-            this.env.model.dispatch("STOP_EDITION");
             this.env.model.selection.moveAnchorCell(direction, 1);
-        }
-        processSpaceKey(ev) {
-            if (ev.ctrlKey) {
-                ev.preventDefault();
-                ev.stopPropagation();
-                this.showAutocomplete("");
-                this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-            }
         }
         processEnterKey(ev) {
             ev.preventDefault();
@@ -24181,6 +24268,9 @@
             this.compositionActive = false;
         }
         onKeydown(ev) {
+            if (this.env.model.getters.getEditionMode() === "inactive") {
+                return;
+            }
             let handler = this.keyMapping[ev.key] || this.keyCodeMapping[ev.code];
             if (handler) {
                 handler.call(this, ev);
@@ -24189,14 +24279,33 @@
                 ev.stopPropagation();
             }
         }
+        onPaste(ev) {
+            if (this.env.model.getters.getEditionMode() !== "inactive") {
+                ev.stopPropagation();
+            }
+        }
         /*
          * Triggered automatically by the content-editable between the keydown and key up
          * */
         onInput(ev) {
-            if (this.props.focus === "inactive" || !this.shouldProcessInputEvents) {
+            if (!this.shouldProcessInputEvents) {
                 return;
             }
-            let content = this.contentHelper.getText();
+            if (ev.inputType === "insertFromPaste" &&
+                this.env.model.getters.getEditionMode() === "inactive") {
+                return;
+            }
+            ev.stopPropagation();
+            let content;
+            if (this.env.model.getters.getEditionMode() === "inactive") {
+                content = ev.data || "";
+            }
+            else {
+                content = this.contentHelper.getText();
+            }
+            if (this.props.focus === "inactive") {
+                return this.props.onComposerCellFocused?.(content);
+            }
             let selection = this.contentHelper.getCurrentSelection();
             if (ev.inputType === "insertParagraph") {
                 const start = Math.min(selection.start, selection.end);
@@ -24274,9 +24383,8 @@
             }
             const newSelection = this.contentHelper.getCurrentSelection();
             this.env.model.dispatch("STOP_COMPOSER_RANGE_SELECTION");
-            if (this.props.focus === "inactive") {
-                this.props.onComposerContentFocused(newSelection);
-            }
+            this.props.onComposerContentFocused();
+            if (this.props.focus === "inactive") ;
             this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", newSelection);
             this.processTokenAtCursor();
         }
@@ -24295,6 +24403,9 @@
                 const token = tokens.filter((token) => token.value.includes(currentSelectedText) &&
                     token.start <= currentSelection.start &&
                     token.end >= currentSelection.end)[0];
+                if (!token) {
+                    return;
+                }
                 if (token.type === "REFERENCE") {
                     this.env.model.dispatch("CHANGE_COMPOSER_CURSOR_SELECTION", {
                         start: token.start,
@@ -24440,7 +24551,7 @@
             const highlights = this.env.model.getters.getHighlights();
             const refSheet = sheetName
                 ? this.env.model.getters.getSheetIdByName(sheetName)
-                : this.env.model.getters.getCurrentEditedCell().sheetId;
+                : this.env.model.getters.getCurrentEditedCell()?.sheetId;
             const highlight = highlights.find((highlight) => {
                 if (highlight.sheetId !== refSheet)
                     return false;
@@ -24520,12 +24631,13 @@
         }
     }
     Composer.props = {
-        focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
-        onComposerContentFocused: Function,
         inputStyle: { type: String, optional: true },
         rect: { type: Object, optional: true },
         delimitation: { type: Object, optional: true },
-        onComposerUnmounted: { type: Function, optional: true },
+        focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
+        onComposerCellFocused: { type: Function, optional: true },
+        onComposerContentFocused: Function,
+        isDefaultFocus: { type: Boolean, optional: true },
     };
 
     const COMPOSER_BORDER_WIDTH = 3 * 0.4 * window.devicePixelRatio || 1;
@@ -24559,51 +24671,26 @@
     class GridComposer extends owl.Component {
         static template = "o-spreadsheet-GridComposer";
         static components = { Composer };
-        gridComposerRef;
-        zone;
-        rect;
+        // TODORAR see if we can keep it undefined
+        rect = this.defaultRect;
+        isEditing = false;
         isCellReferenceVisible;
-        composerState;
+        get defaultRect() {
+            return { x: 0, y: 0, width: 0, height: 0 };
+        }
         setup() {
-            this.gridComposerRef = owl.useRef("gridComposer");
-            this.composerState = owl.useState({
-                rect: undefined,
-                delimitation: undefined,
-            });
-            const { sheetId, col, row } = this.env.model.getters.getActivePosition();
-            this.zone = this.env.model.getters.expandZone(sheetId, positionToZone({ col, row }));
-            this.rect = this.env.model.getters.getVisibleRect(this.zone);
-            this.isCellReferenceVisible = false;
-            owl.onMounted(() => {
-                const el = this.gridComposerRef.el;
-                this.composerState.rect = {
-                    x: this.rect.x,
-                    y: this.rect.y,
-                    width: el.clientWidth,
-                    height: el.clientHeight,
-                };
-                this.composerState.delimitation = {
-                    width: this.props.gridDims.width,
-                    height: this.props.gridDims.height,
-                };
-            });
             owl.onWillUpdateProps(() => {
-                if (this.isCellReferenceVisible) {
-                    return;
-                }
-                const sheetId = this.env.model.getters.getActiveSheetId();
-                const zone = this.env.model.getters.getSelectedZone();
-                const rect = this.env.model.getters.getVisibleRect(zone);
-                if (!deepEquals(rect, this.rect) ||
-                    sheetId !== this.env.model.getters.getCurrentEditedCell().sheetId) {
-                    this.isCellReferenceVisible = true;
-                }
+                this.updateComponentPosition();
+                this.updateCellReferenceVisibility();
             });
         }
         get shouldDisplayCellReference() {
             return this.isCellReferenceVisible;
         }
         get cellReference() {
+            if (!this.env.model.getters.getCurrentEditedCell()) {
+                return "";
+            }
             const { col, row, sheetId } = this.env.model.getters.getCurrentEditedCell();
             const prefixSheet = sheetId !== this.env.model.getters.getActiveSheetId();
             return `${prefixSheet ? getCanonicalSheetName(this.env.model.getters.getSheetName(sheetId)) + "!" : ""}${toXC(col, row)}`;
@@ -24615,7 +24702,27 @@
                 top: `${top - GRID_CELL_REFERENCE_TOP_OFFSET}px`,
             });
         }
+        get composerProps() {
+            const { width, height } = this.env.model.getters.getSheetViewDimensionWithHeaders();
+            return {
+                rect: { ...this.rect },
+                delimitation: {
+                    width,
+                    height,
+                },
+                focus: this.props.focus,
+                isDefaultFocus: true,
+                onComposerContentFocused: this.props.onComposerContentFocused,
+                onComposerCellFocused: this.props.onComposerCellFocused,
+            };
+        }
         get containerStyle() {
+            if (this.env.model.getters.getEditionMode() === "inactive" || !this.rect) {
+                return `
+        position: absolute;
+        z-index: -1000;
+      `;
+            }
             const isFormula = this.env.model.getters.getCurrentContent().startsWith("=");
             const cell = this.env.model.getters.getActiveCell();
             const position = this.env.model.getters.getActivePosition();
@@ -24635,6 +24742,8 @@
             if (!isFormula) {
                 textAlign = style.align || cell.defaultAlign;
             }
+            const maxHeight = this.props.gridDims.height - this.rect.y;
+            const maxWidth = this.props.gridDims.width - this.rect.x;
             /**
              * min-size is on the container, not the composer element, because we want to have the same size as the cell by default,
              * including all the paddings/margins of the composer
@@ -24646,6 +24755,8 @@
                 top: `${top}px`,
                 "min-width": `${width + 1}px`,
                 "min-height": `${height + 1}px`,
+                "max-width": `${maxWidth}px`,
+                "max-height": `${maxHeight}px`,
                 background,
                 color,
                 "font-size": `${fontSizeInPixels(fontSize)}px`,
@@ -24655,20 +24766,38 @@
                 "text-align": textAlign,
             });
         }
-        get composerStyle() {
-            const maxHeight = this.props.gridDims.height - this.rect.y;
-            const maxWidth = this.props.gridDims.width - this.rect.x;
-            return cssPropertiesToCss({
-                "max-width": `${maxWidth}px`,
-                "max-height": `${maxHeight}px`,
-            });
+        updateComponentPosition() {
+            const isEditing = this.env.model.getters.getEditionMode() !== "inactive";
+            if (this.isEditing !== isEditing) {
+                this.isEditing = isEditing;
+                if (!isEditing) {
+                    this.rect = this.defaultRect;
+                    this.env.focusableElement.focus();
+                    return;
+                }
+                const position = this.env.model.getters.getActivePosition();
+                const zone = this.env.model.getters.expandZone(position.sheetId, positionToZone(position));
+                this.rect = this.env.model.getters.getVisibleRect(zone);
+            }
+        }
+        updateCellReferenceVisibility() {
+            if (this.isCellReferenceVisible || this.env.model.getters.getEditionMode() === "inactive") {
+                return;
+            }
+            const sheetId = this.env.model.getters.getActiveSheetId();
+            const zone = this.env.model.getters.getSelectedZone();
+            const rect = this.env.model.getters.getVisibleRect(zone);
+            if (!deepEquals(rect, this.rect) ||
+                sheetId !== this.env.model.getters.getCurrentEditedCell().sheetId) {
+                this.isCellReferenceVisible = true;
+            }
         }
     }
     GridComposer.props = {
         focus: { validate: (value) => ["inactive", "cellFocus", "contentFocus"].includes(value) },
-        onComposerUnmounted: Function,
         onComposerContentFocused: Function,
         gridDims: Object,
+        onComposerCellFocused: Function,
     };
 
     const CSS$1 = css /* scss */ `
@@ -25539,14 +25668,16 @@
                 return;
             }
             const [col, row] = this.getCartesianCoordinates(ev);
-            this.props.onCellClicked(col, row, { shiftKey: ev.shiftKey, ctrlKey: ev.ctrlKey });
+            this.props.onCellClicked(col, row, {
+                expandZone: ev.shiftKey,
+                addZone: isCtrlKey(ev),
+            });
         }
         onDoubleClick(ev) {
             const [col, row] = this.getCartesianCoordinates(ev);
             this.props.onCellDoubleClicked(col, row);
         }
         onContextMenu(ev) {
-            ev.preventDefault();
             const [col, row] = this.getCartesianCoordinates(ev);
             this.props.onCellRightClicked(col, row, { x: ev.clientX, y: ev.clientY });
         }
@@ -25767,7 +25898,7 @@
                 this._increaseSelection(index);
             }
             else {
-                this._selectElement(index, ev.ctrlKey);
+                this._selectElement(index, isCtrlKey(ev));
             }
             this.lastSelectedElementIndex = index;
             const mouseMoveSelect = (col, row) => {
@@ -25780,7 +25911,7 @@
             const mouseUpSelect = () => {
                 this.state.isSelecting = false;
                 this.lastSelectedElementIndex = null;
-                this.env.model.dispatch(ev.ctrlKey ? "PREPARE_SELECTION_INPUT_EXPANSION" : "STOP_SELECTION_INPUT");
+                this.env.model.dispatch(isCtrlKey(ev) ? "PREPARE_SELECTION_INPUT_EXPANSION" : "STOP_SELECTION_INPUT");
                 this._computeGrabDisplay(ev);
             };
             dragAndDropBeyondTheViewport(this.env, mouseMoveSelect, mouseUpSelect);
@@ -25932,8 +26063,8 @@
                 this.env.raiseError(MergeErrorMessage);
             }
         }
-        _selectElement(index, ctrlKey) {
-            this.env.model.selection.selectColumn(index, ctrlKey ? "newAnchor" : "overrideSelection");
+        _selectElement(index, addDistinctHeader) {
+            this.env.model.selection.selectColumn(index, addDistinctHeader ? "newAnchor" : "overrideSelection");
         }
         _increaseSelection(index) {
             this.env.model.selection.selectColumn(index, "updateAnchor");
@@ -26106,8 +26237,8 @@
                 this.env.raiseError(MergeErrorMessage);
             }
         }
-        _selectElement(index, ctrlKey) {
-            this.env.model.selection.selectRow(index, ctrlKey ? "newAnchor" : "overrideSelection");
+        _selectElement(index, addDistinctHeader) {
+            this.env.model.selection.selectRow(index, addDistinctHeader ? "newAnchor" : "overrideSelection");
         }
         _increaseSelection(index) {
             this.env.model.selection.selectRow(index, "updateAnchor");
@@ -26639,7 +26770,6 @@
         HEADER_WIDTH = HEADER_WIDTH;
         menuState;
         gridRef;
-        hiddenInput;
         onMouseWheel;
         canvasPosition;
         hoveredCell;
@@ -26650,17 +26780,16 @@
                 menuItems: [],
             });
             this.gridRef = owl.useRef("grid");
-            this.hiddenInput = owl.useRef("hiddenInput");
             this.canvasPosition = useAbsoluteBoundingRect(this.gridRef);
             this.hoveredCell = owl.useState({ col: undefined, row: undefined });
             owl.useChildSubEnv({ getPopoverContainerRect: () => this.getGridRect() });
             owl.useExternalListener(document.body, "cut", this.copy.bind(this, true));
             owl.useExternalListener(document.body, "copy", this.copy.bind(this, false));
             owl.useExternalListener(document.body, "paste", this.paste);
-            owl.onMounted(() => this.focus());
-            this.props.exposeFocus(() => this.focus());
+            owl.onMounted(() => this.focusDefaultElement());
+            this.props.exposeFocus(() => this.focusDefaultElement());
             useGridDrawing("canvas", this.env.model, () => this.env.model.getters.getSheetViewDimensionWithHeaders());
-            owl.useEffect(() => this.focus(), () => [this.env.model.getters.getActiveSheetId()]);
+            owl.useEffect(() => this.focusDefaultElement(), () => [this.env.model.getters.getActiveSheetId()]);
             this.onMouseWheel = useWheelHandler((deltaX, deltaY) => {
                 this.moveCanvas(deltaX, deltaY);
                 this.hoveredCell.col = undefined;
@@ -26683,7 +26812,7 @@
             if (this.env.model.getters.hasOpenedPopover()) {
                 this.closeOpenedPopover();
             }
-            this.focus();
+            this.focusDefaultElement();
         }
         // this map will handle most of the actions that should happen on key down. The arrow keys are managed in the key
         // down itself
@@ -26856,10 +26985,10 @@
             PAGEUP: () => this.env.model.dispatch("SHIFT_VIEWPORT_UP"),
             "CTRL+K": () => INSERT_LINK(this.env),
         };
-        focus() {
+        focusDefaultElement() {
             if (!this.env.model.getters.getSelectedFigureId() &&
                 this.env.model.getters.getEditionMode() === "inactive") {
-                this.hiddenInput.el?.focus();
+                this.env.focusableElement.focus();
             }
         }
         get gridEl() {
@@ -26913,8 +27042,8 @@
         // ---------------------------------------------------------------------------
         // Zone selection with mouse
         // ---------------------------------------------------------------------------
-        onCellClicked(col, row, { ctrlKey, shiftKey }) {
-            if (ctrlKey) {
+        onCellClicked(col, row, { addZone, expandZone }) {
+            if (addZone) {
                 this.env.model.dispatch("PREPARE_SELECTION_INPUT_EXPANSION");
             }
             if (this.env.model.getters.hasOpenedPopover()) {
@@ -26923,10 +27052,10 @@
             if (this.env.model.getters.getEditionMode() === "editing") {
                 this.env.model.dispatch("STOP_EDITION");
             }
-            if (shiftKey) {
+            if (expandZone) {
                 this.env.model.selection.setAnchorCorner(col, row);
             }
-            else if (ctrlKey) {
+            else if (addZone) {
                 this.env.model.selection.addCellToSelection(col, row);
             }
             else {
@@ -26988,9 +27117,7 @@
                 return;
             }
             let keyDownString = "";
-            if (ev.ctrlKey)
-                keyDownString += "CTRL+";
-            if (ev.metaKey)
+            if (isCtrlKey(ev))
                 keyDownString += "CTRL+";
             if (ev.altKey)
                 keyDownString += "ALT+";
@@ -27003,19 +27130,6 @@
                 ev.stopPropagation();
                 handler();
                 return;
-            }
-        }
-        onInput(ev) {
-            // the user meant to paste in the sheet, not open the composer with the pasted content
-            if (!ev.isComposing && ev.inputType === "insertFromPaste") {
-                return;
-            }
-            if (ev.data) {
-                // if the user types a character on the grid, it means he wants to start composing the selected cell with that
-                // character
-                ev.preventDefault();
-                ev.stopPropagation();
-                this.props.onGridComposerCellFocused(ev.data);
             }
         }
         // ---------------------------------------------------------------------------
@@ -27130,7 +27244,7 @@
         }
         closeMenu() {
             this.menuState.isOpen = false;
-            this.focus();
+            this.focusDefaultElement();
         }
     }
     Grid.props = {
@@ -30791,6 +30905,31 @@
             },
         },
         {
+            description: "Fix datafilter duplication",
+            from: 12,
+            to: 12.5,
+            applyMigration(data) {
+                for (let sheet of data.sheets || []) {
+                    let knownDataFilterZones = [];
+                    for (let filterTable of sheet.filterTables || []) {
+                        const zone = toZone(filterTable.range);
+                        // See commit message for the details
+                        const intersectZoneIndex = knownDataFilterZones.findIndex((knownZone) => overlap(knownZone, zone));
+                        if (intersectZoneIndex !== -1) {
+                            knownDataFilterZones[intersectZoneIndex] = zone;
+                        }
+                        else {
+                            knownDataFilterZones.push(zone);
+                        }
+                    }
+                    sheet.filterTables = knownDataFilterZones.map((zone) => ({
+                        range: zoneToXc(zone),
+                    }));
+                }
+                return data;
+            },
+        },
+        {
             description: "Change Border description structure",
             from: 12,
             to: 13,
@@ -31598,7 +31737,7 @@
             const currentBorder = this.getCellBorder(cmd);
             const areAllNewBordersUndefined = !cmd.border?.bottom && !cmd.border?.left && !cmd.border?.right && !cmd.border?.top;
             if ((!currentBorder && areAllNewBordersUndefined) || deepEquals(currentBorder, cmd.border)) {
-                return 97 /* CommandResult.NoChanges */;
+                return 98 /* CommandResult.NoChanges */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -31709,9 +31848,9 @@
         allowDispatch(cmd) {
             switch (cmd.type) {
                 case "UPDATE_CELL":
-                    return this.checkCellOutOfSheet(cmd);
+                    return this.checkValidations(cmd, this.checkCellOutOfSheet, this.checkUselessUpdateCell);
                 case "CLEAR_CELL":
-                    return this.checkValidations(cmd, this.chainValidations(this.checkCellOutOfSheet, this.checkUselessClearCell));
+                    return this.checkValidations(cmd, this.checkCellOutOfSheet, this.checkUselessClearCell);
                 default:
                     return 0 /* CommandResult.Success */;
             }
@@ -31877,13 +32016,13 @@
         /*
          * Reconstructs the original formula string based on a normalized form and its dependencies
          */
-        buildFormulaContent(sheetId, cell, dependencies) {
+        buildFormulaContent(sheetId, cell, dependencies, useFixedZone = false) {
             const ranges = dependencies || cell.dependencies;
             let rangeIndex = 0;
             return concat(cell.compiledFormula.tokens.map((token) => {
                 if (token.type === "REFERENCE") {
                     const range = ranges[rangeIndex++];
-                    return this.getters.getRangeString(range, sheetId);
+                    return this.getters.getRangeString(range, sheetId, useFixedZone);
                 }
                 return token.value;
             }));
@@ -32005,10 +32144,7 @@
             else {
                 style = before ? before.style : undefined;
             }
-            const locale = this.getters.getLocale();
-            let format = ("format" in after ? after.format : before && before.format) ||
-                detectDateFormat(afterContent, locale) ||
-                detectNumberFormat(afterContent);
+            const format = "format" in after ? after.format : before && before.format;
             /* Read the following IF as:
              * we need to remove the cell if it is completely empty, but we can know if it completely empty if:
              * - the command says the new content is empty and has no border/format/style
@@ -32049,12 +32185,11 @@
         }
         createLiteralCell(id, content, format, style) {
             const locale = this.getters.getLocale();
-            content = parseLiteral(content, locale).toString();
             return {
                 id,
-                content,
+                content: parseLiteral(content, locale).toString(),
                 style,
-                format,
+                format: format || detectDateFormat(content, locale) || detectNumberFormat(content),
                 isFormula: false,
             };
         }
@@ -32109,9 +32244,21 @@
         checkUselessClearCell(cmd) {
             const cell = this.getters.getCell(cmd);
             if (!cell)
-                return 97 /* CommandResult.NoChanges */;
+                return 98 /* CommandResult.NoChanges */;
             if (!cell.content && !cell.style && !cell.format) {
-                return 97 /* CommandResult.NoChanges */;
+                return 98 /* CommandResult.NoChanges */;
+            }
+            return 0 /* CommandResult.Success */;
+        }
+        checkUselessUpdateCell(cmd) {
+            const cell = this.getters.getCell(cmd);
+            const hasContent = "content" in cmd || "formula" in cmd;
+            const hasStyle = "style" in cmd;
+            const hasFormat = "format" in cmd;
+            if ((!hasContent || cell?.content === cmd.content) &&
+                (!hasStyle || deepEquals(cell?.style, cmd.style)) &&
+                (!hasFormat || cell?.format === cmd.format)) {
+                return 98 /* CommandResult.NoChanges */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32336,13 +32483,13 @@
         }
         checkChartDuplicate(cmd) {
             return this.getters.getFigureSheetId(cmd.id)
-                ? 86 /* CommandResult.DuplicatedChartId */
+                ? 87 /* CommandResult.DuplicatedChartId */
                 : 0 /* CommandResult.Success */;
         }
         checkChartExists(cmd) {
             return this.getters.getFigureSheetId(cmd.id)
                 ? 0 /* CommandResult.Success */
-                : 87 /* CommandResult.ChartDoesNotExist */;
+                : 88 /* CommandResult.ChartDoesNotExist */;
         }
     }
 
@@ -32452,7 +32599,13 @@
             }
         }
         exportForExcel(data) {
-            this.export(data);
+            if (data.sheets) {
+                for (let sheet of data.sheets) {
+                    if (this.cfRules[sheet.id]) {
+                        sheet.conditionalFormats = this.cfRules[sheet.id].map((rule) => this.mapToConditionalFormat(sheet.id, rule, { useFixedReference: true }));
+                    }
+                }
+            }
         }
         // ---------------------------------------------------------------------------
         // Getters
@@ -32517,11 +32670,11 @@
         // ---------------------------------------------------------------------------
         // Private
         // ---------------------------------------------------------------------------
-        mapToConditionalFormat(sheetId, cf) {
+        mapToConditionalFormat(sheetId, cf, options = { useFixedReference: false }) {
             return {
                 ...cf,
                 ranges: cf.ranges.map((range) => {
-                    return this.getters.getRangeString(range, sheetId);
+                    return this.getters.getRangeString(range, sheetId, options.useFixedReference);
                 }),
             };
         }
@@ -32554,10 +32707,10 @@
                 return 28 /* CommandResult.InvalidSheetId */;
             const ruleIndex = this.cfRules[sheetId].findIndex((cf) => cf.id === cfId);
             if (ruleIndex === -1)
-                return 73 /* CommandResult.InvalidConditionalFormatId */;
+                return 74 /* CommandResult.InvalidConditionalFormatId */;
             const cfIndex2 = direction === "up" ? ruleIndex - 1 : ruleIndex + 1;
             if (cfIndex2 < 0 || cfIndex2 >= this.cfRules[sheetId].length) {
-                return 73 /* CommandResult.InvalidConditionalFormatId */;
+                return 74 /* CommandResult.InvalidConditionalFormatId */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32598,10 +32751,10 @@
                     const errors = [];
                     const isEmpty = (value) => value === undefined || value === "";
                     if (expectedNumber >= 1 && isEmpty(rule.values[0])) {
-                        errors.push(53 /* CommandResult.FirstArgMissing */);
+                        errors.push(54 /* CommandResult.FirstArgMissing */);
                     }
                     if (expectedNumber >= 2 && isEmpty(rule.values[1])) {
-                        errors.push(54 /* CommandResult.SecondArgMissing */);
+                        errors.push(55 /* CommandResult.SecondArgMissing */);
                     }
                     return errors.length ? errors : 0 /* CommandResult.Success */;
                 }
@@ -32613,15 +32766,15 @@
                 (threshold.value === "" || isNaN(threshold.value))) {
                 switch (thresholdName) {
                     case "min":
-                        return 55 /* CommandResult.MinNaN */;
+                        return 56 /* CommandResult.MinNaN */;
                     case "max":
-                        return 57 /* CommandResult.MaxNaN */;
+                        return 58 /* CommandResult.MaxNaN */;
                     case "mid":
-                        return 56 /* CommandResult.MidNaN */;
+                        return 57 /* CommandResult.MidNaN */;
                     case "upperInflectionPoint":
-                        return 58 /* CommandResult.ValueUpperInflectionNaN */;
+                        return 59 /* CommandResult.ValueUpperInflectionNaN */;
                     case "lowerInflectionPoint":
-                        return 59 /* CommandResult.ValueLowerInflectionNaN */;
+                        return 60 /* CommandResult.ValueLowerInflectionNaN */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -32635,15 +32788,15 @@
             catch (error) {
                 switch (thresholdName) {
                     case "min":
-                        return 60 /* CommandResult.MinInvalidFormula */;
+                        return 61 /* CommandResult.MinInvalidFormula */;
                     case "max":
-                        return 62 /* CommandResult.MaxInvalidFormula */;
+                        return 63 /* CommandResult.MaxInvalidFormula */;
                     case "mid":
-                        return 61 /* CommandResult.MidInvalidFormula */;
+                        return 62 /* CommandResult.MidInvalidFormula */;
                     case "upperInflectionPoint":
-                        return 63 /* CommandResult.ValueUpperInvalidFormula */;
+                        return 64 /* CommandResult.ValueUpperInvalidFormula */;
                     case "lowerInflectionPoint":
-                        return 64 /* CommandResult.ValueLowerInvalidFormula */;
+                        return 65 /* CommandResult.ValueLowerInvalidFormula */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -32660,7 +32813,7 @@
             if (["number", "percentage", "percentile"].includes(rule.lowerInflectionPoint.type) &&
                 rule.lowerInflectionPoint.type === rule.upperInflectionPoint.type &&
                 Number(minValue) > Number(maxValue)) {
-                return 50 /* CommandResult.LowerBiggerThanUpper */;
+                return 51 /* CommandResult.LowerBiggerThanUpper */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32670,7 +32823,7 @@
             if (["number", "percentage", "percentile"].includes(rule.minimum.type) &&
                 rule.minimum.type === rule.maximum.type &&
                 stringToNumber(minValue) >= stringToNumber(maxValue)) {
-                return 49 /* CommandResult.MinBiggerThanMax */;
+                return 50 /* CommandResult.MinBiggerThanMax */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32681,7 +32834,7 @@
                 ["number", "percentage", "percentile"].includes(rule.midpoint.type) &&
                 rule.midpoint.type === rule.maximum.type &&
                 stringToNumber(midValue) >= stringToNumber(maxValue)) {
-                return 51 /* CommandResult.MidBiggerThanMax */;
+                return 52 /* CommandResult.MidBiggerThanMax */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32692,7 +32845,7 @@
                 ["number", "percentage", "percentile"].includes(rule.midpoint.type) &&
                 rule.minimum.type === rule.midpoint.type &&
                 stringToNumber(minValue) >= stringToNumber(midValue)) {
-                return 52 /* CommandResult.MinBiggerThanMid */;
+                return 53 /* CommandResult.MinBiggerThanMid */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32824,13 +32977,13 @@
         }
         checkFigureExists(sheetId, figureId) {
             if (this.figures[sheetId]?.[figureId] === undefined) {
-                return 72 /* CommandResult.FigureDoesNotExist */;
+                return 73 /* CommandResult.FigureDoesNotExist */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkFigureDuplicate(figureId) {
             if (Object.values(this.figures).find((sheet) => sheet?.[figureId])) {
-                return 84 /* CommandResult.DuplicatedFigureId */;
+                return 85 /* CommandResult.DuplicatedFigureId */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -32942,12 +33095,12 @@
             switch (cmd.type) {
                 case "CREATE_FILTER_TABLE":
                     if (!areZonesContinuous(...cmd.target)) {
-                        return 83 /* CommandResult.NonContinuousTargets */;
+                        return 84 /* CommandResult.NonContinuousTargets */;
                     }
                     const zone = union(...cmd.target);
                     const checkFilterOverlap = () => {
                         if (this.getFilterTables(cmd.sheetId).some((filter) => overlap(filter.zone, zone))) {
-                            return 80 /* CommandResult.FilterOverlap */;
+                            return 81 /* CommandResult.FilterOverlap */;
                         }
                         return 0 /* CommandResult.Success */;
                     };
@@ -32955,7 +33108,7 @@
                         const mergesInTarget = this.getters.getMergesInZone(cmd.sheetId, zone);
                         for (let merge of mergesInTarget) {
                             if (overlap(zone, merge)) {
-                                return 82 /* CommandResult.MergeInFilter */;
+                                return 83 /* CommandResult.MergeInFilter */;
                             }
                         }
                         return 0 /* CommandResult.Success */;
@@ -32965,7 +33118,7 @@
                     for (let merge of cmd.target) {
                         for (let filterTable of this.getFilterTables(cmd.sheetId)) {
                             if (overlap(filterTable.zone, merge)) {
-                                return 82 /* CommandResult.MergeInFilter */;
+                                return 83 /* CommandResult.MergeInFilter */;
                             }
                         }
                     }
@@ -33334,10 +33487,10 @@
                         : this.getters.getNumberRows(cmd.sheetId);
                     const hiddenElements = new Set((hiddenGroup || []).flat().concat(cmd.elements));
                     if (hiddenElements.size >= elements) {
-                        return 68 /* CommandResult.TooManyHiddenElements */;
+                        return 69 /* CommandResult.TooManyHiddenElements */;
                     }
                     else if (Math.min(...cmd.elements) < 0 || Math.max(...cmd.elements) > elements) {
-                        return 88 /* CommandResult.InvalidHeaderIndex */;
+                        return 89 /* CommandResult.InvalidHeaderIndex */;
                     }
                     else {
                         return 0 /* CommandResult.Success */;
@@ -33901,7 +34054,7 @@
             for (const zone of target) {
                 for (const zone2 of target) {
                     if (zone !== zone2 && overlap(zone, zone2)) {
-                        return 67 /* CommandResult.MergeOverlap */;
+                        return 68 /* CommandResult.MergeOverlap */;
                     }
                 }
             }
@@ -33915,7 +34068,7 @@
             for (const zone of target) {
                 if ((zone.left < xSplit && zone.right >= xSplit) ||
                     (zone.top < ySplit && zone.bottom >= ySplit)) {
-                    return 77 /* CommandResult.FrozenPaneOverlap */;
+                    return 78 /* CommandResult.FrozenPaneOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -34358,8 +34511,9 @@
          *
          * @param range the range (received from getRangeFromXC or getRangeFromZone)
          * @param forSheetId the id of the sheet where the range string is supposed to be used.
+         * @param [useFixedZone=false] if true, the range will be returned with fixed row and column
          */
-        getRangeString(range, forSheetId) {
+        getRangeString(range, forSheetId, useFixedZone = false) {
             if (!range) {
                 return INCORRECT_RANGE_STRING;
             }
@@ -34386,7 +34540,7 @@
             if (prefixSheet && !sheetName) {
                 return INCORRECT_RANGE_STRING;
             }
-            let rangeString = this.getRangePartString(rangeImpl, 0);
+            let rangeString = this.getRangePartString(rangeImpl, 0, useFixedZone);
             if (rangeImpl.parts && rangeImpl.parts.length === 2) {
                 // this if converts A2:A2 into A2 except if any part of the original range had fixed row or column (with $)
                 if (rangeImpl.zone.top !== rangeImpl.zone.bottom ||
@@ -34396,7 +34550,7 @@
                     rangeImpl.parts[1].rowFixed ||
                     rangeImpl.parts[1].colFixed) {
                     rangeString += ":";
-                    rangeString += this.getRangePartString(rangeImpl, 1);
+                    rangeString += this.getRangePartString(rangeImpl, 1, useFixedZone);
                 }
             }
             return `${prefixSheet ? sheetName + "!" : ""}${rangeString}`;
@@ -34437,13 +34591,13 @@
         /**
          * Get a Xc string that represent a part of a range
          */
-        getRangePartString(range, part) {
-            const colFixed = range.parts && range.parts[part].colFixed ? "$" : "";
+        getRangePartString(range, part, useFixedZone = false) {
+            const colFixed = range.parts && range.parts[part]?.colFixed ? "$" : "";
             const col = part === 0 ? numberToLetters(range.zone.left) : numberToLetters(range.zone.right);
-            const rowFixed = range.parts && range.parts[part].rowFixed ? "$" : "";
+            const rowFixed = range.parts && range.parts[part]?.rowFixed ? "$" : "";
             const row = part === 0 ? String(range.zone.top + 1) : String(range.zone.bottom + 1);
             let str = "";
-            if (range.isFullCol) {
+            if (range.isFullCol && !useFixedZone) {
                 if (part === 0 && range.unboundedZone.hasHeader) {
                     str = colFixed + col + rowFixed + row;
                 }
@@ -34451,7 +34605,7 @@
                     str = colFixed + col;
                 }
             }
-            else if (range.isFullRow) {
+            else if (range.isFullRow && !useFixedZone) {
                 if (part === 0 && range.unboundedZone.hasHeader) {
                     str = colFixed + col + rowFixed + row;
                 }
@@ -34548,10 +34702,10 @@
                         ? this.getNumberCols(cmd.sheetId)
                         : this.getNumberRows(cmd.sheetId);
                     if (cmd.base < 0 || cmd.base >= elements) {
-                        return 88 /* CommandResult.InvalidHeaderIndex */;
+                        return 89 /* CommandResult.InvalidHeaderIndex */;
                     }
                     else if (cmd.quantity <= 0) {
-                        return 89 /* CommandResult.InvalidQuantity */;
+                        return 90 /* CommandResult.InvalidQuantity */;
                     }
                     return 0 /* CommandResult.Success */;
                 case "REMOVE_COLUMNS_ROWS": {
@@ -34559,7 +34713,7 @@
                         ? this.getNumberCols(cmd.sheetId)
                         : this.getNumberRows(cmd.sheetId);
                     if (Math.min(...cmd.elements) < 0 || Math.max(...cmd.elements) > elements) {
-                        return 88 /* CommandResult.InvalidHeaderIndex */;
+                        return 89 /* CommandResult.InvalidHeaderIndex */;
                     }
                     else if (this.checkElementsIncludeAllNonFrozenHeaders(cmd.sheetId, cmd.dimension, cmd.elements)) {
                         return 8 /* CommandResult.NotEnoughElements */;
@@ -35039,18 +35193,18 @@
         checkRowFreezeQuantity(cmd) {
             return cmd.quantity >= 1 && cmd.quantity < this.getNumberRows(cmd.sheetId)
                 ? 0 /* CommandResult.Success */
-                : 76 /* CommandResult.InvalidFreezeQuantity */;
+                : 77 /* CommandResult.InvalidFreezeQuantity */;
         }
         checkColFreezeQuantity(cmd) {
             return cmd.quantity >= 1 && cmd.quantity < this.getNumberCols(cmd.sheetId)
                 ? 0 /* CommandResult.Success */
-                : 76 /* CommandResult.InvalidFreezeQuantity */;
+                : 77 /* CommandResult.InvalidFreezeQuantity */;
         }
         checkRowFreezeOverlapMerge(cmd) {
             const merges = this.getters.getMerges(cmd.sheetId);
             for (let merge of merges) {
                 if (merge.top < cmd.quantity && cmd.quantity <= merge.bottom) {
-                    return 67 /* CommandResult.MergeOverlap */;
+                    return 68 /* CommandResult.MergeOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -35059,7 +35213,7 @@
             const merges = this.getters.getMerges(cmd.sheetId);
             for (let merge of merges) {
                 if (merge.left < cmd.quantity && cmd.quantity <= merge.right) {
-                    return 67 /* CommandResult.MergeOverlap */;
+                    return 68 /* CommandResult.MergeOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -35380,7 +35534,7 @@
         allowDispatch(cmd) {
             switch (cmd.type) {
                 case "UPDATE_LOCALE":
-                    return isValidLocale(cmd.locale) ? 0 /* CommandResult.Success */ : 95 /* CommandResult.InvalidLocale */;
+                    return isValidLocale(cmd.locale) ? 0 /* CommandResult.Success */ : 96 /* CommandResult.InvalidLocale */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -35461,21 +35615,16 @@
          *        The `compute` of the formula's function must process it completely
          */
         refFn(range, isMeta, functionName, paramNumber) {
+            this.assertRangeValid(range);
             if (isMeta) {
                 // Use zoneToXc of zone instead of getRangeString to avoid sending unbounded ranges
                 return { value: zoneToXc(range.zone) };
-            }
-            if (!isZoneValid(range.zone)) {
-                throw new InvalidReferenceError();
             }
             // if the formula definition could have accepted a range, we would pass through the _range function and not here
             if (range.zone.bottom !== range.zone.top || range.zone.left !== range.zone.right) {
                 throw new Error(paramNumber
                     ? _lt("Function %s expects the parameter %s to be a single value or a single cell reference, not a range.", functionName.toString(), paramNumber.toString())
                     : _lt("Function %s expects its parameters to be single values or single cell references, not ranges.", functionName.toString()));
-            }
-            if (range.invalidSheetName) {
-                throw new Error(_lt("Invalid sheet name: %s", range.invalidSheetName));
             }
             return this.readCell(range);
         }
@@ -35511,10 +35660,10 @@
          * Note that each col is possibly sparse: it only contain the values of cells
          * that are actually present in the grid.
          */
-        range({ sheetId, zone }) {
-            if (!isZoneValid(zone)) {
-                throw new InvalidReferenceError();
-            }
+        range(range) {
+            this.assertRangeValid(range);
+            const sheetId = range.sheetId;
+            const zone = range.zone;
             // Performance issue: Avoid fetching data on positions that are out of the spreadsheet
             // e.g. A1:ZZZ9999 in a sheet with 10 cols and 10 rows should ignore everything past J10 and return a 10x10 array
             const sheetZone = this.getters.getSheetZone(sheetId);
@@ -35557,58 +35706,776 @@
             this.rangeCache[cacheKey] = result;
             return result;
         }
+        assertRangeValid(range) {
+            if (!isZoneValid(range.zone)) {
+                throw new InvalidReferenceError();
+            }
+            if (range.invalidSheetName) {
+                throw new Error(_lt("Invalid sheet name: %s", range.invalidSheetName));
+            }
+        }
+    }
+
+    function quickselect(arr, k, left, right, compare) {
+        quickselectStep(arr, k, left || 0, right || (arr.length - 1), compare || defaultCompare);
+    }
+
+    function quickselectStep(arr, k, left, right, compare) {
+
+        while (right > left) {
+            if (right - left > 600) {
+                var n = right - left + 1;
+                var m = k - left + 1;
+                var z = Math.log(n);
+                var s = 0.5 * Math.exp(2 * z / 3);
+                var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+                var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+                var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+                quickselectStep(arr, k, newLeft, newRight, compare);
+            }
+
+            var t = arr[k];
+            var i = left;
+            var j = right;
+
+            swap(arr, left, k);
+            if (compare(arr[right], t) > 0) swap(arr, left, right);
+
+            while (i < j) {
+                swap(arr, i, j);
+                i++;
+                j--;
+                while (compare(arr[i], t) < 0) i++;
+                while (compare(arr[j], t) > 0) j--;
+            }
+
+            if (compare(arr[left], t) === 0) swap(arr, left, j);
+            else {
+                j++;
+                swap(arr, j, right);
+            }
+
+            if (j <= k) left = j + 1;
+            if (k <= j) right = j - 1;
+        }
+    }
+
+    function swap(arr, i, j) {
+        var tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+
+    function defaultCompare(a, b) {
+        return a < b ? -1 : a > b ? 1 : 0;
+    }
+
+    class RBush {
+        constructor(maxEntries = 9) {
+            // max entries in a node is 9 by default; min node fill is 40% for best performance
+            this._maxEntries = Math.max(4, maxEntries);
+            this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
+            this.clear();
+        }
+
+        all() {
+            return this._all(this.data, []);
+        }
+
+        search(bbox) {
+            let node = this.data;
+            const result = [];
+
+            if (!intersects(bbox, node)) return result;
+
+            const toBBox = this.toBBox;
+            const nodesToSearch = [];
+
+            while (node) {
+                for (let i = 0; i < node.children.length; i++) {
+                    const child = node.children[i];
+                    const childBBox = node.leaf ? toBBox(child) : child;
+
+                    if (intersects(bbox, childBBox)) {
+                        if (node.leaf) result.push(child);
+                        else if (contains(bbox, childBBox)) this._all(child, result);
+                        else nodesToSearch.push(child);
+                    }
+                }
+                node = nodesToSearch.pop();
+            }
+
+            return result;
+        }
+
+        collides(bbox) {
+            let node = this.data;
+
+            if (!intersects(bbox, node)) return false;
+
+            const nodesToSearch = [];
+            while (node) {
+                for (let i = 0; i < node.children.length; i++) {
+                    const child = node.children[i];
+                    const childBBox = node.leaf ? this.toBBox(child) : child;
+
+                    if (intersects(bbox, childBBox)) {
+                        if (node.leaf || contains(bbox, childBBox)) return true;
+                        nodesToSearch.push(child);
+                    }
+                }
+                node = nodesToSearch.pop();
+            }
+
+            return false;
+        }
+
+        load(data) {
+            if (!(data && data.length)) return this;
+
+            if (data.length < this._minEntries) {
+                for (let i = 0; i < data.length; i++) {
+                    this.insert(data[i]);
+                }
+                return this;
+            }
+
+            // recursively build the tree with the given data from scratch using OMT algorithm
+            let node = this._build(data.slice(), 0, data.length - 1, 0);
+
+            if (!this.data.children.length) {
+                // save as is if tree is empty
+                this.data = node;
+
+            } else if (this.data.height === node.height) {
+                // split root if trees have the same height
+                this._splitRoot(this.data, node);
+
+            } else {
+                if (this.data.height < node.height) {
+                    // swap trees if inserted one is bigger
+                    const tmpNode = this.data;
+                    this.data = node;
+                    node = tmpNode;
+                }
+
+                // insert the small tree into the large tree at appropriate level
+                this._insert(node, this.data.height - node.height - 1, true);
+            }
+
+            return this;
+        }
+
+        insert(item) {
+            if (item) this._insert(item, this.data.height - 1);
+            return this;
+        }
+
+        clear() {
+            this.data = createNode([]);
+            return this;
+        }
+
+        remove(item, equalsFn) {
+            if (!item) return this;
+
+            let node = this.data;
+            const bbox = this.toBBox(item);
+            const path = [];
+            const indexes = [];
+            let i, parent, goingUp;
+
+            // depth-first iterative tree traversal
+            while (node || path.length) {
+
+                if (!node) { // go up
+                    node = path.pop();
+                    parent = path[path.length - 1];
+                    i = indexes.pop();
+                    goingUp = true;
+                }
+
+                if (node.leaf) { // check current node
+                    const index = findItem(item, node.children, equalsFn);
+
+                    if (index !== -1) {
+                        // item found, remove the item and condense tree upwards
+                        node.children.splice(index, 1);
+                        path.push(node);
+                        this._condense(path);
+                        return this;
+                    }
+                }
+
+                if (!goingUp && !node.leaf && contains(node, bbox)) { // go down
+                    path.push(node);
+                    indexes.push(i);
+                    i = 0;
+                    parent = node;
+                    node = node.children[0];
+
+                } else if (parent) { // go right
+                    i++;
+                    node = parent.children[i];
+                    goingUp = false;
+
+                } else node = null; // nothing found
+            }
+
+            return this;
+        }
+
+        toBBox(item) { return item; }
+
+        compareMinX(a, b) { return a.minX - b.minX; }
+        compareMinY(a, b) { return a.minY - b.minY; }
+
+        toJSON() { return this.data; }
+
+        fromJSON(data) {
+            this.data = data;
+            return this;
+        }
+
+        _all(node, result) {
+            const nodesToSearch = [];
+            while (node) {
+                if (node.leaf) result.push(...node.children);
+                else nodesToSearch.push(...node.children);
+
+                node = nodesToSearch.pop();
+            }
+            return result;
+        }
+
+        _build(items, left, right, height) {
+
+            const N = right - left + 1;
+            let M = this._maxEntries;
+            let node;
+
+            if (N <= M) {
+                // reached leaf level; return leaf
+                node = createNode(items.slice(left, right + 1));
+                calcBBox(node, this.toBBox);
+                return node;
+            }
+
+            if (!height) {
+                // target height of the bulk-loaded tree
+                height = Math.ceil(Math.log(N) / Math.log(M));
+
+                // target number of root entries to maximize storage utilization
+                M = Math.ceil(N / Math.pow(M, height - 1));
+            }
+
+            node = createNode([]);
+            node.leaf = false;
+            node.height = height;
+
+            // split the items into M mostly square tiles
+
+            const N2 = Math.ceil(N / M);
+            const N1 = N2 * Math.ceil(Math.sqrt(M));
+
+            multiSelect(items, left, right, N1, this.compareMinX);
+
+            for (let i = left; i <= right; i += N1) {
+
+                const right2 = Math.min(i + N1 - 1, right);
+
+                multiSelect(items, i, right2, N2, this.compareMinY);
+
+                for (let j = i; j <= right2; j += N2) {
+
+                    const right3 = Math.min(j + N2 - 1, right2);
+
+                    // pack each entry recursively
+                    node.children.push(this._build(items, j, right3, height - 1));
+                }
+            }
+
+            calcBBox(node, this.toBBox);
+
+            return node;
+        }
+
+        _chooseSubtree(bbox, node, level, path) {
+            while (true) {
+                path.push(node);
+
+                if (node.leaf || path.length - 1 === level) break;
+
+                let minArea = Infinity;
+                let minEnlargement = Infinity;
+                let targetNode;
+
+                for (let i = 0; i < node.children.length; i++) {
+                    const child = node.children[i];
+                    const area = bboxArea(child);
+                    const enlargement = enlargedArea(bbox, child) - area;
+
+                    // choose entry with the least area enlargement
+                    if (enlargement < minEnlargement) {
+                        minEnlargement = enlargement;
+                        minArea = area < minArea ? area : minArea;
+                        targetNode = child;
+
+                    } else if (enlargement === minEnlargement) {
+                        // otherwise choose one with the smallest area
+                        if (area < minArea) {
+                            minArea = area;
+                            targetNode = child;
+                        }
+                    }
+                }
+
+                node = targetNode || node.children[0];
+            }
+
+            return node;
+        }
+
+        _insert(item, level, isNode) {
+            const bbox = isNode ? item : this.toBBox(item);
+            const insertPath = [];
+
+            // find the best node for accommodating the item, saving all nodes along the path too
+            const node = this._chooseSubtree(bbox, this.data, level, insertPath);
+
+            // put the item into the node
+            node.children.push(item);
+            extend(node, bbox);
+
+            // split on node overflow; propagate upwards if necessary
+            while (level >= 0) {
+                if (insertPath[level].children.length > this._maxEntries) {
+                    this._split(insertPath, level);
+                    level--;
+                } else break;
+            }
+
+            // adjust bboxes along the insertion path
+            this._adjustParentBBoxes(bbox, insertPath, level);
+        }
+
+        // split overflowed node into two
+        _split(insertPath, level) {
+            const node = insertPath[level];
+            const M = node.children.length;
+            const m = this._minEntries;
+
+            this._chooseSplitAxis(node, m, M);
+
+            const splitIndex = this._chooseSplitIndex(node, m, M);
+
+            const newNode = createNode(node.children.splice(splitIndex, node.children.length - splitIndex));
+            newNode.height = node.height;
+            newNode.leaf = node.leaf;
+
+            calcBBox(node, this.toBBox);
+            calcBBox(newNode, this.toBBox);
+
+            if (level) insertPath[level - 1].children.push(newNode);
+            else this._splitRoot(node, newNode);
+        }
+
+        _splitRoot(node, newNode) {
+            // split root node
+            this.data = createNode([node, newNode]);
+            this.data.height = node.height + 1;
+            this.data.leaf = false;
+            calcBBox(this.data, this.toBBox);
+        }
+
+        _chooseSplitIndex(node, m, M) {
+            let index;
+            let minOverlap = Infinity;
+            let minArea = Infinity;
+
+            for (let i = m; i <= M - m; i++) {
+                const bbox1 = distBBox(node, 0, i, this.toBBox);
+                const bbox2 = distBBox(node, i, M, this.toBBox);
+
+                const overlap = intersectionArea(bbox1, bbox2);
+                const area = bboxArea(bbox1) + bboxArea(bbox2);
+
+                // choose distribution with minimum overlap
+                if (overlap < minOverlap) {
+                    minOverlap = overlap;
+                    index = i;
+
+                    minArea = area < minArea ? area : minArea;
+
+                } else if (overlap === minOverlap) {
+                    // otherwise choose distribution with minimum area
+                    if (area < minArea) {
+                        minArea = area;
+                        index = i;
+                    }
+                }
+            }
+
+            return index || M - m;
+        }
+
+        // sorts node children by the best axis for split
+        _chooseSplitAxis(node, m, M) {
+            const compareMinX = node.leaf ? this.compareMinX : compareNodeMinX;
+            const compareMinY = node.leaf ? this.compareMinY : compareNodeMinY;
+            const xMargin = this._allDistMargin(node, m, M, compareMinX);
+            const yMargin = this._allDistMargin(node, m, M, compareMinY);
+
+            // if total distributions margin value is minimal for x, sort by minX,
+            // otherwise it's already sorted by minY
+            if (xMargin < yMargin) node.children.sort(compareMinX);
+        }
+
+        // total margin of all possible split distributions where each node is at least m full
+        _allDistMargin(node, m, M, compare) {
+            node.children.sort(compare);
+
+            const toBBox = this.toBBox;
+            const leftBBox = distBBox(node, 0, m, toBBox);
+            const rightBBox = distBBox(node, M - m, M, toBBox);
+            let margin = bboxMargin(leftBBox) + bboxMargin(rightBBox);
+
+            for (let i = m; i < M - m; i++) {
+                const child = node.children[i];
+                extend(leftBBox, node.leaf ? toBBox(child) : child);
+                margin += bboxMargin(leftBBox);
+            }
+
+            for (let i = M - m - 1; i >= m; i--) {
+                const child = node.children[i];
+                extend(rightBBox, node.leaf ? toBBox(child) : child);
+                margin += bboxMargin(rightBBox);
+            }
+
+            return margin;
+        }
+
+        _adjustParentBBoxes(bbox, path, level) {
+            // adjust bboxes along the given tree path
+            for (let i = level; i >= 0; i--) {
+                extend(path[i], bbox);
+            }
+        }
+
+        _condense(path) {
+            // go through the path, removing empty nodes and updating bboxes
+            for (let i = path.length - 1, siblings; i >= 0; i--) {
+                if (path[i].children.length === 0) {
+                    if (i > 0) {
+                        siblings = path[i - 1].children;
+                        siblings.splice(siblings.indexOf(path[i]), 1);
+
+                    } else this.clear();
+
+                } else calcBBox(path[i], this.toBBox);
+            }
+        }
+    }
+
+    function findItem(item, items, equalsFn) {
+        if (!equalsFn) return items.indexOf(item);
+
+        for (let i = 0; i < items.length; i++) {
+            if (equalsFn(item, items[i])) return i;
+        }
+        return -1;
+    }
+
+    // calculate node's bbox from bboxes of its children
+    function calcBBox(node, toBBox) {
+        distBBox(node, 0, node.children.length, toBBox, node);
+    }
+
+    // min bounding rectangle of node children from k to p-1
+    function distBBox(node, k, p, toBBox, destNode) {
+        if (!destNode) destNode = createNode(null);
+        destNode.minX = Infinity;
+        destNode.minY = Infinity;
+        destNode.maxX = -Infinity;
+        destNode.maxY = -Infinity;
+
+        for (let i = k; i < p; i++) {
+            const child = node.children[i];
+            extend(destNode, node.leaf ? toBBox(child) : child);
+        }
+
+        return destNode;
+    }
+
+    function extend(a, b) {
+        a.minX = Math.min(a.minX, b.minX);
+        a.minY = Math.min(a.minY, b.minY);
+        a.maxX = Math.max(a.maxX, b.maxX);
+        a.maxY = Math.max(a.maxY, b.maxY);
+        return a;
+    }
+
+    function compareNodeMinX(a, b) { return a.minX - b.minX; }
+    function compareNodeMinY(a, b) { return a.minY - b.minY; }
+
+    function bboxArea(a)   { return (a.maxX - a.minX) * (a.maxY - a.minY); }
+    function bboxMargin(a) { return (a.maxX - a.minX) + (a.maxY - a.minY); }
+
+    function enlargedArea(a, b) {
+        return (Math.max(b.maxX, a.maxX) - Math.min(b.minX, a.minX)) *
+               (Math.max(b.maxY, a.maxY) - Math.min(b.minY, a.minY));
+    }
+
+    function intersectionArea(a, b) {
+        const minX = Math.max(a.minX, b.minX);
+        const minY = Math.max(a.minY, b.minY);
+        const maxX = Math.min(a.maxX, b.maxX);
+        const maxY = Math.min(a.maxY, b.maxY);
+
+        return Math.max(0, maxX - minX) *
+               Math.max(0, maxY - minY);
+    }
+
+    function contains(a, b) {
+        return a.minX <= b.minX &&
+               a.minY <= b.minY &&
+               b.maxX <= a.maxX &&
+               b.maxY <= a.maxY;
+    }
+
+    function intersects(a, b) {
+        return b.minX <= a.maxX &&
+               b.minY <= a.maxY &&
+               b.maxX >= a.minX &&
+               b.maxY >= a.minY;
+    }
+
+    function createNode(children) {
+        return {
+            children,
+            height: 1,
+            leaf: true,
+            minX: Infinity,
+            minY: Infinity,
+            maxX: -Infinity,
+            maxY: -Infinity
+        };
+    }
+
+    // sort an array so that items come in groups of n unsorted items, with groups sorted between each other;
+    // combines selection algorithm with binary divide & conquer approach
+
+    function multiSelect(arr, left, right, n, compare) {
+        const stack = [left, right];
+
+        while (stack.length) {
+            right = stack.pop();
+            left = stack.pop();
+
+            if (right - left <= n) continue;
+
+            const mid = left + Math.ceil((right - left) / n / 2) * n;
+            quickselect(arr, mid, left, right, compare);
+
+            stack.push(left, mid, mid, right);
+        }
     }
 
     /**
-     * This class is an implementation of a dependency Graph.
+     * R-Tree Data Structure
+     *
+     * R-Tree is a spatial data structure used for efficient indexing and querying
+     * of multi-dimensional objects, particularly in geometric and spatial applications.
+     *
+     * It organizes objects into a tree hierarchy, grouping nearby objects together
+     * in bounding boxes. Each node in the tree represents a bounding box that
+     * contains its child nodes or leaf objects. This hierarchical structure allows
+     * for faster spatial queries.
+     *
+     * @see https://en.wikipedia.org/wiki/R-tree
+     *
+     * Consider a 2D Space with four zones: A, B, C, D
+     * +--------------------------+
+     * |                          |
+     * |   +---+     +-------+    |
+     * |   | A |     |   B   |    |
+     * |   +---+     +-------+    |
+     * |                          |
+     * |                          |
+     * |          +---+           |
+     * |          | C |           |
+     * |          +---+           |
+     * |      +-----------+       |
+     * |      |     D     |       |
+     * |      +-----------+       |
+     * |                          |
+     * +--------------------------+
+     *
+     * It groups together zones that are spatially close into a minimum bounding box.
+     * For example, A and B are grouped together in rectangle R1, and C and D are grouped
+     * in R2.
+     *
+     * R0
+     * +--------------------------+
+     * |   R1                     |
+     * |   +-----------------+    |
+     * |   | A |     |   B   |    |
+     * |   +-----------------+    |
+     * |                          |
+     * |      R2                  |
+     * |      +---+---+---+       |
+     * |      |   | C |   |       |
+     * |      |   +---+   |       |
+     * |      +-----------+       |
+     * |      |     D     |       |
+     * |      +-----------+       |
+     * |                          |
+     * +--------------------------+
+     *
+     * The tree would look like this:
+     *          R0
+     *         /  \
+     *        /    \
+     *       R1     R2
+     *       |      |
+     *      A,B    C,D
+
+     * Choosing how to group the zones is crucial for the performance of the tree.
+     * Key considerations include avoiding excessive empty space coverage and minimizing overlap
+     * to reduce the number of subtrees processed during searches.
+     *
+     * Various heuristics exist for determining the optimal grouping strategy, such as "least enlargement"
+     * which prioritizes grouping nodes resulting in the smallest increase in bounding box size. In cases where
+     * the choice cannot be made based on this criterion due to the same enlargement for different groupings,
+     * we then evaluate "least area," aiming to minimize the overall area of bounding boxes.
+     *
+     * This implementation is tailored for spreadsheet use, indexing objects associated
+     * with a zone and a sheet.
+     *
+     * It uses the RBush library under the hood. One 2D RBush R-tree per sheet.
+     * @see https://github.com/mourner/rbush
+     */
+    class SpreadsheetRTree {
+        /**
+         * One 2D R-tree per sheet
+         */
+        rTrees = {};
+        /**
+         * Bulk-inserts the given items into the tree. Bulk insertion is usually ~2-3 times
+         * faster than inserting items one by one. After bulk loading (bulk insertion into
+         * an empty tree), subsequent query performance is also ~20-30% better.
+         */
+        constructor(items = []) {
+            const rangesPerSheet = {};
+            for (const item of items) {
+                const sheetId = item.boundingBox.sheetId;
+                if (!rangesPerSheet[sheetId]) {
+                    rangesPerSheet[sheetId] = [];
+                }
+                rangesPerSheet[sheetId].push(item);
+            }
+            for (const sheetId in rangesPerSheet) {
+                this.rTrees[sheetId] = new ZoneRBush();
+                this.rTrees[sheetId].load(rangesPerSheet[sheetId]); // bulk-insert
+            }
+        }
+        insert(item) {
+            const sheetId = item.boundingBox.sheetId;
+            if (!this.rTrees[sheetId]) {
+                this.rTrees[sheetId] = new ZoneRBush();
+            }
+            this.rTrees[sheetId].insert(item);
+        }
+        search({ zone, sheetId }) {
+            if (!this.rTrees[sheetId]) {
+                return [];
+            }
+            return this.rTrees[sheetId].search({
+                minX: zone.left,
+                minY: zone.top,
+                maxX: zone.right,
+                maxY: zone.bottom,
+            });
+        }
+        remove(item) {
+            const sheetId = item.boundingBox.sheetId;
+            if (!this.rTrees[sheetId]) {
+                return;
+            }
+            this.rTrees[sheetId].remove(item, this.rtreeItemComparer);
+        }
+        rtreeItemComparer(left, right) {
+            return (left.data == right.data &&
+                left.boundingBox.sheetId === right.boundingBox.sheetId &&
+                left.boundingBox?.zone.left === right.boundingBox.zone.left &&
+                left.boundingBox?.zone.top === right.boundingBox.zone.top &&
+                left.boundingBox?.zone.right === right.boundingBox.zone.right &&
+                left.boundingBox?.zone.bottom === right.boundingBox.zone.bottom);
+        }
+    }
+    /**
+     * RBush extension to use zones as bounding boxes
+     */
+    class ZoneRBush extends RBush {
+        toBBox({ boundingBox }) {
+            const zone = boundingBox.zone;
+            return {
+                minX: zone.left,
+                minY: zone.top,
+                maxX: zone.right,
+                maxY: zone.bottom,
+            };
+        }
+        compareMinX(a, b) {
+            return a.boundingBox.zone.left - b.boundingBox.zone.left;
+        }
+        compareMinY(a, b) {
+            return a.boundingBox.zone.top - b.boundingBox.zone.top;
+        }
+    }
+
+    /**
+     * Implementation of a dependency Graph.
      * The graph is used to evaluate the cells in the correct
      * order, and should be updated each time a cell's content is modified
      *
+     * It uses an R-Tree data structure to efficiently find dependent cells.
      */
     class FormulaDependencyGraph {
-        /**
-         * Internal structure:
-         * - key: a cell position (encoded as an integer)
-         * - value: a set of cell positions that depends on the key
-         *
-         * Given
-         * - A1:"= B1 + SQRT(B2)"
-         * - C1:"= B1";
-         * - C2:"= C1"
-         *
-         * we will have something like:
-         * - B1 ---> (A1, C1)   meaning A1 and C1 depends on B1
-         * - B2 ---> (A1)       meaning A1 depends on B2
-         * - C1 ---> (C2)       meaning C2 depends on C1
-         */
-        inverseDependencies = new Map();
+        encoder;
         dependencies = new Map();
+        rTree;
+        constructor(encoder, data = []) {
+            this.encoder = encoder;
+            this.rTree = new SpreadsheetRTree(data);
+        }
         removeAllDependencies(formulaPositionId) {
-            const dependencies = this.dependencies.get(formulaPositionId);
-            if (!dependencies) {
+            const ranges = this.dependencies.get(formulaPositionId);
+            if (!ranges) {
                 return;
             }
-            for (const dependency of dependencies) {
-                this.inverseDependencies.get(dependency)?.delete(formulaPositionId);
+            for (const range of ranges) {
+                this.rTree.remove(range);
             }
             this.dependencies.delete(formulaPositionId);
         }
         addDependencies(formulaPositionId, dependencies) {
-            for (const dependency of dependencies) {
-                const inverseDependencies = this.inverseDependencies.get(dependency);
-                if (inverseDependencies) {
-                    inverseDependencies.add(formulaPositionId);
-                }
-                else {
-                    this.inverseDependencies.set(dependency, new Set([formulaPositionId]));
-                }
+            const rTreeItems = dependencies.map(({ sheetId, zone }) => ({
+                data: formulaPositionId,
+                boundingBox: {
+                    zone,
+                    sheetId,
+                },
+            }));
+            for (const item of rTreeItems) {
+                this.rTree.insert(item);
             }
             const existingDependencies = this.dependencies.get(formulaPositionId);
             if (existingDependencies) {
-                existingDependencies.push(...dependencies);
+                existingDependencies.push(...rTreeItems);
             }
             else {
-                this.dependencies.set(formulaPositionId, dependencies);
+                this.dependencies.set(formulaPositionId, rTreeItems);
             }
         }
         /**
@@ -35616,20 +36483,20 @@
          * in the correct order they should be evaluated.
          * This is called a topological ordering (excluding cycles)
          */
-        getCellsDependingOn(positionIds) {
+        getCellsDependingOn(ranges) {
             const visited = new JetSet();
-            const queue = Array.from(positionIds).reverse();
+            const queue = Array.from(ranges).reverse();
             while (queue.length > 0) {
-                const node = queue.pop();
-                visited.add(node);
-                const adjacentNodes = this.inverseDependencies.get(node) || new Set();
-                for (const adjacentNode of adjacentNodes) {
-                    if (!visited.has(adjacentNode)) {
-                        queue.push(adjacentNode);
+                const range = queue.pop();
+                visited.addMany(this.encoder.encodeBoundingBox(range));
+                const impactedPositionIds = this.rTree.search(range).map((dep) => dep.data);
+                for (const positionId of impactedPositionIds) {
+                    if (!visited.has(positionId)) {
+                        queue.push(this.encoder.decodeToBoundingBox(positionId));
                     }
                 }
             }
-            visited.delete(...positionIds);
+            visited.deleteMany(ranges.flatMap((r) => this.encoder.encodeBoundingBox(r)));
             return visited;
         }
     }
@@ -35717,9 +36584,9 @@
         context;
         getters;
         compilationParams;
-        positionEncoder = new PositionBitsEncoder();
+        encoder = new PositionBitsEncoder();
         evaluatedCells = new Map();
-        formulaDependencies = lazy(new FormulaDependencyGraph());
+        formulaDependencies = lazy(new FormulaDependencyGraph(this.encoder));
         blockedArrayFormulas = new Set();
         spreadingRelations = new SpreadingRelation();
         constructor(context, getters) {
@@ -35728,16 +36595,16 @@
             this.compilationParams = buildCompilationParameters(this.context, this.getters, this.computeAndSave.bind(this));
         }
         getEvaluatedCell(position) {
-            return (this.evaluatedCells.get(this.encodePosition(position)) ||
+            return (this.evaluatedCells.get(this.encoder.encode(position)) ||
                 createEvaluatedCell("", { locale: this.getters.getLocale() }));
         }
         getArrayFormulaSpreadingOn(position) {
-            const positionId = this.encodePosition(position);
+            const positionId = this.encoder.encode(position);
             const formulaPosition = this.getArrayFormulaSpreadingOnId(positionId);
-            return formulaPosition !== undefined ? this.decodePosition(formulaPosition) : undefined;
+            return formulaPosition !== undefined ? this.encoder.decode(formulaPosition) : undefined;
         }
         getEvaluatedPositions() {
-            return [...this.evaluatedCells.keys()].map(this.decodePosition.bind(this));
+            return [...this.evaluatedCells.keys()].map((p) => this.encoder.decode(p));
         }
         getArrayFormulaSpreadingOnId(positionId) {
             if (!this.spreadingRelations.hasArrayFormulaResult(positionId)) {
@@ -35747,7 +36614,7 @@
             return Array.from(arrayFormulas).find((positionId) => !this.blockedArrayFormulas.has(positionId));
         }
         updateDependencies(position) {
-            const positionId = this.encodePosition(position);
+            const positionId = this.encoder.encode(position);
             this.formulaDependencies().removeAllDependencies(positionId);
             const dependencies = this.getDirectDependencies(positionId);
             this.formulaDependencies().addDependencies(positionId, dependencies);
@@ -35757,12 +36624,12 @@
             this.compilationParams = buildCompilationParameters(this.context, this.getters, this.computeAndSave.bind(this));
         }
         evaluateCells(positions) {
-            const cells = positions.map(this.encodePosition.bind(this));
+            const cells = positions.map((p) => this.encoder.encode(p));
             const cellsToCompute = new JetSet(cells);
-            const arrayFormulas = this.getArrayFormulasImpactedByChangesOf(cells);
-            cellsToCompute.add(...this.getCellsDependingOn(cells));
-            cellsToCompute.add(...arrayFormulas);
-            cellsToCompute.add(...this.getCellsDependingOn(arrayFormulas));
+            const arrayFormulasPositionIds = this.getArrayFormulasImpactedByChangesOf(cells);
+            cellsToCompute.addMany(this.getCellsDependingOn(cells));
+            cellsToCompute.addMany(arrayFormulasPositionIds);
+            cellsToCompute.addMany(this.getCellsDependingOn(arrayFormulasPositionIds));
             this.evaluate(cellsToCompute);
         }
         getArrayFormulasImpactedByChangesOf(positionIds) {
@@ -35776,7 +36643,7 @@
                 }
                 if (!content) {
                     // The previous content could have blocked some array formulas
-                    impactedPositionIds.add(...this.getArrayFormulasBlockedByOrSpreadingOn(positionId));
+                    impactedPositionIds.addMany(this.getArrayFormulasBlockedByOrSpreadingOn(positionId));
                 }
             }
             return impactedPositionIds;
@@ -35785,12 +36652,14 @@
             this.blockedArrayFormulas = new Set();
             this.spreadingRelations = new SpreadingRelation();
             this.formulaDependencies = lazy(() => {
-                const dependencyGraph = new FormulaDependencyGraph();
-                for (const positionId of this.getAllCells()) {
-                    const dependencies = this.getDirectDependencies(positionId);
-                    dependencyGraph.addDependencies(positionId, dependencies);
-                }
-                return dependencyGraph;
+                const dependencies = [...this.getAllCells()].flatMap((positionId) => this.getDirectDependencies(positionId).map((range) => ({
+                    data: positionId,
+                    boundingBox: {
+                        zone: range.zone,
+                        sheetId: range.sheetId,
+                    },
+                })));
+                return new FormulaDependencyGraph(this.encoder, dependencies);
             });
         }
         evaluateAllCells() {
@@ -35811,7 +36680,7 @@
             for (const sheetId of this.getters.getSheetIds()) {
                 const cellIds = this.getters.getCells(sheetId);
                 for (const cellId in cellIds) {
-                    positionIds.add(this.encodePosition(this.getters.getCellPosition(cellId)));
+                    positionIds.add(this.encoder.encode(this.getters.getCellPosition(cellId)));
                 }
             }
             return positionIds;
@@ -35822,7 +36691,7 @@
             }
             const arrayFormulas = this.spreadingRelations.getFormulaPositionsSpreadingOn(positionId);
             const cells = new JetSet(arrayFormulas);
-            cells.add(...this.getCellsDependingOn(arrayFormulas));
+            cells.addMany(this.getCellsDependingOn(arrayFormulas));
             return cells;
         }
         nextPositionsToUpdate = new JetSet();
@@ -35878,7 +36747,7 @@
             }
         }
         computeAndSave(position) {
-            const positionId = this.encodePosition(position);
+            const positionId = this.encoder.encode(position);
             const evaluatedCell = this.computeCell(positionId);
             if (!this.evaluatedCells.has(positionId)) {
                 this.setEvaluatedCell(positionId, evaluatedCell);
@@ -35939,15 +36808,15 @@
             throw new Error(_lt("Result couldn't be automatically expanded. Please insert more columns and rows."));
         }
         updateSpreadRelation({ sheetId, col, row, }) {
-            const arrayFormulaPositionId = this.encodePosition({ sheetId, col, row });
+            const arrayFormulaPositionId = this.encoder.encode({ sheetId, col, row });
             return (i, j) => {
                 const position = { sheetId, col: i + col, row: j + row };
-                const resultPositionId = this.encodePosition(position);
+                const resultPositionId = this.encoder.encode(position);
                 this.spreadingRelations.addRelation({ resultPositionId, arrayFormulaPositionId });
             };
         }
         checkCollision({ sheetId, col, row }) {
-            const formulaPositionId = this.encodePosition({ sheetId, col, row });
+            const formulaPositionId = this.encoder.encode({ sheetId, col, row });
             return (i, j) => {
                 const position = { sheetId: sheetId, col: i + col, row: j + row };
                 const rawCell = this.getters.getCell(position);
@@ -35969,11 +36838,11 @@
                     format: format || formatFromPosition(i, j),
                     locale: this.getters.getLocale(),
                 });
-                const positionId = this.encodePosition(position);
+                const positionId = this.encoder.encode(position);
                 this.setEvaluatedCell(positionId, evaluatedCell);
                 // check if formula dependencies present in the spread zone
                 // if so, they need to be recomputed
-                this.nextPositionsToUpdate.add(...this.getCellsDependingOn([positionId]));
+                this.nextPositionsToUpdate.addMany(this.getCellsDependingOn([positionId]));
             };
         }
         invalidateSpreading(positionId) {
@@ -35988,8 +36857,8 @@
                     continue;
                 }
                 this.evaluatedCells.delete(child);
-                this.nextPositionsToUpdate.add(...this.getCellsDependingOn([child]));
-                this.nextPositionsToUpdate.add(...this.getArrayFormulasBlockedByOrSpreadingOn(child));
+                this.nextPositionsToUpdate.addMany(this.getCellsDependingOn([child]));
+                this.nextPositionsToUpdate.addMany(this.getArrayFormulasBlockedByOrSpreadingOn(child));
             }
             this.spreadingRelations.removeNode(positionId);
         }
@@ -36001,29 +36870,17 @@
             if (!cell?.isFormula) {
                 return [];
             }
-            const dependencies = [];
-            for (const range of cell.dependencies) {
-                if (range.invalidSheetName || range.invalidXc) {
-                    continue;
-                }
-                const sheetId = range.sheetId;
-                forEachPositionsInZone(range.zone, (col, row) => {
-                    dependencies.push(this.encodePosition({ sheetId, col, row }));
-                });
-            }
-            return dependencies;
+            return cell.dependencies;
         }
         getCellsDependingOn(positionIds) {
-            return this.formulaDependencies().getCellsDependingOn(positionIds);
+            const ranges = [];
+            for (const positionId of positionIds) {
+                ranges.push(this.encoder.decodeToBoundingBox(positionId));
+            }
+            return this.formulaDependencies().getCellsDependingOn(ranges);
         }
         getCell(positionId) {
-            return this.getters.getCell(this.decodePosition(positionId));
-        }
-        encodePosition(position) {
-            return this.positionEncoder.encode(position);
-        }
-        decodePosition(positionId) {
-            return this.positionEncoder.decode(positionId);
+            return this.getters.getCell(this.encoder.decode(positionId));
         }
     }
     function forEachSpreadPositionInMatrix(matrix, callback) {
@@ -36098,12 +36955,23 @@
         encode({ sheetId, col, row }) {
             return (this.encodeSheet(sheetId) << 42n) | (BigInt(col) << 21n) | BigInt(row);
         }
+        encodeBoundingBox({ sheetId, zone }) {
+            const positions = [];
+            forEachPositionsInZone(zone, (col, row) => {
+                positions.push(this.encode({ sheetId, col, row }));
+            });
+            return positions;
+        }
         decode(id) {
             // keep only the last 21 bits by AND-ing the bit sequence with 21 ones
             const row = Number(id & 2097151n);
             const col = Number((id >> 21n) & 2097151n);
             const sheetId = this.decodeSheet(id >> 42n);
             return { sheetId, col, row };
+        }
+        decodeToBoundingBox(id) {
+            const { sheetId, col, row } = this.decode(id);
+            return { sheetId, zone: { left: col, top: row, right: col, bottom: row } };
         }
         encodeSheet(sheetId) {
             const sheetKey = this.sheetMapping[sheetId];
@@ -36219,6 +37087,7 @@
     class EvaluationPlugin extends UIPlugin {
         static getters = [
             "evaluateFormula",
+            "getCorrespondingFormulaCell",
             "getRangeFormattedValues",
             "getRangeValues",
             "getRangeFormats",
@@ -36272,7 +37141,12 @@
         // Getters
         // ---------------------------------------------------------------------------
         evaluateFormula(sheetId, formulaString) {
-            return this.evaluator.evaluateFormula(sheetId, formulaString);
+            try {
+                return this.evaluator.evaluateFormula(sheetId, formulaString);
+            }
+            catch (error) {
+                return error instanceof EvaluationError ? error.errorType : CellErrorType.GenericError;
+            }
         }
         /**
          * Return the value of each cell in the range as they are displayed in the grid.
@@ -36344,7 +37218,13 @@
                 const format = newFormat
                     ? getItemId(newFormat, data.formats)
                     : exportedCellData.format;
-                const content = !isExported ? newContent : exportedCellData.content;
+                let content;
+                if (formulaCell instanceof FormulaCellWithDependencies) {
+                    content = this.getters.buildFormulaContent(exportedSheetData.id, formulaCell, formulaCell.dependencies, true);
+                }
+                else {
+                    content = !isExported ? newContent : exportedCellData.content;
+                }
                 exportedSheetData.cells[xc] = { ...exportedCellData, value, isFormula, content, format };
             }
         }
@@ -36662,34 +37542,29 @@
         getComputedStyles(sheetId) {
             const computedStyle = {};
             for (let cf of this.getters.getConditionalFormats(sheetId).reverse()) {
-                try {
-                    switch (cf.rule.type) {
-                        case "ColorScaleRule":
-                            for (let range of cf.ranges) {
-                                this.applyColorScale(sheetId, range, cf.rule, computedStyle);
-                            }
-                            break;
-                        case "CellIsRule":
-                            for (let ref of cf.ranges) {
-                                const zone = this.getters.getRangeFromSheetXC(sheetId, ref).zone;
-                                for (let row = zone.top; row <= zone.bottom; row++) {
-                                    for (let col = zone.left; col <= zone.right; col++) {
-                                        const pr = this.rulePredicate[cf.rule.type];
-                                        let cell = this.getters.getEvaluatedCell({ sheetId, col, row });
-                                        if (pr && pr(cell, cf.rule)) {
-                                            if (!computedStyle[col])
-                                                computedStyle[col] = [];
-                                            // we must combine all the properties of all the CF rules applied to the given cell
-                                            computedStyle[col][row] = Object.assign(computedStyle[col]?.[row] || {}, cf.rule.style);
-                                        }
+                switch (cf.rule.type) {
+                    case "ColorScaleRule":
+                        for (let range of cf.ranges) {
+                            this.applyColorScale(sheetId, range, cf.rule, computedStyle);
+                        }
+                        break;
+                    case "CellIsRule":
+                        for (let ref of cf.ranges) {
+                            const zone = this.getters.getRangeFromSheetXC(sheetId, ref).zone;
+                            for (let row = zone.top; row <= zone.bottom; row++) {
+                                for (let col = zone.left; col <= zone.right; col++) {
+                                    const pr = this.rulePredicate[cf.rule.type];
+                                    let cell = this.getters.getEvaluatedCell({ sheetId, col, row });
+                                    if (pr && pr(cell, cf.rule)) {
+                                        if (!computedStyle[col])
+                                            computedStyle[col] = [];
+                                        // we must combine all the properties of all the CF rules applied to the given cell
+                                        computedStyle[col][row] = Object.assign(computedStyle[col]?.[row] || {}, cf.rule.style);
                                     }
                                 }
                             }
-                            break;
-                    }
-                }
-                catch (_) {
-                    // we don't care about the errors within the evaluation of a rule
+                        }
+                        break;
                 }
             }
             return computedStyle;
@@ -36725,7 +37600,7 @@
                     return percentile(rangeValues, Number(threshold.value) / 100, true);
                 case "formula":
                     const value = threshold.value && this.getters.evaluateFormula(sheetId, threshold.value);
-                    return !(value instanceof Promise) ? value : null;
+                    return typeof value === "number" ? value : null;
                 default:
                     return null;
             }
@@ -37131,7 +38006,7 @@
                     if (this.lastCellSelected.col !== undefined && this.lastCellSelected.row !== undefined) {
                         return 0 /* CommandResult.Success */;
                     }
-                    return 47 /* CommandResult.InvalidAutofillSelection */;
+                    return 48 /* CommandResult.InvalidAutofillSelection */;
                 case "AUTOFILL_AUTO":
                     const zone = this.getters.getSelectedZone();
                     return zone.top === zone.bottom
@@ -37292,7 +38167,7 @@
             let row = zone.bottom;
             if (col > 0) {
                 let leftPosition = { sheetId, col: col - 1, row };
-                while (this.getters.getEvaluatedCell(leftPosition).type !== CellValueType.empty ||
+                while (this.getters.getCorrespondingFormulaCell(leftPosition) ||
                     this.getters.getCell(leftPosition)?.content) {
                     row += 1;
                     leftPosition = { sheetId, col: col - 1, row };
@@ -37302,7 +38177,7 @@
                 col = zone.right;
                 if (col <= this.getters.getNumberCols(sheetId)) {
                     let rightPosition = { sheetId, col: col + 1, row };
-                    while (this.getters.getEvaluatedCell(rightPosition).type !== CellValueType.empty ||
+                    while (this.getters.getCorrespondingFormulaCell(rightPosition) ||
                         this.getters.getCell(rightPosition)?.content) {
                         row += 1;
                         rightPosition = { sheetId, col: col + 1, row };
@@ -37750,7 +38625,7 @@
                         cellPopoverRegistry.get(cmd.popoverType);
                     }
                     catch (error) {
-                        return 74 /* CommandResult.InvalidCellPopover */;
+                        return 75 /* CommandResult.InvalidCellPopover */;
                     }
                     return 0 /* CommandResult.Success */;
                 default:
@@ -39890,27 +40765,6 @@
         // ---------------------------------------------------------------------------
         // Command Handling
         // ---------------------------------------------------------------------------
-        allowDispatch(cmd) {
-            switch (cmd.type) {
-                case "ADD_RANGE":
-                case "ADD_EMPTY_RANGE":
-                    if (this.inputHasSingleRange && this.ranges.length === 1) {
-                        return 31 /* CommandResult.MaximumRangesReached */;
-                    }
-                    break;
-                case "REMOVE_RANGE":
-                    if (this.ranges.length === 1) {
-                        return 32 /* CommandResult.MinimumRangesReached */;
-                    }
-                    break;
-                case "CHANGE_RANGE":
-                    if (this.inputHasSingleRange && cmd.value.split(",").length > 1) {
-                        return 31 /* CommandResult.MaximumRangesReached */;
-                    }
-                    break;
-            }
-            return 0 /* CommandResult.Success */;
-        }
         handleEvent(event) {
             const inputSheetId = this.activeSheet;
             const sheetId = this.getters.getActiveSheetId();
@@ -40132,14 +40986,39 @@
         allowDispatch(cmd) {
             switch (cmd.type) {
                 case "FOCUS_RANGE":
+                case "CHANGE_RANGE":
+                case "ADD_EMPTY_RANGE":
+                case "REMOVE_RANGE":
+                    if (!this.inputs[cmd.id]) {
+                        return 33 /* CommandResult.InvalidInputId */;
+                    }
+            }
+            switch (cmd.type) {
+                case "FOCUS_RANGE":
                     const index = this.currentInput?.getIndex(cmd.rangeId);
                     if (this.focusedInputId === cmd.id && this.currentInput?.focusedRangeIndex === index) {
                         return 30 /* CommandResult.InputAlreadyFocused */;
                     }
                     break;
-            }
-            if (this.currentInput) {
-                return this.currentInput.allowDispatch(cmd);
+                case "ADD_RANGE":
+                case "ADD_EMPTY_RANGE":
+                    const input = this.inputs[cmd.id];
+                    if (input.inputHasSingleRange && input.ranges.length === 1) {
+                        return 31 /* CommandResult.MaximumRangesReached */;
+                    }
+                    break;
+                case "REMOVE_RANGE":
+                    if (this.inputs[cmd.id].ranges.length === 1) {
+                        return 32 /* CommandResult.MinimumRangesReached */;
+                    }
+                    break;
+                case "CHANGE_RANGE": {
+                    const input = this.inputs[cmd.id];
+                    if (input.inputHasSingleRange && cmd.value.split(",").length > 1) {
+                        return 31 /* CommandResult.MaximumRangesReached */;
+                    }
+                    break;
+                }
             }
             return 0 /* CommandResult.Success */;
         }
@@ -40269,7 +41148,7 @@
             /*Test the presence of single cells*/
             const singleCells = positions(zone).some(({ col, row }) => !this.getters.isInMerge({ sheetId, col, row }));
             if (singleCells) {
-                return 65 /* CommandResult.InvalidSortZone */;
+                return 66 /* CommandResult.InvalidSortZone */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -40288,7 +41167,7 @@
                 ];
                 return widthCurrent === widthFirst && heightCurrent === heightFirst;
             })) {
-                return 65 /* CommandResult.InvalidSortZone */;
+                return 66 /* CommandResult.InvalidSortZone */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -40726,7 +41605,7 @@
             const sheetId = "sheetId" in cmd ? cmd.sheetId : this.getters.tryGetActiveSheetId();
             const zones = this.getters.getCommandZones(cmd);
             if (!sheetId && zones.length > 0) {
-                return 94 /* CommandResult.NoActiveSheet */;
+                return 95 /* CommandResult.NoActiveSheet */;
             }
             if (sheetId && zones.length > 0) {
                 return this.getters.checkZonesExistInSheet(sheetId, zones);
@@ -41208,13 +42087,13 @@
         }
         checkSingleColSelected() {
             if (!this.getters.isSingleColSelected()) {
-                return 90 /* CommandResult.MoreThanOneColumnSelected */;
+                return 91 /* CommandResult.MoreThanOneColumnSelected */;
             }
             return 0 /* CommandResult.Success */;
         }
         checkNonEmptySelector(cmd) {
             if (cmd.separator === "") {
-                return 91 /* CommandResult.EmptySplitSeparator */;
+                return 92 /* CommandResult.EmptySplitSeparator */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -41225,7 +42104,7 @@
             const selection = this.getters.getSelectedZones()[0];
             const splitted = this.getSplittedCols(selection, cmd.separator);
             if (this.willSplittedColsOverwriteContent(selection, splitted)) {
-                return 92 /* CommandResult.SplitWillOverwriteContent */;
+                return 93 /* CommandResult.SplitWillOverwriteContent */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -41236,7 +42115,7 @@
                     return 0 /* CommandResult.Success */;
                 }
             }
-            return 93 /* CommandResult.NoSplitSeparatorInSelection */;
+            return 94 /* CommandResult.NoSplitSeparatorInSelection */;
         }
     }
 
@@ -41384,7 +42263,7 @@
             for (const zone of this.getPasteZones(target)) {
                 if ((zone.left < xSplit && zone.right >= xSplit) ||
                     (zone.top < ySplit && zone.bottom >= ySplit)) {
-                    return 77 /* CommandResult.FrozenPaneOverlap */;
+                    return 78 /* CommandResult.FrozenPaneOverlap */;
                 }
             }
             return 0 /* CommandResult.Success */;
@@ -41836,7 +42715,7 @@
         }
         isPasteAllowed(target, option) {
             if (target.length === 0) {
-                return 75 /* CommandResult.EmptyTarget */;
+                return 76 /* CommandResult.EmptyTarget */;
             }
             if (option?.pasteOption !== undefined) {
                 return 23 /* CommandResult.WrongFigurePasteOption */;
@@ -42069,7 +42948,7 @@
                 }
                 case "ACTIVATE_PAINT_FORMAT": {
                     if (this.paintFormatStatus !== "inactive") {
-                        return 96 /* CommandResult.AlreadyInPaintingFormatMode */;
+                        return 97 /* CommandResult.AlreadyInPaintingFormatMode */;
                     }
                 }
             }
@@ -42647,7 +43526,7 @@
         validateSelection(length, start, end) {
             return start >= 0 && start <= length && end >= 0 && end <= length
                 ? 0 /* CommandResult.Success */
-                : 48 /* CommandResult.WrongComposerSelection */;
+                : 49 /* CommandResult.WrongComposerSelection */;
         }
         onColumnsRemoved(cmd) {
             if (cmd.elements.includes(this.col) && this.mode !== "inactive") {
@@ -42864,7 +43743,7 @@
             this.replaceText(ref, this.selectionInitialStart, this.selectionEnd);
         }
         getZoneReference(zone) {
-            const inputSheetId = this.getters.getCurrentEditedCell().sheetId;
+            const inputSheetId = this.getters.getCurrentEditedCell()?.sheetId || this.getters.getActiveSheetId();
             const sheetId = this.getters.getActiveSheetId();
             const range = this.getters.getRangeFromZone(sheetId, zone);
             return this.getters.getSelectionRangeString(range, inputSheetId);
@@ -42878,7 +43757,7 @@
                 _fixedParts.pop();
             }
             const newRange = range.clone({ parts: _fixedParts });
-            return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell().sheetId);
+            return this.getters.getSelectionRangeString(newRange, this.getters.getCurrentEditedCell()?.sheetId || this.getters.getActiveSheetId());
         }
         /**
          * Replace the current selection by a new text.
@@ -42911,7 +43790,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return;
             }
-            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
+            const editionSheetId = this.getters.getCurrentEditedCell()?.sheetId || this.getters.getActiveSheetId();
             const XCs = this.getReferencedRanges().map((range) => this.getters.getRangeString(range, editionSheetId));
             const colorsToKeep = {};
             for (const xc of XCs) {
@@ -42940,7 +43819,7 @@
             if (!this.currentContent.startsWith("=") || this.mode === "inactive") {
                 return [];
             }
-            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
+            const editionSheetId = this.getters.getCurrentEditedCell()?.sheetId || this.getters.getActiveSheetId();
             const rangeColor = (rangeString) => {
                 const colorIndex = this.colorIndexByRange[rangeString];
                 return colors$1[colorIndex % colors$1.length];
@@ -42958,10 +43837,11 @@
          * Return ranges currently referenced in the composer
          */
         getReferencedRanges() {
-            const editionSheetId = this.getters.getCurrentEditedCell().sheetId;
-            return this.currentTokens
+            const editionSheetId = this.getters.getCurrentEditedCell()?.sheetId || this.getters.getActiveSheetId();
+            const referenceRanges = this.currentTokens
                 .filter((token) => token.type === "REFERENCE")
                 .map((token) => this.getters.getRangeFromSheetXC(editionSheetId, token.value));
+            return referenceRanges.filter((range) => !range.invalidSheetName && !range.invalidXc);
         }
         /**
          * Function used to determine when composer selection can start.
@@ -43028,7 +43908,7 @@
             switch (cmd.type) {
                 case "UPDATE_FILTER":
                     if (!this.getters.getFilterId(cmd)) {
-                        return 81 /* CommandResult.FilterNotFound */;
+                        return 82 /* CommandResult.FilterNotFound */;
                     }
                     break;
             }
@@ -43823,7 +44703,7 @@
             const headers = [cmd.base, ...cmd.elements];
             const maxHeaderValue = isCol ? this.getters.getNumberCols(id) : this.getters.getNumberRows(id);
             if (headers.some((h) => h < 0 || h >= maxHeaderValue)) {
-                return 88 /* CommandResult.InvalidHeaderIndex */;
+                return 89 /* CommandResult.InvalidHeaderIndex */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -44639,7 +45519,7 @@
         }
         checkPositiveDimension(cmd) {
             if (cmd.width < 0 || cmd.height < 0) {
-                return 70 /* CommandResult.InvalidViewportSize */;
+                return 71 /* CommandResult.InvalidViewportSize */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -44649,7 +45529,7 @@
                 cmd.gridOffsetY === this.gridOffsetY &&
                 cmd.width === width &&
                 cmd.height === height) {
-                return 78 /* CommandResult.ValuesNotChanged */;
+                return 79 /* CommandResult.ValuesNotChanged */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -44657,7 +45537,7 @@
             const pane = this.getMainInternalViewport(this.getters.getActiveSheetId());
             if ((!pane.canScrollHorizontally && offsetX > 0) ||
                 (!pane.canScrollVertically && offsetY > 0)) {
-                return 71 /* CommandResult.InvalidScrollingDirection */;
+                return 72 /* CommandResult.InvalidScrollingDirection */;
             }
             return 0 /* CommandResult.Success */;
         }
@@ -44918,6 +45798,16 @@
                 });
                 image.addEventListener("error", reject);
             });
+        }
+    }
+
+    class FocusableElement {
+        focusableElement = undefined;
+        setFocusableElement(element) {
+            this.focusableElement = element;
+        }
+        focus() {
+            this.focusableElement?.focus();
         }
     }
 
@@ -46963,6 +47853,7 @@
                 _t: Spreadsheet._t,
                 clipboard: this.env.clipboard || instantiateClipboard(),
                 startCellEdition: (content) => this.onGridComposerCellFocused(content),
+                focusableElement: new FocusableElement(),
             });
             owl.useExternalListener(window, "resize", () => this.render(true));
             owl.useExternalListener(window, "beforeunload", this.unbindModelEvents.bind(this));
@@ -47050,7 +47941,7 @@
         }
         onKeydown(ev) {
             let keyDownString = "";
-            if (ev.ctrlKey || ev.metaKey) {
+            if (isCtrlKey(ev)) {
                 keyDownString += "CTRL+";
             }
             keyDownString += ev.key.toUpperCase();
@@ -47069,17 +47960,18 @@
             this.model.dispatch("UNFOCUS_SELECTION_INPUT");
             this.composer.topBarFocus = "contentFocus";
             this.composer.gridFocusMode = "inactive";
-            this.setComposerContent({ selection } || {});
+            this.setComposerContent({ selection });
         }
-        onGridComposerContentFocused() {
+        onGridComposerContentFocused(selection) {
             if (this.model.getters.isReadonly()) {
                 return;
             }
             this.model.dispatch("UNFOCUS_SELECTION_INPUT");
             this.composer.topBarFocus = "inactive";
             this.composer.gridFocusMode = "contentFocus";
-            this.setComposerContent({});
+            this.setComposerContent({ selection });
         }
+        // TODO: either both are defined or none of them. change those args to an object
         onGridComposerCellFocused(content, selection) {
             if (this.model.getters.isReadonly()) {
                 return;
@@ -48116,7 +49008,7 @@
          */
         moveAnchorCell(direction, step = 1) {
             if (step !== "end" && step <= 0) {
-                return new DispatchResult(85 /* CommandResult.InvalidSelectionStep */);
+                return new DispatchResult(86 /* CommandResult.InvalidSelectionStep */);
             }
             const { col, row } = this.getNextAvailablePosition(direction, step);
             return this.selectCell(col, row);
@@ -48162,7 +49054,7 @@
          */
         resizeAnchorZone(direction, step = 1) {
             if (step !== "end" && step <= 0) {
-                return new DispatchResult(85 /* CommandResult.InvalidSelectionStep */);
+                return new DispatchResult(86 /* CommandResult.InvalidSelectionStep */);
             }
             const sheetId = this.getters.getActiveSheetId();
             const anchor = this.anchor;
@@ -48491,11 +49383,10 @@
          * next cluster if the given cell is outside a cluster or at the border of a cluster in the given direction.
          */
         getEndOfCluster(startPosition, dim, dir) {
-            const sheet = this.getters.getActiveSheet();
             let currentPosition = startPosition;
             // If both the current cell and the next cell are not empty, we want to go to the end of the cluster
             const nextCellPosition = this.getNextCellPosition(startPosition, dim, dir);
-            let mode = !this.isCellEmpty(currentPosition, sheet.id) && !this.isCellEmpty(nextCellPosition, sheet.id)
+            let mode = !this.isEvaluatedCellEmpty(currentPosition) && !this.isEvaluatedCellEmpty(nextCellPosition)
                 ? "endOfCluster"
                 : "nextCluster";
             while (true) {
@@ -48505,7 +49396,7 @@
                     currentPosition.row === nextCellPosition.row) {
                     break;
                 }
-                const isNextCellEmpty = this.isCellEmpty(nextCellPosition, sheet.id);
+                const isNextCellEmpty = this.isEvaluatedCellEmpty(nextCellPosition);
                 if (mode === "endOfCluster" && isNextCellEmpty) {
                     break;
                 }
@@ -48519,10 +49410,20 @@
             return dim === "cols" ? currentPosition.col : currentPosition.row;
         }
         /**
-         * Check if a cell is empty or undefined in the model. If the cell is part of a merge,
-         * check if the merge containing the cell is empty.
+         * Checks if a cell is empty (i.e. does not have a content). If the cell is part of a merge,
+         * the check applies to the main cell of the merge.
          */
-        isCellEmpty({ col, row }, sheetId = this.getters.getActiveSheetId()) {
+        isCellEmpty({ col, row }) {
+            const sheetId = this.getters.getActiveSheetId();
+            const position = this.getters.getMainCellPosition({ sheetId, col, row });
+            return !(this.getters.getCorrespondingFormulaCell(position) || this.getters.getCell(position)?.content);
+        }
+        /**
+         * Checks if a cell evaluated value is empty. If the cell is part of a merge,
+         * the check applies to the main cell of the merge.
+         */
+        isEvaluatedCellEmpty({ col, row }) {
+            const sheetId = this.getters.getActiveSheetId();
             const position = this.getters.getMainCellPosition({ sheetId, col, row });
             const cell = this.getters.getEvaluatedCell(position);
             return cell.type === CellValueType.empty;
@@ -49000,12 +49901,7 @@
             attrs.push(["t", "str"]);
             cycle = escapeXml /*xml*/ `<v>${cell.value}</v>`;
         }
-        node = escapeXml /*xml*/ `
-      <f>
-        ${XlsxFormula}
-      </f>
-      ${cycle}
-    `;
+        node = escapeXml /*xml*/ ` <f> ${XlsxFormula} </f> ${cycle} `;
         return { attrs, node };
     }
     function addContent(content, sharedStrings, forceString = false) {
@@ -49824,11 +50720,10 @@
                         ({ attrs: additionalAttrs, node: cellNode } = addContent(cell.content, construct.sharedStrings, isTableHeader));
                     }
                     attributes.push(...additionalAttrs);
-                    cellNodes.push(escapeXml /*xml*/ `
-          <c ${formatAttributes(attributes)}>
-            ${cellNode}
-          </c>
-        `);
+                    // prettier-ignore
+                    cellNodes.push(escapeXml /*xml*/ `<c ${formatAttributes(attributes)}>
+  ${cellNode}
+</c>`);
                 }
             }
             if (cellNodes.length || row.size !== DEFAULT_CELL_HEIGHT || row.isHidden) {
@@ -50519,10 +51414,10 @@
             const command = createCommand(type, payload);
             let status = this.status;
             if (this.getters.isReadonly() && !canExecuteInReadonly(command)) {
-                return new DispatchResult(69 /* CommandResult.Readonly */);
+                return new DispatchResult(70 /* CommandResult.Readonly */);
             }
             if (!this.session.canApplyOptimisticUpdate()) {
-                return new DispatchResult(66 /* CommandResult.WaitingSessionConfirmation */);
+                return new DispatchResult(67 /* CommandResult.WaitingSessionConfirmation */);
             }
             switch (status) {
                 case 0 /* Status.Ready */:
@@ -50811,9 +51706,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.4.16';
-    __info__.date = '2023-12-05T10:45:24.320Z';
-    __info__.hash = '1abbb92';
+    __info__.version = '16.4.23';
+    __info__.date = '2024-02-16T15:04:29.705Z';
+    __info__.hash = 'cb5db1a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

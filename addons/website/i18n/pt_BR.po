@@ -6,8 +6,8 @@
 # Martin Trigaux, 2023
 # Wil Odoo, 2023
 # Éder Brito <britoederr@gmail.com>, 2023
-# Maitê Dietze, 2023
-# Layna Nascimento, 2023
+# a75f12d3d37ea5bf159c4b3e85eb30e7_0fa6927, 2023
+# Maitê Dietze, 2024
 # 
 msgid ""
 msgstr ""
@@ -15,7 +15,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-25 11:22+0000\n"
 "PO-Revision-Date: 2023-07-25 12:22+0000\n"
-"Last-Translator: Layna Nascimento, 2023\n"
+"Last-Translator: Maitê Dietze, 2024\n"
 "Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3120,7 +3120,7 @@ msgstr "Conteúdo"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__cdn_activated
 #: model:ir.model.fields,field_description:website.field_website__cdn_activated
 msgid "Content Delivery Network (CDN)"
-msgstr "Rede de entrega de conteúdo (CDN: Content Delivery Network)"
+msgstr "Rede de distribuição de conteúdo (CDN: Content Delivery Network)"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -3884,6 +3884,15 @@ msgstr "Exiba esta logo no site."
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Display this website when users visit this domain"
 msgstr "Exiba este site quando usuários visitarem este domínio"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/xml/website.editor.xml:0
+#, python-format
+msgid ""
+"Do not copy/paste code you do not understand, this could put your data at "
+"risk."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -4710,7 +4719,10 @@ msgid "Font Size"
 msgstr "Tamanho da fonte"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/editor/snippets.editor.js:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
+#, python-format
 msgid "Font family"
 msgstr "Família de fontes"
 
@@ -5521,6 +5533,15 @@ msgid ""
 msgstr ""
 "Se você descartar as edições atuais, todas as alterações não salvas serão "
 "perdidas. Você pode cancelar para retornar ao modo de edição."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_embed_code/options.js:0
+#, python-format
+msgid ""
+"If you need to add analytics or marketing tags, inject code in your <head> "
+"or <body> instead. The option is in the \"Theme\" tab."
+msgstr ""
 
 #. module: website
 #. odoo-javascript
@@ -8419,7 +8440,10 @@ msgid "Reset to Headings Font Family"
 msgstr "Redefinir para a família de fontes de cabeçalhos"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/editor/snippets.editor.js:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
+#, python-format
 msgid "Reset to Paragraph Font Family"
 msgstr "Redefinir para a família de fontes de parágrafos"
 
@@ -11622,6 +11646,15 @@ msgstr ""
 #, python-format
 msgid "Your Email"
 msgstr "Seu e-mail"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_embed_code/000.js:0
+#, python-format
+msgid ""
+"Your Embed Code snippet doesn't have anything to display. Click on Edit to "
+"modify it."
+msgstr ""
 
 #. module: website
 #. odoo-javascript

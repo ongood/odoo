@@ -2,6 +2,7 @@
 
 from werkzeug.exceptions import NotFound
 
+import odoo
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessError
 from odoo.osv import expression
@@ -20,8 +21,8 @@ class ChannelMember(models.Model):
     channel_id = fields.Many2one('discuss.channel', string='Channel', ondelete='cascade', readonly=True, required=True)
     # state
     custom_channel_name = fields.Char('Custom channel name')
-    fetched_message_id = fields.Many2one('mail.message', string='Last Fetched')
-    seen_message_id = fields.Many2one('mail.message', string='Last Seen')
+    fetched_message_id = fields.Many2one('mail.message', string='Last Fetched', index='btree_not_null')
+    seen_message_id = fields.Many2one('mail.message', string='Last Seen', index='btree_not_null')
     message_unread_counter = fields.Integer('Unread Messages Counter', compute='_compute_message_unread', compute_sudo=True)
     fold_state = fields.Selection([('open', 'Open'), ('folded', 'Folded'), ('closed', 'Closed')], string='Conversation Fold State', default='open')
     is_minimized = fields.Boolean("Conversation is minimized")
@@ -139,7 +140,7 @@ class ChannelMember(models.Model):
 
     def _discuss_channel_member_format(self, fields=None):
         if not fields:
-            fields = {'id': True, 'channel': {}, 'persona': {}}
+            fields = {'id': True, 'channel': {}, 'persona': {}, 'create_date': True}
         members_formatted_data = {}
         for member in self:
             data = {}
@@ -153,6 +154,8 @@ class ChannelMember(models.Model):
                 if member.guest_id:
                     persona = {'guest': member.guest_id.sudo()._guest_format(fields=fields.get('persona', {}).get('guest')).get(member.guest_id)}
                 data['persona'] = persona
+            if 'create_date' in fields:
+                data['create_date'] = odoo.fields.Datetime.to_string(member.create_date)
             members_formatted_data[member] = data
         return members_formatted_data
 
