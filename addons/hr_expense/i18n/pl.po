@@ -25,6 +25,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
+msgid "%(date_from)s - %(date_to)s"
+msgstr ""
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
 msgid ""
 "%(user)s confirms this expense is not a duplicate with similar expense."
 msgstr ""
@@ -1337,6 +1344,13 @@ msgstr "Nazwa"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
+msgid "New Expense Report, paid by %(paid_by)s"
+msgstr ""
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
 msgid "New Expense Reports"
 msgstr "Nowe raporty wydatków"
 
@@ -2039,11 +2053,6 @@ msgstr ""
 "duplikatów."
 
 #. module: hr_expense
-#: model:ir.model.constraint,message:hr_expense.constraint_hr_expense_sheet_journal_id_required_posted
-msgid "The journal must be set on posted expense"
-msgstr "Dziennik musi być ustawiony na zaksięgowany wydatek"
-
-#. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__employee_journal_id
 msgid "The journal used when the expense is paid by employee."
 msgstr "Dziennik używany, gdy wydatek jest ponoszony przez pracownika."
@@ -2079,8 +2088,9 @@ msgstr ""
 #: code:addons/hr_expense/models/product_product.py:0
 #, python-format
 msgid ""
-"There are unposted expenses linked to this category. Updating the category "
-"cost will change expense amounts. Make sure it is what you want to do."
+"There are unsubmitted expenses linked to this category. Updating the "
+"category cost will change expense amounts. Make sure it is what you want to "
+"do."
 msgstr ""
 
 #. module: hr_expense

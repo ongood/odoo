@@ -3893,6 +3893,8 @@ msgid ""
 "Do not copy/paste code you do not understand, this could put your data at "
 "risk."
 msgstr ""
+"Não copie/cole códigos que você não entende, pois isso pode colocar seus "
+"dados em risco."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -5009,6 +5011,18 @@ msgstr "Chave da API do Google Maps"
 #: model:ir.model.fields,field_description:website.field_website__google_search_console
 msgid "Google Search Console"
 msgstr "Google Search Console"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/res_config_settings.py:0
+#: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
+#, python-format
+msgid ""
+"Google doesn't need to be pinged anymore. It will automatically fetch your "
+"/sitemap.xml."
+msgstr ""
+"O sinal do Google não precisa mais ser localizado. Ele recuperará "
+"automaticamente o /sitemap.xml."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__google_search_console
@@ -11655,6 +11669,8 @@ msgid ""
 "Your Embed Code snippet doesn't have anything to display. Click on Edit to "
 "modify it."
 msgstr ""
+"Não há nada a exibir em seu snippet Código de incorporação. Clique em Editar"
+" para modificá-lo."
 
 #. module: website
 #. odoo-javascript

@@ -6,7 +6,7 @@
 # Tomáš Píšek, 2023
 # Ivana Bartonkova, 2023
 # Jakub Smolka, 2023
-# Aleš Fiala <f.ales1@seznam.cz>, 2024
+# Aleš Fiala <f.ales1@seznam.cz>, 2023
 # Vojtech Smolka, 2024
 # Wil Odoo, 2024
 # 
@@ -23,6 +23,13 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
+msgid "%(date_from)s - %(date_to)s"
+msgstr ""
 
 #. module: hr_expense
 #. odoo-python
@@ -1333,6 +1340,13 @@ msgstr "Jméno"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
+msgid "New Expense Report, paid by %(paid_by)s"
+msgstr ""
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
 msgid "New Expense Reports"
 msgstr "Nové výkazy výdajů"
 
@@ -2029,11 +2043,6 @@ msgstr ""
 "duplikáty."
 
 #. module: hr_expense
-#: model:ir.model.constraint,message:hr_expense.constraint_hr_expense_sheet_journal_id_required_posted
-msgid "The journal must be set on posted expense"
-msgstr "Deník musí být nastaven na zaúčtované výdaje"
-
-#. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__employee_journal_id
 msgid "The journal used when the expense is paid by employee."
 msgstr ""
@@ -2069,11 +2078,10 @@ msgstr ""
 #: code:addons/hr_expense/models/product_product.py:0
 #, python-format
 msgid ""
-"There are unposted expenses linked to this category. Updating the category "
-"cost will change expense amounts. Make sure it is what you want to do."
+"There are unsubmitted expenses linked to this category. Updating the "
+"category cost will change expense amounts. Make sure it is what you want to "
+"do."
 msgstr ""
-"S touto kategorií souvisí nezaúčtované výdaje. Aktualizace ceny kategorie "
-"změní výši nákladů. Ujistěte se, že je to to, co chcete dělat."
 
 #. module: hr_expense
 #. odoo-javascript
