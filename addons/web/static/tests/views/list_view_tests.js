@@ -831,6 +831,22 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
+    QUnit.test("list view with button with invisible: true attrs", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree>
+                    <field name="foo"/>
+                    <button name="a" type="object" icon="fa-car" attrs="{'invisible': true}"/>
+                </tree>`,
+        });
+
+        assert.containsN(target, "th", 3);
+        assert.containsNone(target, "td.o_list_button button");
+    });
+
     QUnit.test("list view with adjacent buttons and optional field", async function (assert) {
         await makeView({
             type: "list",
@@ -19699,5 +19715,38 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target.querySelector(".o_data_row"), ".o_tag");
 
         await clickSave(target);
+    });
+
+    QUnit.test("onchange should only be called once after pressing enter on a field", async function (assert) {
+        serverData.models.foo.onchanges = {
+            foo(record) {
+                if (record.foo) {
+                    record.int_field = 1;
+                }
+            },
+        };
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: `
+                <tree editable="top">
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                </tree>`,
+            async mockRPC(_, { method }) {
+                if (method === "onchange") {
+                    assert.step(method);
+                }
+            },
+        });
+        await click(target.querySelector(".o_data_cell"));
+        target.querySelector(".o_field_widget[name=foo] input").value = "1";
+        await triggerEvents(target, ".o_field_widget[name=foo] input", [
+            ["keydown", { key: "Enter" }],
+            ["change"],
+        ]);
+        await nextTick();
+        assert.verifySteps(["onchange"], "There should only be one onchange call");
     });
 });

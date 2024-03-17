@@ -5229,8 +5229,10 @@
             if (x === cell) {
                 found = true;
             }
-            const cellValue = evaluateLiteral(x?.content, { locale: DEFAULT_LOCALE });
-            if (filter(cellValue)) {
+            const cellValue = x?.isFormula
+                ? undefined
+                : evaluateLiteral(x?.content, { locale: DEFAULT_LOCALE });
+            if (cellValue && filter(cellValue)) {
                 group.push(cellValue);
             }
             else {
@@ -24781,7 +24783,11 @@
             }
         }
         updateCellReferenceVisibility() {
-            if (this.isCellReferenceVisible || this.env.model.getters.getEditionMode() === "inactive") {
+            if (this.env.model.getters.getEditionMode() === "inactive") {
+                this.isCellReferenceVisible = false;
+                return;
+            }
+            if (this.isCellReferenceVisible) {
                 return;
             }
             const sheetId = this.env.model.getters.getActiveSheetId();
@@ -24942,7 +24948,7 @@
     function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
     }
-    function dragFigureForResize(initialFigure, dirX, dirY, { x: mouseX, y: mouseY }, { x: mouseInitialX, y: mouseInitialY }, keepRatio, minFigSize) {
+    function dragFigureForResize(initialFigure, dirX, dirY, { x: mouseX, y: mouseY }, { x: mouseInitialX, y: mouseInitialY }, keepRatio, minFigSize, { scrollX, scrollY }) {
         let { x, y, width, height } = initialFigure;
         if (keepRatio && dirX != 0 && dirY != 0) {
             const deltaX = Math.min(dirX * (mouseInitialX - mouseX), initialFigure.width - minFigSize);
@@ -24969,14 +24975,14 @@
                 y = initialFigure.y - deltaY;
             }
         }
-        // Restrict resizing if x or y reaches header boundaries
-        if (x < 0) {
-            width += x;
-            x = 0;
+        // Adjusts figure dimensions to ensure it remains within header boundaries and viewport during resizing.
+        if (x + scrollX <= 0) {
+            width = width + x + scrollX;
+            x = -scrollX;
         }
-        if (y < 0) {
-            height += y;
-            y = 0;
+        if (y + scrollY <= 0) {
+            height = height + y + scrollY;
+            y = -scrollY;
         }
         return { ...initialFigure, x, y, width, height };
     }
@@ -25393,7 +25399,7 @@
             const minFigSize = figureRegistry.get(figure.tag).minFigSize || MIN_FIG_SIZE;
             const onMouseMove = (ev) => {
                 const currentMousePosition = { x: ev.clientX, y: ev.clientY };
-                const draggedFigure = dragFigureForResize(initialFig, dirX, dirY, currentMousePosition, initialMousePosition, keepRatio, minFigSize);
+                const draggedFigure = dragFigureForResize(initialFig, dirX, dirY, currentMousePosition, initialMousePosition, keepRatio, minFigSize, this.env.model.getters.getActiveSheetScrollInfo());
                 const otherFigures = this.getOtherFigures(figure.id);
                 const snapResult = snapForResize(this.env.model.getters, dirX, dirY, draggedFigure, otherFigures);
                 this.dnd.draggedFigure = snapResult.snappedFigure;
@@ -32900,6 +32906,15 @@
                     return 0 /* CommandResult.Success */;
             }
         }
+        beforeHandle(cmd) {
+            switch (cmd.type) {
+                case "DELETE_SHEET":
+                    this.getters.getFigures(cmd.sheetId).forEach((figure) => {
+                        this.dispatch("DELETE_FIGURE", { id: figure.id, sheetId: cmd.sheetId });
+                    });
+                    break;
+            }
+        }
         handle(cmd) {
             switch (cmd.type) {
                 case "CREATE_SHEET":
@@ -34662,7 +34677,6 @@
             "getNumberHeaders",
             "getGridLinesVisibility",
             "getNextSheetName",
-            "isEmpty",
             "getSheetSize",
             "getSheetZone",
             "getPaneDivisions",
@@ -35038,14 +35052,6 @@
         // ---------------------------------------------------------------------------
         // Row/Col manipulation
         // ---------------------------------------------------------------------------
-        /**
-         * Check if a zone only contains empty cells
-         */
-        isEmpty(sheetId, zone) {
-            return positions(zone)
-                .map(({ col, row }) => this.getCell({ sheetId, col, row }))
-                .every((cell) => !cell || cell.content === "");
-        }
         getCommandZones(cmd) {
             const zones = [];
             if ("zone" in cmd) {
@@ -37105,6 +37111,7 @@
             "getEvaluatedCell",
             "getEvaluatedCells",
             "getEvaluatedCellsInZone",
+            "isEmpty",
         ];
         shouldRebuildDependenciesGraph = true;
         evaluator;
@@ -37202,6 +37209,14 @@
         }
         getEvaluatedCellsInZone(sheetId, zone) {
             return positions(zone).map(({ col, row }) => this.getters.getEvaluatedCell({ sheetId, col, row }));
+        }
+        /**
+         * Check if a zone only contains empty cells
+         */
+        isEmpty(sheetId, zone) {
+            return positions(zone)
+                .map(({ col, row }) => this.getEvaluatedCell({ sheetId, col, row }))
+                .every((cell) => cell.type === CellValueType.empty);
         }
         // ---------------------------------------------------------------------------
         // Export
@@ -46091,6 +46106,9 @@
             this.scrollToSheet();
         }
         onDblClick() {
+            if (this.env.model.getters.isReadonly()) {
+                return;
+            }
             this.startEdition();
         }
         onKeyDown(ev) {
@@ -51715,9 +51733,9 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.4.24';
-    __info__.date = '2024-02-28T12:47:21.498Z';
-    __info__.hash = '90c74d1';
+    __info__.version = '16.4.26';
+    __info__.date = '2024-03-15T12:11:34.154Z';
+    __info__.hash = 'b8caa0f';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

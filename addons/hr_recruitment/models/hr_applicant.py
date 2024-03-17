@@ -422,7 +422,7 @@ class Applicant(models.Model):
             'res_model': 'ir.attachment',
             'name': _('Documents'),
             'context': {
-                'default_res_model': 'hr.job',
+                'default_res_model': 'hr.applicant',
                 'default_res_id': self.ids[0],
                 'show_partner_name': 1,
             },
@@ -612,6 +612,7 @@ class Applicant(models.Model):
             'work_email': self.department_id.company_id.email or self.email_from, # To have a valid email address by default
             'work_phone': self.department_id.company_id.phone,
             'applicant_id': self.ids,
+            'private_phone': self.partner_phone or self.partner_mobile
         }
 
     def _update_employee_from_applicant(self):
