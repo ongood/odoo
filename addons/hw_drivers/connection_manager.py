@@ -41,7 +41,7 @@ class ConnectionManager(Thread):
 
         try:
             urllib3.disable_warnings()
-            req = requests.post('https://iot-proxy.odoo.com/odoo-enterprise/iot/connect-box', json=data, verify=False)
+            req = requests.post('https://www.odoo.icu/odoo-enterprise/iot/connect-box', json=data, verify=False)
             result = req.json().get('result', {})
             if all(key in result for key in ['pairing_code', 'pairing_uuid']):
                 self.pairing_code = result['pairing_code']
